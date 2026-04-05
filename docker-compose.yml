@@ -1,0 +1,15 @@
+# Local PostgreSQL (replaces SQLite). Copy .env.example → .env and use the DATABASE_URL / DIRECT_URL shown below.
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: nobudget
+      POSTGRES_PASSWORD: nobudget
+      POSTGRES_DB: nobudget
+    volumes:
+      - nobudget_pg:/var/lib/postgresql/data
+
+volumes:
+  nobudget_pg:
