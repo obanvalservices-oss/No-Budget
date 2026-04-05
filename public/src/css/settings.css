@@ -1,0 +1,17 @@
+/* Config layout — forms: dashboard-shell.css */
+
+.config-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.config-container > h2.nb-section-title {
+  margin-bottom: 1rem;
+}
+
+.estado-actual {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #334155;
+}

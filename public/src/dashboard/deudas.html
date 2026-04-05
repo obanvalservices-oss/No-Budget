@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f1419" />
+  <title>Deudas | No Budget</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/css/dashboard-shell.css" />
+  <link rel="stylesheet" href="/src/css/deudas.css" />
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="dashboard-body module-deudas">
+  <header class="header">
+    <div class="header-brand">
+      <a href="home.html" class="brand-mark" aria-label="No Budget — Dashboard">
+        <img class="brand-logo" src="/assets/logo_budget.png" alt="" width="32" height="32" decoding="async" />
+        <span class="brand-text">No Budget</span>
+      </a>
+    </div>
+    <nav class="menu" aria-label="Módulos">
+      <ul>
+        <li><a href="home.html" class="nav-link" data-nav="home">Dashboard</a></li>
+        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Ingresos</a></li>
+        <li><a href="gastos.html" class="nav-link" data-nav="gastos">Gastos</a></li>
+        <li><a href="deudas.html" class="nav-link active" data-nav="deudas">Deudas</a></li>
+        <li><a href="ahorros.html" class="nav-link" data-nav="ahorros">Ahorros</a></li>
+        <li><a href="inversiones.html" class="nav-link" data-nav="inversiones">Inversiones</a></li>
+        <li><a href="compartido.html" class="nav-link" data-nav="compartido">Compartido</a></li>
+        <li><a href="settings.html" class="nav-link" data-nav="settings">Configuración</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="deudas-container">
+    <section class="card">
+      <h2 class="nb-section-title">Registrar deuda</h2>
+      <form id="formDeuda" autocomplete="off">
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="title">Título / Nombre</label>
+            <input id="title" type="text" placeholder="Auto, Sezzle, Préstamo personal…" required />
+          </div>
+
+          <div class="form-group">
+            <label for="principal">Monto total de la deuda ($)</label>
+            <input id="principal" type="number" min="0" step="0.01" required />
+          </div>
+
+          <div class="form-group">
+            <label for="startDate">Fecha de inicio</label>
+            <input id="startDate" type="date" required />
+          </div>
+
+          <div class="form-group">
+            <label for="description">Descripción (opcional)</label>
+            <input id="description" type="text" placeholder="Notas, número de contrato, etc." />
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="form-inline">
+          <label class="switch">
+            <input id="hasInstallments" type="checkbox" />
+            <span>¿Este préstamo será pagado en cuotas fijas?</span>
+          </label>
+        </div>
+
+        <div id="campoCuotas" class="grid-3 hidden">
+          <div class="form-group">
+            <label for="installmentsCount">Cantidad de cuotas</label>
+            <input id="installmentsCount" type="number" min="1" step="1" placeholder="p. ej. 6, 12, 24" />
+          </div>
+
+          <div class="form-group">
+            <label for="frequency">Frecuencia de cuotas</label>
+            <select id="frequency">
+              <option value="mensual">Mensual</option>
+              <option value="quincenal">Quincenal</option>
+              <option value="bisemanal">Bisemanal</option>
+              <option value="semanal">Semanal</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="firstDueDate">Fecha de vencimiento de la 1ra cuota</label>
+            <input id="firstDueDate" type="date" />
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h3>Fuentes de pago</h3>
+
+        <div class="grid-3">
+          <div class="form-group">
+            <label for="downPayment">Pago inicial ($, opcional)</label>
+            <input id="downPayment" type="number" min="0" step="0.01" value="0" />
+          </div>
+
+          <div class="form-group">
+            <label for="downSource">Fuente pago inicial</label>
+            <select id="downSource">
+              <option value="NONE">— Sin pago inicial —</option>
+              <option value="INGRESO">Ingreso</option>
+              <option value="SAVINGS">Fondo de ahorro</option>
+            </select>
+          </div>
+
+          <div class="form-group hidden" id="downSavingsWrap">
+            <label for="downSavings">Fondo (para pago inicial)</label>
+            <select id="downSavings"></select>
+            <small id="downSavingsHint" class="hint"></small>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="installmentsSource">Fuente pago de cuotas</label>
+            <select id="installmentsSource">
+              <option value="INGRESO">Ingreso</option>
+              <option value="SAVINGS">Fondo de ahorro</option>
+            </select>
+          </div>
+
+          <div class="form-group hidden" id="instSavingsWrap">
+            <label for="instSavings">Fondo (para cuotas)</label>
+            <select id="instSavings"></select>
+            <small id="instSavingsHint" class="hint"></small>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary">Guardar deuda</button>
+          <button type="button" id="btnReset" class="btn-ghost">Limpiar</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2 class="nb-section-title">Historial</h2>
+
+      <div class="tabs">
+        <button type="button" class="tab active" data-tab="act">Activas</button>
+        <button type="button" class="tab" data-tab="inact">Inactivas</button>
+      </div>
+
+      <div id="listActivas" class="list"></div>
+      <div id="listInactivas" class="list hidden"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 No Budget</p>
+  </footer>
+
+  <script src="/src/js/auth.js"></script>
+  <script src="/src/js/nb-historial.js"></script>
+  <script src="/src/js/deudas.js"></script>
+</body>
+</html>

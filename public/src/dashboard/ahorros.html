@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#0f1419" />
+  <title>Ahorros - No Budget</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/css/dashboard-shell.css" />
+  <link rel="stylesheet" href="/src/css/ahorros.css" />
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="dashboard-body module-ahorros">
+  <header class="header">
+    <div class="header-brand">
+      <a href="home.html" class="brand-mark" aria-label="No Budget — Dashboard">
+        <img class="brand-logo" src="/assets/logo_budget.png" alt="" width="32" height="32" decoding="async" />
+        <span class="brand-text">No Budget</span>
+      </a>
+    </div>
+    <nav class="menu" aria-label="Módulos">
+      <ul>
+        <li><a href="home.html" class="nav-link" data-nav="home">Dashboard</a></li>
+        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Ingresos</a></li>
+        <li><a href="gastos.html" class="nav-link" data-nav="gastos">Gastos</a></li>
+        <li><a href="deudas.html" class="nav-link" data-nav="deudas">Deudas</a></li>
+        <li><a href="ahorros.html" class="nav-link active" data-nav="ahorros">Ahorros</a></li>
+        <li><a href="inversiones.html" class="nav-link" data-nav="inversiones">Inversiones</a></li>
+        <li><a href="compartido.html" class="nav-link" data-nav="compartido">Compartido</a></li>
+        <li><a href="settings.html" class="nav-link" data-nav="settings">Configuración</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="contenedor-ahorros">
+    <section class="formulario-ahorro">
+      <h2 class="nb-section-title">Crear fondo de ahorro</h2>
+      <form id="ahorrosForm" autocomplete="off">
+        <label for="nombreFondo">Nombre del fondo</label>
+        <input id="nombreFondo" type="text" required />
+
+        <label for="montoMeta">Meta / Monto máximo ($)</label>
+        <input id="montoMeta" type="number" min="0" step="0.01" required />
+
+        <label for="aporteInicial">Aporte inicial ($)</label>
+        <input id="aporteInicial" type="number" min="0" step="0.01" value="0" />
+        <p class="nb-field-hint">Solo define la base del fondo; no se descuenta del flujo semanal del dashboard.</p>
+
+        <label for="montoAporteFijo">Monto aporte fijo ($)</label>
+        <input id="montoAporteFijo" type="number" min="0" step="0.01" value="0" />
+
+        <label for="fechaInicio">¿Desde cuándo aportas?</label>
+        <input id="fechaInicio" type="date" required />
+
+        <label for="frecuenciaAhorro">Frecuencia de aporte <span class="nb-muted">(solo obligatoria si el fondo es fijo)</span></label>
+        <select id="frecuenciaAhorro">
+          <option value="">— Sin frecuencia —</option>
+          <option value="semanal">Semanal</option>
+          <option value="bisemanal">Bisemanal</option>
+          <option value="mensual">Mensual</option>
+        </select>
+
+        <label class="chk-wrap">
+          <input id="fijoAhorro" type="checkbox" />
+          ¿Es un fondo fijo? (proyectar aportes en el tiempo)
+        </label>
+
+        <label for="tasaAnualPct">Tasa anual nominal (%)</label>
+        <input id="tasaAnualPct" type="number" step="0.01" placeholder="Ej. 4.5 o 0" />
+        <p class="nb-field-hint">Opcional. Estima ganancia o pérdida sobre el saldo aportado (interés simple desde la fecha de inicio). Usá 0 si no hay rendimiento.</p>
+
+        <button type="submit" class="btn-guardar">Guardar fondo</button>
+      </form>
+    </section>
+
+    <section class="lista-ahorros">
+      <h2 class="nb-section-title">Fondos de ahorro</h2>
+      <div id="listaAhorros" class="lista"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 No Budget</p>
+  </footer>
+
+  <script src="/src/js/auth.js"></script>
+  <script src="/src/js/nb-historial.js"></script>
+  <script src="/src/js/ahorros.js"></script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#0f1419" />
+  <title>Compartido - No Budget</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/css/dashboard-shell.css" />
+  <link rel="stylesheet" href="/src/css/compartido.css" />
+</head>
+<body class="dashboard-body module-compartido">
+  <header class="header">
+    <div class="header-brand">
+      <a href="home.html" class="brand-mark" aria-label="No Budget — Dashboard">
+        <img class="brand-logo" src="/assets/logo_budget.png" alt="" width="32" height="32" decoding="async" />
+        <span class="brand-text">No Budget</span>
+      </a>
+    </div>
+    <nav class="menu" aria-label="Módulos">
+      <ul>
+        <li><a href="home.html" class="nav-link" data-nav="home">Dashboard</a></li>
+        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Ingresos</a></li>
+        <li><a href="gastos.html" class="nav-link" data-nav="gastos">Gastos</a></li>
+        <li><a href="deudas.html" class="nav-link" data-nav="deudas">Deudas</a></li>
+        <li><a href="ahorros.html" class="nav-link" data-nav="ahorros">Ahorros</a></li>
+        <li><a href="inversiones.html" class="nav-link" data-nav="inversiones">Inversiones</a></li>
+        <li><a href="compartido.html" class="nav-link active" data-nav="compartido">Compartido</a></li>
+        <li><a href="settings.html" class="nav-link" data-nav="settings">Configuración</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1 class="h1 nb-section-title">Compartido <span class="badge">beta</span></h1>
+    <p class="sub">Invita, acepta y administra permisos/ocultos. Visualiza el dashboard combinado.</p>
+
+    <section class="grid">
+      <!-- INVITAR -->
+      <div class="card">
+        <h2 class="nb-section-title">Invitar usuario</h2>
+        <form id="form-invitar">
+          <label>Correo</label>
+          <input name="partnerEmail" type="email" required />
+          <label>Alias local (opcional)</label>
+          <input name="partnerDisplayName" type="text" />
+          <label>Parentesco</label>
+          <select name="relacion" required>
+            <option value="PAREJA">Pareja</option>
+            <option value="AMIGO">Amigo</option>
+            <option value="SOCIO">Socio</option>
+            <option value="FAMILIAR">Familiar</option>
+            <option value="OTRO">Otro</option>
+          </select>
+
+          <h4 style="margin-top:12px">Permisos iniciales</h4>
+          <div class="grid grid-2">
+            <div><label>Ingresos</label><select data-mod="INGRESOS" class="vis"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
+            <div><label>Gastos</label><select data-mod="GASTOS" class="vis"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
+            <div><label>Ahorros</label><select data-mod="AHORROS" class="vis"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
+            <div><label>Inversiones</label><select data-mod="INVERSIONES" class="vis"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
+          </div>
+
+          <div class="actions">
+            <button type="submit">Enviar invitación</button>
+            <button class="secondary" type="button" id="limpiarAsoc">Limpiar ASOC_ID</button>
+          </div>
+          <pre id="out-invitar" class="mono out"></pre>
+        </form>
+      </div>
+
+      <!-- ACEPTAR -->
+      <div class="card">
+        <h2 class="nb-section-title">Aceptar invitación</h2>
+        <form id="form-aceptar">
+          <label>ID de asociación (ASOC_ID)</label>
+          <input name="asocId" type="text" placeholder="cuid..." required />
+          <label>Alias para la otra persona (opcional)</label>
+          <input name="aliasParaPartner" type="text" />
+          <div class="actions"><button type="submit">Aceptar</button></div>
+          <pre id="out-aceptar" class="mono out"></pre>
+        </form>
+      </div>
+
+      <!-- PERMISOS (gestión posterior) -->
+      <div class="card">
+        <h2 class="nb-section-title">Permisos</h2>
+        <div class="dash-controls">
+          <input id="asocPerms" type="text" placeholder="ASOC_ID" />
+          <button id="btnCargarPerms" type="button" class="secondary">Cargar</button>
+        </div>
+        <div class="grid grid-2" style="margin-top:12px">
+          <div><label>Ingresos</label><select id="perm-ingresos"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
+          <div><label>Gastos</label><select id="perm-gastos"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
+          <div><label>Ahorros</label><select id="perm-ahorros"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
+          <div><label>Inversiones</label><select id="perm-inversiones"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
+        </div>
+        <div class="actions"><button id="btnGuardarPerms" type="button">Guardar permisos</button></div>
+        <pre id="out-perms" class="mono out"></pre>
+      </div>
+
+      <!-- MOVIMIENTO COMPARTIDO -->
+      <div class="card">
+        <h2 class="nb-section-title">Crear movimiento compartido</h2>
+        <form id="form-mov">
+          <label>ASOC_ID</label><input name="asocId" type="text" placeholder="cuid..." required />
+          <label>Módulo</label>
+          <select name="modulo">
+            <option value="INGRESOS">INGRESOS</option>
+            <option value="GASTOS">GASTOS</option>
+            <option value="AHORROS">AHORROS</option>
+            <option value="INVERSIONES">INVERSIONES</option>
+          </select>
+          <label>Concepto</label><input name="concepto" type="text" required />
+          <label>Monto total</label><input name="montoTotal" type="number" step="0.01" required />
+          <label>Fecha</label><input name="fecha" type="datetime-local" required />
+          <div class="actions"><button type="submit">Crear</button></div>
+          <pre id="out-mov" class="mono out"></pre>
+        </form>
+      </div>
+
+      <!-- DASHBOARD + ocultos -->
+      <div class="card">
+        <h2 class="nb-section-title">Dashboard compartido</h2>
+        <div class="dash-controls">
+          <input id="asocDash" type="text" placeholder="ASOC_ID" />
+          <button id="btnDash" type="button" class="secondary">Cargar</button>
+        </div>
+        <h3 class="h3">Totales</h3>
+        <pre id="totales" class="mono out"></pre>
+        <h3 class="h3">Movimientos</h3>
+        <div id="items">
+          <div class="row header-row" style="grid-template-columns: 1fr 120px 120px 120px">
+            <div>Concepto / Descripción</div>
+            <div>Módulo</div>
+            <div class="monto">Monto</div>
+            <div>Acciones</div>
+          </div>
+        </div>
+        <h3 class="h3" style="margin-top:14px">Registros ocultos</h3>
+        <div id="ocultos">
+          <div class="row header-row" style="grid-template-columns: 1fr 140px 160px 120px">
+            <div>RecordId</div>
+            <div>Módulo</div>
+            <div>Usuario origen (ID)</div>
+            <div>Acción</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <p>&copy; 2026 No Budget</p>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="/src/js/auth.js"></script>
+  <script src="/src/js/api.js"></script>
+  <script src="/src/js/compartido.js"></script>
+</body>
+</html>

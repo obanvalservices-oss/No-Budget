@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f1419" />
+  <title>Configuración | No Budget</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/css/dashboard-shell.css" />
+  <link rel="stylesheet" href="/src/css/settings.css" />
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="dashboard-body module-settings">
+  <header class="header">
+    <div class="header-brand">
+      <a href="home.html" class="brand-mark" aria-label="No Budget — Dashboard">
+        <img class="brand-logo" src="/assets/logo_budget.png" alt="" width="32" height="32" decoding="async" />
+        <span class="brand-text">No Budget</span>
+      </a>
+    </div>
+    <nav class="menu" aria-label="Módulos">
+      <ul>
+        <li><a href="home.html" class="nav-link" data-nav="home">Dashboard</a></li>
+        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Ingresos</a></li>
+        <li><a href="gastos.html" class="nav-link" data-nav="gastos">Gastos</a></li>
+        <li><a href="deudas.html" class="nav-link" data-nav="deudas">Deudas</a></li>
+        <li><a href="ahorros.html" class="nav-link" data-nav="ahorros">Ahorros</a></li>
+        <li><a href="inversiones.html" class="nav-link" data-nav="inversiones">Inversiones</a></li>
+        <li><a href="compartido.html" class="nav-link" data-nav="compartido">Compartido</a></li>
+        <li><a href="settings.html" class="nav-link active" data-nav="settings">Configuración</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="config-container">
+    <h2 class="nb-section-title">Configuración de la cuenta</h2>
+
+    <!-- Estado actual visible -->
+    <section class="config-box" id="estadoActualBox">
+      <h3>📌 Estado actual</h3>
+      <div id="estadoActual" class="estado-actual">
+        <!-- Se rellena en settings.js -->
+      </div>
+    </section>
+
+    <!-- Preferencias de semana -->
+    <section class="config-box">
+      <h3>📅 Preferencias de semana</h3>
+      <form id="formSemana">
+        <label for="weekStartDay">Día de inicio:</label>
+        <select id="weekStartDay" name="weekStartDay">
+          <option value="0">Domingo</option>
+          <option value="1">Lunes</option>
+          <option value="2">Martes</option>
+          <option value="3">Miércoles</option>
+          <option value="4">Jueves</option>
+          <option value="5">Viernes</option>
+          <option value="6">Sábado</option>
+        </select>
+
+        <label for="weekEndDay">Día de fin:</label>
+        <select id="weekEndDay" name="weekEndDay">
+          <option value="0">Domingo</option>
+          <option value="1">Lunes</option>
+          <option value="2">Martes</option>
+          <option value="3">Miércoles</option>
+          <option value="4">Jueves</option>
+          <option value="5">Viernes</option>
+          <option value="6">Sábado</option>
+        </select>
+        <button type="submit">Guardar</button>
+      </form>
+    </section>
+
+    <!-- Preferencias generales -->
+    <section class="config-box">
+      <h3>🌍 Preferencias generales</h3>
+      <form id="formGeneral">
+        <label for="currency">Moneda:</label>
+        <select id="currency" name="currency">
+          <option value="USD">USD ($)</option>
+          <option value="EUR">EUR (€)</option>
+          <option value="MXN">MXN (₱)</option>
+          <option value="COP">COP ($)</option>
+          <option value="ARS">ARS ($)</option>
+          <option value="CLP">CLP ($)</option>
+          <option value="PEN">PEN (S/)</option>
+        </select>
+
+        <label for="timezone">Zona horaria:</label>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+          <select id="timezone" name="timezone"></select>
+          <button type="button" id="btnDetectarTZ" title="Detectar automáticamente">Detectar</button>
+        </div>
+
+        <label style="margin-top:.75rem;">
+          <input type="checkbox" id="notifications" />
+          Recibir notificaciones
+        </label>
+
+        <button type="submit">Guardar</button>
+      </form>
+      <small id="tzHint" style="color:#666;display:block;margin-top:.5rem;"></small>
+    </section>
+
+    <!-- Seguridad -->
+    <section class="config-box">
+      <h3>🔒 Seguridad</h3>
+      <form id="formPassword">
+        <label for="currentPassword">Contraseña actual:</label>
+        <input type="password" id="currentPassword" required />
+
+        <label for="newPassword">Nueva contraseña:</label>
+        <input type="password" id="newPassword" required minlength="6" />
+
+        <button type="submit">Actualizar contraseña</button>
+      </form>
+      <small style="color:#666;display:block;margin-top:.5rem;">La contraseña debe tener al menos 6 caracteres.</small>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 No Budget</p>
+  </footer>
+
+  <script src="/src/js/auth.js"></script>
+  <script src="/src/js/settings.js"></script>
+</body>
+</html>

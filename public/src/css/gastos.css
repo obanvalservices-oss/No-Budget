@@ -1,0 +1,105 @@
+/* Layout + historial — forms/panels: dashboard-shell.css */
+
+.nb-categoria-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.nb-categoria-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+form#gastosForm .nb-categoria-nueva:not(.is-visible) {
+  display: none !important;
+}
+
+form#gastosForm .nb-categoria-nueva.is-visible {
+  display: block !important;
+}
+
+main.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.form-section,
+.historial-section {
+  flex: 1 1 320px;
+  max-width: 600px;
+}
+
+#historialGastos.historial-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.historial-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 1rem 1.1rem;
+  border-left: 4px solid var(--page-accent, #e74c3c);
+  border-radius: 10px;
+  transition: box-shadow 0.2s ease;
+}
+
+.historial-item:hover {
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.07);
+}
+
+.historial-item .info {
+  flex: 1;
+}
+
+.historial-item .info h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.historial-item .info .categoria,
+.historial-item .info .fecha {
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.monto.negativo {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--page-accent, #e74c3c);
+}
+
+.eliminar-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--page-accent, #e74c3c);
+  margin-left: 1rem;
+  padding: 0.25rem;
+  border-radius: 6px;
+}
+
+.eliminar-btn:hover {
+  filter: brightness(0.85);
+  background: #fff1f2;
+}
+
+@media (max-width: 768px) {
+  main.container {
+    flex-direction: column;
+    padding: 1rem;
+  }
+}

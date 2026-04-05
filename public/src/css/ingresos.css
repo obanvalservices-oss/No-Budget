@@ -1,0 +1,142 @@
+/* Layout + list items — forms/panels: dashboard-shell.css */
+
+.nb-categoria-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.nb-categoria-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+form#formIngreso .nb-categoria-nueva:not(.is-visible) {
+  display: none !important;
+}
+
+form#formIngreso .nb-categoria-nueva.is-visible {
+  display: block !important;
+}
+
+.ingreso-cat {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  padding: 0.15rem 0.5rem;
+  background: color-mix(in srgb, var(--page-accent, #059669) 12%, #f8fafc);
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.btn-eliminar {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #64748b;
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn-eliminar:hover {
+  color: #b91c1c;
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+main.contenedor-ingresos {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  flex-wrap: wrap;
+}
+
+.formulario-ingreso,
+.lista-ingresos {
+  flex: 1 1 320px;
+  max-width: 600px;
+}
+
+.ingreso-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid var(--page-accent, #2e7d32);
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.ingreso-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ingreso-fuente {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.ingreso-fecha {
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.ingreso-monto-acciones {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ingreso-monto {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--page-accent, #2e7d32);
+}
+
+.acciones button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  margin-left: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 6px;
+  color: #64748b;
+}
+
+.acciones button:hover {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+@media (max-width: 768px) {
+  main.contenedor-ingresos {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .ingreso-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ingreso-monto-acciones {
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}

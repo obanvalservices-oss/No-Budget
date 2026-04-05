@@ -1,0 +1,112 @@
+/* Compartido layout + dashboard table — forms/cards: dashboard-shell.css */
+
+.container {
+  max-width: 980px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.h1 {
+  font-size: 1.5rem;
+  margin: 12px 0;
+}
+
+.h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 12px 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.sub {
+  color: #64748b;
+  margin-bottom: 1.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.badge {
+  background: color-mix(in srgb, var(--page-accent, #db2777) 12%, white);
+  color: var(--page-accent, #db2777);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.actions {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.out {
+  margin-top: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  max-height: 220px;
+  overflow: auto;
+  font-size: 0.8125rem;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.dash-controls {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.dash-controls input {
+  flex: 1;
+  min-width: 140px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 120px 120px;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px dashed #e2e8f0;
+  font-size: 0.875rem;
+  align-items: center;
+}
+
+.row.header-row {
+  font-weight: 700;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  border-bottom-style: solid;
+  border-color: #cbd5e1;
+}
+
+.row .monto {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 860px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

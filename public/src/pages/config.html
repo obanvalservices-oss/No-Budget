@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Configuración | No Budget</title>
+  <link rel="stylesheet" href="/src/css/home.css" />
+</head>
+<body>
+  <header class="header">
+    <h1>No Budget</h1>
+    <nav class="menu">
+      <ul>
+        <li><a href="home.html">Inicio</a></li>
+        <li><a href="ingresos.html">Ingresos</a></li>
+        <li><a href="gastos.html">Gastos</a></li>
+        <li><a href="ahorros.html">Ahorros</a></li>
+        <li><a href="inversiones.html">Inversiones</a></li>
+        <li><a href="compartido.html">Compartido</a></li>
+        <li><a href="config.html" class="active">Configuración</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="dashboard-container" style="max-width:1080px;margin:0 auto;gap:1rem;">
+    <!-- Estado actual -->
+    <section class="resumen-box" id="estadoActualBox" style="width:100%;">
+      <h2 class="resumen-title">Estado actual de tu cuenta</h2>
+      <div class="resumen-item">
+        <span>Semana contable:</span>
+        <strong id="stateWeekText">—</strong>
+      </div>
+      <div class="resumen-item">
+        <span>Zona horaria:</span>
+        <strong id="stateTzText">—</strong>
+      </div>
+      <div class="resumen-item">
+        <span>Moneda:</span>
+        <strong id="stateCurrencyText">—</strong>
+      </div>
+    </section>
+
+    <!-- Configurar semana -->
+    <section class="resumen-box" style="width:100%;">
+      <h2 class="resumen-title">Definir inicio y fin de semana</h2>
+      <div class="resumen-item" style="border:0;padding:0.25rem 0;">
+        <label for="weekStartSelect" style="min-width:160px;">Día de inicio</label>
+        <select id="weekStartSelect">
+          <option value="1">Lunes</option>
+          <option value="2">Martes</option>
+          <option value="3">Miércoles</option>
+          <option value="4">Jueves</option>
+          <option value="5">Viernes</option>
+          <option value="6">Sábado</option>
+          <option value="7">Domingo</option>
+        </select>
+      </div>
+      <div class="resumen-item" style="border:0;padding:0.25rem 0;">
+        <label for="weekEndSelect" style="min-width:160px;">Día de fin</label>
+        <select id="weekEndSelect">
+          <option value="1">Lunes</option>
+          <option value="2">Martes</option>
+          <option value="3">Miércoles</option>
+          <option value="4">Jueves</option>
+          <option value="5">Viernes</option>
+          <option value="6">Sábado</option>
+          <option value="7">Domingo</option>
+        </select>
+      </div>
+      <div class="resumen-item" style="border:0;padding:.5rem 0;">
+        <button id="btnSaveWeek" class="btn-guardar">Guardar</button>
+      </div>
+      <small style="color:#777;">Sugerencia: si la semana empieza sábado, el fin típico es viernes.</small>
+    </section>
+
+    <!-- Zona horaria y moneda (opcional ahora) -->
+    <section class="resumen-box" style="width:100%;">
+      <h2 class="resumen-title">Zona horaria y moneda</h2>
+      <div class="resumen-item" style="border:0;padding:0.25rem 0;">
+        <label for="tzSelect" style="min-width:160px;">Zona horaria</label>
+        <input id="tzSelect" type="text" placeholder="Ej: America/New_York" />
+      </div>
+      <div class="resumen-item" style="border:0;padding:0.25rem 0;">
+        <label for="currencySelect" style="min-width:160px;">Moneda</label>
+        <input id="currencySelect" type="text" placeholder="USD, EUR, etc." />
+      </div>
+      <div class="resumen-item" style="border:0;padding:.5rem 0;">
+        <button id="btnSavePrefs" class="btn-guardar">Guardar</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 No Budget</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="/src/js/auth.js"></script>
+  <script src="/src/js/settings.js"></script>
+</body>
+</html>

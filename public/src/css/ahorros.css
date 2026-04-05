@@ -1,0 +1,109 @@
+/* Layout + fondos — forms/panels: dashboard-shell.css */
+
+.nb-muted {
+  font-weight: 400;
+  color: #64748b;
+}
+
+.nb-field-hint {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: -0.35rem 0 0.75rem;
+  line-height: 1.4;
+}
+
+main.contenedor-ahorros {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  flex-wrap: wrap;
+}
+
+.formulario-ahorro,
+.lista-ahorros {
+  flex: 1 1 320px;
+  max-width: 600px;
+}
+
+#listaAhorros.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.fondo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid var(--page-accent, #2563eb);
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.fondo-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.fondo-descripcion {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.fondo-meta {
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.fondo-monto-acciones {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.fondo-aporte {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--page-accent, #2563eb);
+}
+
+.acciones button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  margin-left: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 6px;
+  color: #64748b;
+}
+
+.acciones button:hover {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+@media (max-width: 768px) {
+  main.contenedor-ahorros {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .fondo-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .fondo-monto-acciones {
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}

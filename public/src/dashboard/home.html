@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f1419" />
+  <title>Resumen — No Budget</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/css/dashboard-shell.css" />
+  <link rel="stylesheet" href="/src/css/home.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="dashboard-body module-home">
+  <header class="header">
+    <div class="header-brand">
+      <a href="home.html" class="brand-mark" aria-label="No Budget — Dashboard">
+        <img class="brand-logo" src="/assets/logo_budget.png" alt="" width="32" height="32" decoding="async" />
+        <span class="brand-text">No Budget</span>
+      </a>
+    </div>
+    <nav class="menu" aria-label="Módulos">
+      <ul>
+        <li><a href="home.html" class="nav-link active" data-nav="home">Dashboard</a></li>
+        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Ingresos</a></li>
+        <li><a href="gastos.html" class="nav-link" data-nav="gastos">Gastos</a></li>
+        <li><a href="deudas.html" class="nav-link" data-nav="deudas">Deudas</a></li>
+        <li><a href="ahorros.html" class="nav-link" data-nav="ahorros">Ahorros</a></li>
+        <li><a href="inversiones.html" class="nav-link" data-nav="inversiones">Inversiones</a></li>
+        <li><a href="compartido.html" class="nav-link" data-nav="compartido">Compartido</a></li>
+        <li><a href="settings.html" class="nav-link" data-nav="settings">Configuración</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="dashboard-container">
+    <section class="page-hero">
+      <h2 class="nb-section-title">Resumen financiero</h2>
+      <p class="page-hero-sub">Ingresos, gastos y proyección en un solo vistazo.</p>
+    </section>
+
+    <section id="periodBar" class="nb-period-bar" aria-label="Período del resumen"></section>
+
+    <section class="grafico-box" id="graficoContainer">
+      <h3 class="nb-grafico-title">Distribución del período</h3>
+      <div class="nb-grafico-canvas-wrap">
+        <canvas id="graficoResumen" width="300" height="300"></canvas>
+      </div>
+    </section>
+
+    <section class="resumen-container">
+      <!-- Se llena dinámicamente -->
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 No Budget</p>
+  </footer>
+
+  <!-- Modal de edición (igual que ya tenías) -->
+  <div id="modalEditar" class="modal-editar" style="display: none;">
+    <div class="modal-contenido">
+      <h3>Editar transacción</h3>
+      <form id="formEditar">
+        <input type="hidden" id="editId">
+        <input type="hidden" id="editTipo">
+
+        <label for="editFuente">Descripción</label>
+        <input type="text" id="editFuente" required>
+
+        <label for="editMonto">Monto</label>
+        <input type="number" id="editMonto" step="0.01" required>
+
+        <label for="editFecha">Fecha</label>
+        <input type="date" id="editFecha" required>
+
+        <div class="botones-modal">
+          <button type="submit" class="btn-guardar">Guardar cambios</button>
+          <button type="button" id="btnCancelar" class="btn-cancelar">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts (orden importa: axios -> auth -> home) -->
+  <script src="/src/js/auth.js"></script>
+  <script src="/src/js/home.js"></script>
+</body>
+</html>
+

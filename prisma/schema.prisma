@@ -1,0 +1,341 @@
+// ==========================
+// prisma/schema.prisma
+// ==========================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Local: sqlite + DATABASE_URL=file:./dev.db  |  Production: use postgresql + Postgres URL
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+//// ===== ENUMS =====
+
+enum RelacionTipo {
+  PAREJA
+  AMIGO
+  SOCIO
+  FAMILIAR
+  OTRO
+}
+
+enum ModuloTipo {
+  INGRESOS
+  GASTOS
+  AHORROS
+  INVERSIONES
+}
+
+enum VisibilidadNivel {
+  NADA
+  PARCIAL
+  TOTAL
+}
+
+enum AsociacionEstado {
+  PENDIENTE
+  ACTIVA
+  REVOCADA
+  RECHAZADA
+  BLOQUEADA
+}
+
+// Fuente del pago de una deuda
+enum PaySource {
+  INCOME // desde un ingreso (flujo normal de caja)
+  SAVINGS // desde un fondo de ahorro (ahorros)
+}
+
+//// ===== MODELOS PRINCIPALES =====
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  nombre    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  asociacionesCreadas  Asociacion[]           @relation("AsociacionesCreadas")
+  asociacionesInvitado Asociacion[]           @relation("AsociacionesInvitado")
+  movimientosCreados   MovimientoCompartido[] @relation("SharedCreatedBy")
+  Ingreso              Ingreso[]
+  Gasto                Gasto[]
+  Ahorro               Ahorro[]
+  FondoInversion       FondoInversion[]
+  Inversion            Inversion[]
+
+  // ⬇️ Relación necesaria para el módulo de deudas
+  debts Debt[]
+
+  UserSettings UserSettings?
+}
+
+model UserSettings {
+  id            Int     @id @default(autoincrement())
+  userId        Int     @unique
+  weekStartDay  Int     @default(1)
+  weekEndDay    Int     @default(7)
+  currency      String? @default("USD")
+  timezone      String? @default("UTC")
+  notifications Boolean @default(true)
+  user          User    @relation(fields: [userId], references: [id])
+}
+
+model Categoria {
+  id        String   @id @default(uuid())
+  nombre    String
+  modulo    String // "INGRESOS" | "GASTOS" | "AHORROS" | "INVERSIONES"
+  gastos    Gasto[]  @relation("CategoriaGastos")
+  createdAt DateTime @default(now())
+}
+
+model Ingreso {
+  id         Int      @id @default(autoincrement())
+  fuente     String
+  monto      Float
+  frecuencia String?
+  fecha      DateTime
+  fijo       Boolean
+  categoria  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  isShared Boolean @default(false)
+  sharedId String?
+  colorTag String?
+
+  @@index([sharedId])
+}
+
+model Gasto {
+  id          String    @id @default(uuid())
+  descripcion String
+  monto       Float
+  origen      String
+  fecha       DateTime
+  fijo        Boolean
+  frecuencia  String?
+  categoria   Categoria @relation("CategoriaGastos", fields: [categoriaId], references: [id])
+  categoriaId String
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  createdAt   DateTime  @default(now())
+  isShared    Boolean   @default(false)
+  sharedId    String?
+  colorTag    String?
+}
+
+model Ahorro {
+  id          Int                @id @default(autoincrement())
+  objetivo    String             @default("")
+  monto       Float              @default(0)
+  categoria   String             @default("")
+  fecha       DateTime
+  recurrente  Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  movimientos MovimientoAhorro[]
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  isShared   Boolean @default(false)
+  sharedId   String?
+  colorTag   String?
+
+  // 👇 NUEVO
+  descripcion String?
+
+  /** Tasa anual nominal % (puede ser 0; null = no aplicar estimación de rendimiento). */
+  tasaAnualPct Float?
+
+  // back-relation
+  debtPayments DebtPayment[]
+
+  @@index([sharedId])
+}
+
+model FondoInversion {
+  id          Int         @id @default(autoincrement())
+  nombre      String
+  monto       Float
+  fecha       DateTime    @default(now())
+  descripcion String?
+  inversiones Inversion[]
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+}
+
+model Inversion {
+  id           Int            @id @default(autoincrement())
+  tipo         String
+  activo       String
+  categoria    String
+  cantidad     Float?
+  precioCompra Float?
+  precioActual Float?
+  descripcion  String?
+  /** Símbolo Twelve Data (ej. AAPL, BTC/USD). Opcional si coincide con el mapa por activo. */
+  simbolo      String?
+  /** Planificación: no afecta métricas de posición hasta que existan aportes ejecutados (futuro). */
+  planAporteMonto       Float?
+  planAporteFrecuencia  String?
+  planAporteInicio      DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  fondo        FondoInversion @relation(fields: [fondoId], references: [id])
+  fondoId      Int
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  isShared Boolean @default(false)
+  sharedId String?
+  colorTag String?
+
+  @@index([sharedId])
+}
+
+/** Cotización diaria por símbolo (máx. 1 fila por símbolo y fecha UTC; Twelve Data + fallback local). */
+model MarketQuoteDaily {
+  id             Int      @id @default(autoincrement())
+  symbol         String
+  quoteDate      String
+  close          Float
+  previousClose  Float?
+  createdAt      DateTime @default(now())
+
+  @@unique([symbol, quoteDate])
+  @@index([symbol])
+}
+
+model MovimientoAhorro {
+  id     Int      @id @default(autoincrement())
+  fecha  DateTime @default(now())
+  motivo String   @default("")
+  monto  Float    @default(0)
+
+  ahorro   Ahorro @relation(fields: [ahorroId], references: [id])
+  ahorroId Int
+
+  createdAt DateTime @default(now())
+}
+
+//// ===== COMPARTIDO / ASOCIACIONES =====
+
+model Asociacion {
+  id                 String           @id @default(cuid())
+  ownerId            Int
+  partnerUserId      Int?
+  partnerEmail       String
+  partnerDisplayName String
+  relacion           RelacionTipo
+  estado             AsociacionEstado @default(PENDIENTE)
+  aliasParaOwner     String?
+  aliasParaPartner   String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  owner       User  @relation("AsociacionesCreadas", fields: [ownerId], references: [id], onDelete: Cascade)
+  partnerUser User? @relation("AsociacionesInvitado", fields: [partnerUserId], references: [id], onDelete: SetNull)
+
+  permisos               AsociacionPermiso[]
+  ocultos                AsociacionOculto[]
+  movimientosCompartidos MovimientoCompartido[]
+
+  @@unique([ownerId, partnerEmail])
+  @@index([ownerId, partnerUserId])
+  @@index([ownerId])
+  @@index([partnerUserId])
+}
+
+model AsociacionPermiso {
+  id           String           @id @default(cuid())
+  asociacionId String
+  modulo       ModuloTipo
+  visibilidad  VisibilidadNivel
+
+  asociacion Asociacion @relation(fields: [asociacionId], references: [id])
+
+  @@unique([asociacionId, modulo])
+}
+
+model AsociacionOculto {
+  id           String     @id @default(cuid())
+  asociacionId String
+  modulo       ModuloTipo
+  recordId     String
+
+  asociacion Asociacion @relation(fields: [asociacionId], references: [id])
+
+  @@index([asociacionId, modulo])
+}
+
+model MovimientoCompartido {
+  id              String     @id @default(cuid())
+  asociacionId    String
+  modulo          ModuloTipo
+  concepto        String
+  montoTotal      Float
+  aporteOwner     Float
+  aportePartner   Float
+  fecha           DateTime
+  createdByUserId Int? // opcional para onDelete: SetNull
+
+  asociacion Asociacion @relation(fields: [asociacionId], references: [id], onDelete: Cascade)
+  createdBy  User?      @relation("SharedCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([asociacionId])
+  @@index([createdByUserId])
+}
+
+//// ===== MÓDULO DE DEUDAS =====
+
+model Debt {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  title              String
+  description        String?
+  principal          Float
+  interestRate       Float?   @default(0)
+  startDate          DateTime
+  dueDay             Int?
+  frequency          String?   // 'mensual' | 'semanal' | 'bisemanal'
+  installmentAmount  Float?
+  initialDownPayment Float?    @default(0)
+  status             String    @default("ACTIVA")
+
+  // 👇 NUEVO
+  firstDueDate       DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payments DebtPayment[]
+}
+
+model DebtPayment {
+  id     Int  @id @default(autoincrement())
+  debtId Int
+  debt   Debt @relation(fields: [debtId], references: [id], onDelete: Cascade)
+
+  fecha     DateTime
+  monto     Float
+  paySource PaySource @default(INCOME) // INCOME o SAVINGS
+
+  ahorroId Int?
+  ahorro   Ahorro? @relation(fields: [ahorroId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  note      String?
+  createdAt DateTime @default(now())
+}

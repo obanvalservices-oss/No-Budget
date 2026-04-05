@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#0f1419" />
+  <title>Inversiones - No Budget</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/css/dashboard-shell.css" />
+  <link rel="stylesheet" href="/src/css/inversiones.css" />
+</head>
+<body class="dashboard-body module-inversiones">
+  <header class="header">
+    <div class="header-brand">
+      <a href="home.html" class="brand-mark" aria-label="No Budget — Dashboard">
+        <img class="brand-logo" src="/assets/logo_budget.png" alt="" width="32" height="32" decoding="async" />
+        <span class="brand-text">No Budget</span>
+      </a>
+    </div>
+    <nav class="menu" aria-label="Módulos">
+      <ul>
+        <li><a href="home.html" class="nav-link" data-nav="home">Dashboard</a></li>
+        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Ingresos</a></li>
+        <li><a href="gastos.html" class="nav-link" data-nav="gastos">Gastos</a></li>
+        <li><a href="deudas.html" class="nav-link" data-nav="deudas">Deudas</a></li>
+        <li><a href="ahorros.html" class="nav-link" data-nav="ahorros">Ahorros</a></li>
+        <li><a href="inversiones.html" class="nav-link active" data-nav="inversiones">Inversiones</a></li>
+        <li><a href="compartido.html" class="nav-link" data-nav="compartido">Compartido</a></li>
+        <li><a href="settings.html" class="nav-link" data-nav="settings">Configuración</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="contenedor-inversiones">
+    <section class="formulario-inversion">
+      <h2 class="nb-section-title">Registrar inversión</h2>
+      <div class="tabs" id="tipoInversionTabs" role="tablist">
+        <button type="button" class="tab" data-tipo="acciones">Acciones</button>
+        <button type="button" class="tab" data-tipo="criptomonedas">Criptomonedas</button>
+        <button type="button" class="tab" data-tipo="bienes-raices">Bienes Raíces</button>
+        <button type="button" class="tab" data-tipo="fondos">Fondos</button>
+        <button type="button" class="tab" data-tipo="bonos">Bonos</button>
+        <button type="button" class="tab" data-tipo="retiro">Planes de Retiro</button>
+        <button type="button" class="tab" data-tipo="otros">Otros</button>
+      </div>
+      <form id="formInversion">
+        <p id="tipoInversionHint" class="nb-historial-meta" style="margin:0 0 0.75rem;">Elegí un tipo de inversión arriba.</p>
+        <div id="activoUnifiedWrap" class="nb-activo-unified" style="display: none;">
+          <label for="activoInput">Activo</label>
+          <input
+            type="text"
+            id="activoInput"
+            name="activo"
+            list="activosDatalist"
+            placeholder="Escribí el nombre o elegí una sugerencia de la lista"
+            autocomplete="off"
+          />
+          <datalist id="activosDatalist"></datalist>
+          <p id="activoInputHint" class="nb-activo-datalist-hint">
+            Escribí libremente o hacé clic dos veces / flecha abajo para ver sugerencias según el tipo.
+          </p>
+        </div>
+      
+        <div id="valorMercado" class="nb-inversion-cotizacion">Cotización: —</div>
+
+        <label for="capitalInvertido">Capital inicial (USD)</label>
+        <input type="number" id="capitalInvertido" step="0.01" min="0.01" placeholder="Ej: 2500 — se convierte en acciones al precio del día" />
+
+        <label for="simboloMercado">Símbolo / ticker (opcional)</label>
+        <input type="text" id="simboloMercado" placeholder="Ej: AAPL, BTC/USD — obligatorio si el activo no está en el mapa" autocomplete="off" />
+
+        <p class="nb-inversion-divider">O registro manual (sin cotización en vivo)</p>
+
+        <label for="cantidad">Acciones / unidades</label>
+        <input type="number" id="cantidad" step="0.000001" min="0" placeholder="Solo si no usás capital inicial" />
+
+        <label for="precioCompra">Precio unitario de compra</label>
+        <input type="number" id="precioCompra" step="0.000001" min="0" placeholder="Solo si no usás capital inicial" />
+
+        <div id="resultadoInversion"></div>
+
+        <label for="planAporteMonto">Aporte recurrente planificado ($) — no suma a la posición hasta ejecutarlo</label>
+        <input type="number" id="planAporteMonto" step="0.01" min="0" placeholder="Opcional" />
+
+        <label for="planAporteFrecuencia">Frecuencia del plan</label>
+        <select id="planAporteFrecuencia">
+          <option value="">— Ninguna —</option>
+          <option value="semanal">Semanal</option>
+          <option value="mensual">Mensual</option>
+        </select>
+
+        <label for="planAporteInicio">Inicio de los aportes planificados</label>
+        <input type="date" id="planAporteInicio" />
+
+        <label for="descripcion">Notas (opcional)</label>
+        <textarea id="descripcion" placeholder="Ej: Plataforma, comentarios..."></textarea>
+      
+        <button type="submit" class="btn-guardar">Guardar inversión</button>
+      </form>
+      
+    </section>
+
+    <section class="lista-inversiones">
+      <h2 class="nb-section-title">Lista de inversiones</h2>
+      <div id="listaInversiones" class="lista-inversiones-inner"></div>
+    </section>
+  </main>
+
+  <div id="modalEditarInversion" class="modal-editar" style="display: none" aria-hidden="true">
+    <div class="modal-contenido">
+      <h3>Editar inversión</h3>
+      <form id="formEditarInversion">
+        <input type="hidden" id="editInvId" />
+        <label for="editInvTipo">Tipo</label>
+        <select id="editInvTipo" required></select>
+        <label for="editInvActivo">Activo</label>
+        <input type="text" id="editInvActivo" required />
+        <label for="editInvCategoria">Categoría</label>
+        <input type="text" id="editInvCategoria" required />
+        <label for="editInvCantidad">Cantidad</label>
+        <input type="number" id="editInvCantidad" step="0.01" min="0" />
+        <label for="editInvPrecioCompra">Precio de compra (unit.)</label>
+        <input type="number" id="editInvPrecioCompra" step="0.01" min="0" />
+        <label for="editInvSimbolo">Símbolo (Twelve Data)</label>
+        <input type="text" id="editInvSimbolo" placeholder="AAPL, BTC/USD…" />
+        <label for="editInvPrecioActual">Precio de mercado guardado (opcional, override local)</label>
+        <input type="number" id="editInvPrecioActual" step="0.01" min="0" />
+        <label for="editPlanMonto">Plan aporte ($) — solo recordatorio</label>
+        <input type="number" id="editPlanMonto" step="0.01" min="0" />
+        <label for="editPlanFrecuencia">Frecuencia plan</label>
+        <select id="editPlanFrecuencia">
+          <option value="">—</option>
+          <option value="semanal">Semanal</option>
+          <option value="mensual">Mensual</option>
+        </select>
+        <label for="editPlanInicio">Inicio del plan (fecha)</label>
+        <input type="date" id="editPlanInicio" />
+        <label for="editInvDesc">Notas</label>
+        <textarea id="editInvDesc" rows="3"></textarea>
+        <div class="botones-modal">
+          <button type="submit" class="btn-guardar">Guardar cambios</button>
+          <button type="button" id="btnCancelarEditInv" class="btn-cancelar">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 No Budget</p>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="/src/js/auth.js"></script>
+  <script src="/src/js/nb-historial.js"></script>
+  <script src="/src/js/inversiones.js"></script>
+</body>
+</html>

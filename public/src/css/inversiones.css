@@ -1,0 +1,104 @@
+/* Layout + lista inversiones — forms/tabs: dashboard-shell.css */
+
+main.contenedor-inversiones {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  flex-wrap: wrap;
+}
+
+.formulario-inversion,
+.lista-inversiones {
+  flex: 1 1 320px;
+  max-width: 600px;
+}
+
+.lista-inversiones-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.nb-inversion-cotizacion {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #475569;
+  line-height: 1.45;
+  padding: 0.5rem 0.65rem;
+  background: #f1f5f9;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.nb-inversion-divider {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.nb-activo-unified input[list] {
+  width: 100%;
+}
+
+.nb-activo-datalist-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.inversion-item {
+  display: flex;
+  justify-content: space-between;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid var(--page-accent, #7c3aed);
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  margin-bottom: 0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  flex-wrap: wrap;
+}
+
+.inversion-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.inversion-nombre {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.inversion-detalle {
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.inversion-ganancia {
+  color: #059669;
+  font-weight: 700;
+}
+
+.inversion-perdida {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  main.contenedor-inversiones {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .inversion-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
