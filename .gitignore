@@ -60,3 +60,4 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # SQLite local database
 prisma/*.db
 prisma/*.db-journal
+tsconfig.build.tsbuildinfo
