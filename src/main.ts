@@ -2,10 +2,13 @@ import { config } from 'dotenv';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { validateProductionEnv } from './config/validate-env';
+import { assertPostgresDatabaseUrls, validateProductionEnv } from './config/validate-env';
 
-// Carga `.env` del directorio de trabajo (Nest corre desde la raíz del proyecto). Necesario para TWELVE_DATA_API_KEY, etc.
-config();
+// Local/dev only: never load `.env` in production (Railway/Docker inject vars). Avoids a stray `file:` URL winning over the platform.
+if (process.env.NODE_ENV !== 'production') {
+  config();
+}
+assertPostgresDatabaseUrls();
 validateProductionEnv();
 
 async function bootstrap() {
