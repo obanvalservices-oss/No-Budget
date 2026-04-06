@@ -7,32 +7,55 @@
   <title>No Budget — finanzas personales</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/dashboard-shell.css" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body>
+<body class="dashboard-body module-home nb-public">
   <header class="header">
-    <h1>No Budget</h1>
-    <nav class="menu">
+    <div class="header-brand">
+      <a href="index.html" class="brand-mark" aria-label="No Budget — Inicio">
+        <img class="brand-logo" src="/assets/logo_budget.png" alt="" width="32" height="32" decoding="async" />
+        <span class="brand-text">No Budget</span>
+      </a>
+    </div>
+    <nav class="menu" aria-label="Cuenta">
       <ul>
-        <li><a href="login.html">Iniciar sesión</a></li>
-        <li><a href="register.html">Crear cuenta</a></li>
+        <li><a href="login.html" class="nav-link" data-nav="login">Iniciar sesión</a></li>
+        <li><a href="register.html" class="nav-link" data-nav="signup">Crear cuenta</a></li>
       </ul>
     </nav>
   </header>
 
-  <main class="main-container">
-    <section class="bienvenida">
-      <h2>Tu dinero, con claridad</h2>
-      <p>
-        Ingresos, gastos, ahorros y deudas en un solo lugar. Planifica solo o en pareja, con una interfaz simple y datos que puedes confiar.
-      </p>
-      <a href="login.html" class="btn-cta">Entrar</a>
-    </section>
+  <main class="nb-landing-wrap">
+    <div class="nb-landing-hero">
+      <section class="page-hero nb-landing-copy">
+        <h2 class="nb-section-title">Tu dinero, con claridad</h2>
+        <p class="page-hero-sub">
+          Ingresos, gastos, ahorros, inversiones y deudas en un solo lugar. Planificá solo o en pareja, con una interfaz pensada para decidir rápido y con datos que podés confiar.
+        </p>
+        <div class="nb-landing-actions">
+          <a href="login.html" class="btn-cta btn-cta--primary">Entrar</a>
+          <a href="register.html" class="btn-cta btn-cta--ghost">Registrarme</a>
+        </div>
+      </section>
+
+      <aside class="nb-landing-panel" aria-label="Módulos">
+        <h3>Una app, todo el flujo</h3>
+        <div class="nb-module-strip">
+          <span class="nb-module-pill nb-module-pill--in">Ingresos</span>
+          <span class="nb-module-pill nb-module-pill--out">Gastos</span>
+          <span class="nb-module-pill nb-module-pill--debt">Deudas</span>
+          <span class="nb-module-pill nb-module-pill--save">Ahorros</span>
+          <span class="nb-module-pill nb-module-pill--inv">Inversiones</span>
+          <span class="nb-module-pill nb-module-pill--share">Compartido</span>
+        </div>
+      </aside>
+    </div>
   </main>
 
   <footer class="footer">
-    <p>&copy; 2026 No Budget</p>
+    <p>&copy; 2026 No Budget · Finanzas personales</p>
   </footer>
 
   <script src="js/main.js"></script>

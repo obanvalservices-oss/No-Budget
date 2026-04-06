@@ -5,7 +5,11 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
   const nombre = (document.getElementById('nombre') || document.getElementById('name'))?.value?.trim() || '';
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
-  const confirm = (document.getElementById('confirm') || document.getElementById('passwordConfirm'))?.value?.trim();
+  const confirm = (
+    document.getElementById('confirm-password') ||
+    document.getElementById('confirm') ||
+    document.getElementById('passwordConfirm')
+  )?.value?.trim();
 
   if (!email || !password) return alert('Correo y contraseña son obligatorios.');
   if (confirm !== undefined && password !== confirm) return alert('Las contraseñas no coinciden.');
