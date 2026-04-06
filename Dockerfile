@@ -15,7 +15,7 @@ ARG DATABASE_URL="postgresql://build:build@localhost:5432/build"
 ARG DIRECT_URL="postgresql://build:build@localhost:5432/build"
 ENV DATABASE_URL=$DATABASE_URL
 ENV DIRECT_URL=$DIRECT_URL
-RUN npx prisma generate && npm run build
+RUN npm run build
 RUN npm prune --omit=dev
 
 FROM node:22-bookworm-slim AS runner
@@ -28,4 +28,4 @@ COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/package.json ./
 COPY --from=build /app/public ./public
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && node dist/src/main.js"]
+CMD ["sh", "-c", "npx prisma generate --schema=./prisma/schema.prisma && npx prisma migrate deploy --schema=./prisma/schema.prisma && node dist/src/main.js"]
