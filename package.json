@@ -9,7 +9,6 @@
     "node": ">=20"
   },
   "scripts": {
-    "postinstall": "prisma generate --schema=./prisma/schema.prisma",
     "db:push": "prisma db push --schema=./prisma/schema.prisma",
     "db:migrate": "prisma migrate deploy --schema=./prisma/schema.prisma",
     "db:migrate:dev": "prisma migrate dev --schema=./prisma/schema.prisma",
@@ -17,10 +16,10 @@
     "db:studio": "prisma studio --schema=./prisma/schema.prisma",
     "build": "node scripts/assert-prisma-postgres.cjs && prisma generate --schema=./prisma/schema.prisma && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "node dist/main.js",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/src/main.js",
+    "start:prod": "node dist/main.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

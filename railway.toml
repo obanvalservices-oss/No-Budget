@@ -1,10 +1,10 @@
-# Railway: add Postgres (or point env vars at Supabase). Mirror variables from .env.example.
-# Nixpacks runs `npm run build` by default when a build script exists.
+# Build runs Prisma generate (see package.json `build`). Start must not use `nest start` — use `npm start` → node dist/main.js.
 
 [build]
 builder = "nixpacks"
+buildCommand = "npm ci && npm run build"
 
 [deploy]
-startCommand = "npx prisma generate --schema=./prisma/schema.prisma && npx prisma migrate deploy --schema=./prisma/schema.prisma && npm run start:prod"
+startCommand = "npx prisma migrate deploy --schema=./prisma/schema.prisma && node dist/main.js"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10

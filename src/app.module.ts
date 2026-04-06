@@ -29,7 +29,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     DeudasModule,
     DashboardModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', 'public'),
+      rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/',
     }),
   ],
