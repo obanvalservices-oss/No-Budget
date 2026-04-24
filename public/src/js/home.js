@@ -619,16 +619,26 @@ function paintVisor() {
         ? `<div class="nb-visor-fondo-tasa">${Number(f.tasaAnualPct).toFixed(2)}% a.a. · nominal ${fmtMoney(aportado)}</div>`
         : '';
       const saldoLbl = tieneTasa ? 'Total estimado' : 'Total fondo';
-      return `<div class="nb-visor-fondo-card" tabindex="0" role="group">
-        <div class="nb-visor-fondo-head">
-          <span class="nb-visor-fondo-name">${esc(f.nombre || f.objetivo || 'Fondo')}</span>
-          <span class="nb-visor-fondo-meta">Meta ${fmtMoney(Number(f.meta) || 0)}</span>
+      const detalle = `
+        <div class="nb-visor-detail-row"><span>Meta</span><strong>${fmtMoney(Number(f.meta) || 0)}</strong></div>
+        <div class="nb-visor-detail-row"><span>Total aportado</span><strong>${fmtMoney(aportado)}</strong></div>
+        <div class="nb-visor-detail-row"><span>${esc(saldoLbl)}</span><strong>${fmtMoney(conRend)}</strong></div>
+      `;
+      return `<details class="nb-visor-fondo-card nb-visor-collapsible">
+        <summary class="nb-visor-summary">
+          <div class="nb-visor-fondo-head">
+            <span class="nb-visor-fondo-name">${esc(f.nombre || f.objetivo || 'Fondo')}</span>
+            <span class="nb-visor-fondo-meta">Meta ${fmtMoney(Number(f.meta) || 0)}</span>
+          </div>
+          <div class="nb-visor-fondo-total">${fmtMoney(conRend)}</div>
+          <div class="nb-visor-fondo-sublbl">${esc(saldoLbl)} · clic para ver detalle</div>
+        </summary>
+        <div class="nb-visor-detail">
+          ${pillsHtml}
+          ${tasaHtml}
+          ${detalle}
         </div>
-        <div class="nb-visor-fondo-total">${fmtMoney(conRend)}</div>
-        <div class="nb-visor-fondo-sublbl">${esc(saldoLbl)}</div>
-        ${pillsHtml}
-        ${tasaHtml}
-      </div>`;
+      </details>`;
     }).join('') || '<p class="nb-visor-empty">Sin fondos</p>';
     fEl.innerHTML = visorCards;
   }
@@ -654,13 +664,34 @@ function paintVisor() {
       const sign = pnl >= 0 ? '+' : '';
       const pctStr = pnlPct != null && !Number.isNaN(pnlPct) ? `${sign}${pnlPct.toFixed(1)}%` : '—';
       const invCls = pnl >= 0 ? 'is-up' : 'is-down';
+      const detalleInvs = invs
+        .map((inv) => {
+          const m = inv.metricas;
+          const cap = m && typeof m.capitalInvertido === 'number' ? m.capitalInvertido : capitalInvertidoApertura(inv);
+          const val = m && typeof m.valorActual === 'number' ? m.valorActual : cap;
+          const pnlItem = val - cap;
+          const signItem = pnlItem >= 0 ? '+' : '';
+          return `
+            <div class="nb-visor-detail-item">
+              <div class="nb-visor-detail-title">${esc(inv.activo || inv.tipo || 'Inversión')}</div>
+              <div class="nb-visor-detail-row"><span>Invertido</span><strong>${fmtMoney(cap)}</strong></div>
+              <div class="nb-visor-detail-row"><span>Valor mercado</span><strong>${fmtMoney(val)}</strong></div>
+              <div class="nb-visor-detail-row"><span>PnL</span><strong>${signItem}${fmtMoney(pnlItem)}</strong></div>
+            </div>
+          `;
+        })
+        .join('');
       iEl.innerHTML = `
-        <div class="nb-visor-inv-card ${invCls}" tabindex="0" role="group">
-          <div class="nb-visor-inv-label">Cartera agregada</div>
-          <div class="nb-visor-inv-row"><span>Invertido</span><strong>${fmtMoney(totalInv)}</strong></div>
-          <div class="nb-visor-inv-row"><span>Valor mercado</span><strong>${fmtMoney(totalVal)}</strong></div>
-          <div class="nb-visor-inv-pnl">PnL ${sign}${fmtMoney(pnl)} <span class="nb-visor-inv-pct">(${pctStr})</span></div>
-        </div>`;
+        <details class="nb-visor-inv-card nb-visor-collapsible ${invCls}">
+          <summary class="nb-visor-summary">
+            <div class="nb-visor-inv-label">Cartera agregada</div>
+            <div class="nb-visor-inv-row"><span>Invertido</span><strong>${fmtMoney(totalInv)}</strong></div>
+            <div class="nb-visor-inv-row"><span>Valor mercado</span><strong>${fmtMoney(totalVal)}</strong></div>
+            <div class="nb-visor-inv-pnl">PnL ${sign}${fmtMoney(pnl)} <span class="nb-visor-inv-pct">(${pctStr})</span></div>
+            <div class="nb-visor-fondo-sublbl">Clic para ver detalle por inversión</div>
+          </summary>
+          <div class="nb-visor-detail">${detalleInvs}</div>
+        </details>`;
     }
   }
 }

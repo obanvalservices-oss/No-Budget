@@ -501,6 +501,70 @@
   gap: 0.65rem;
 }
 
+.nb-visor-collapsible {
+  overflow: hidden;
+}
+
+.nb-visor-summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.nb-visor-summary::-webkit-details-marker {
+  display: none;
+}
+
+.nb-visor-summary::after {
+  content: '▾';
+  float: right;
+  margin-top: -1.5rem;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 800;
+  transition: transform 0.2s ease;
+}
+
+.nb-visor-collapsible[open] .nb-visor-summary::after {
+  transform: rotate(180deg);
+}
+
+.nb-visor-detail {
+  margin-top: 0.65rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.nb-visor-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.84rem;
+  color: #475569;
+  margin-top: 0.35rem;
+}
+
+.nb-visor-detail-row strong {
+  color: #0f172a;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.nb-visor-detail-item {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  margin-bottom: 0.5rem;
+}
+
+.nb-visor-detail-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.3rem;
+}
+
 .nb-visor-empty {
   margin: 0;
   padding: 1rem 1.1rem;
