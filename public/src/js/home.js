@@ -30,6 +30,44 @@ const STATE = {
   skips: new Set(),     // tipo:origId:YYYY-MM-DD -> skip esta ocurrencia
 };
 
+const HOME_UI_STATE_KEY = 'nb_home_ui_state_v1';
+
+function loadUiState() {
+  try {
+    const raw = localStorage.getItem(HOME_UI_STATE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed?.skips)) {
+      STATE.skips = new Set(parsed.skips.filter((x) => typeof x === 'string'));
+    }
+    if (Array.isArray(parsed?.overrides)) {
+      const clean = parsed.overrides.filter(
+        (x) =>
+          x &&
+          typeof x.key === 'string' &&
+          x.value &&
+          typeof x.value.monto === 'number' &&
+          Number.isFinite(x.value.monto),
+      );
+      STATE.overrides = new Map(clean.map((x) => [x.key, x.value]));
+    }
+  } catch (err) {
+    console.warn('[home] no se pudo restaurar estado local de semanas', err);
+  }
+}
+
+function persistUiState() {
+  try {
+    const payload = {
+      skips: [...STATE.skips],
+      overrides: [...STATE.overrides].map(([key, value]) => ({ key, value })),
+    };
+    localStorage.setItem(HOME_UI_STATE_KEY, JSON.stringify(payload));
+  } catch (err) {
+    console.warn('[home] no se pudo persistir estado local de semanas', err);
+  }
+}
+
 // ===== Helpers de fecha =====
 function startOfWeek(d, startDow = 1) { // startDow: 0=Dom..6=Sab
   const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -64,6 +102,7 @@ function normalizeDateOnly(d){ const nd=new Date(d); nd.setHours(0,0,0,0); retur
 // ===== Carga =====
 document.addEventListener('DOMContentLoaded', async () => {
   buildTopBars(); // crea banner + selector periodo + visor fondos/inv
+  loadUiState();
 
   try {
     const [resS, resI, resG, resInv, resFondos, resDeudas] = await Promise.all([
@@ -1095,6 +1134,7 @@ document.body.addEventListener('click', async (e) => {
     const date = e.target.dataset.date;   // YYYY-MM-DD
     if (!confirm('¿Ocultar solo esta ocurrencia en esta semana?')) return;
     STATE.skips.add(`${tipo}:${orig}:${date}`);
+    persistUiState();
     render();
   }
   if (e.target.classList.contains('btn-edit-occ')) {
@@ -1105,6 +1145,7 @@ document.body.addEventListener('click', async (e) => {
     const monto = Number(montoStr); if (Number.isNaN(monto)) return alert('Monto inválido');
     const label = prompt('Etiqueta/Descripción (opcional):') || '';
     STATE.overrides.set(`${tipo}:${orig}:${date}`, { monto, label });
+    persistUiState();
     render();
   }
 
