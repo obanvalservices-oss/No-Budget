@@ -141,59 +141,24 @@ function buildTopBars() {
   sel.value = STATE.period;
   sel.onchange = () => { STATE.period = sel.value; render(); };
 
-  // Cinturón horizontal interactivo: ahorros + inversiones + gráfico
-  let beltHost = document.getElementById('insightsBeltHost');
-  if (!beltHost) {
-    beltHost = document.createElement('section');
-    beltHost.id = 'insightsBeltHost';
-    main.insertBefore(beltHost, main.children[2]);
+  // Visor compacto de fondos/inversiones (arriba del selector de periodo)
+  let visor = document.getElementById('visorFondosInv');
+  if (!visor) {
+    visor = document.createElement('section');
+    visor.id = 'visorFondosInv';
+    visor.className = 'nb-visor-strip';
+    main.insertBefore(visor, bar);
   }
-  beltHost.innerHTML = `
-    <section id="insightsBelt" class="nb-insights-belt" aria-label="Visores del dashboard">
-      <button type="button" class="nb-belt-arrow" data-dir="-1" aria-label="Panel anterior">◀</button>
-      <div class="nb-belt-track-wrap">
-        <div class="nb-belt-track" id="insightsBeltTrack">
-          <article class="nb-belt-slide nb-visor-col" data-slide-index="0">
-            <h3 class="nb-visor-col-title">Ahorros</h3>
-            <div id="visorFondos" class="nb-visor-cards"></div>
-          </article>
-          <article class="nb-belt-slide nb-visor-col" data-slide-index="1">
-            <h3 class="nb-visor-col-title">Inversiones</h3>
-            <div id="visorInversiones" class="nb-visor-cards"></div>
-          </article>
-          <article class="nb-belt-slide grafico-box" id="graficoContainer" data-slide-index="2">
-            <h3 class="nb-grafico-title">Distribución del período</h3>
-            <div class="nb-grafico-canvas-wrap">
-              <canvas id="graficoResumen" width="300" height="300"></canvas>
-            </div>
-          </article>
-        </div>
-      </div>
-      <button type="button" class="nb-belt-arrow" data-dir="1" aria-label="Panel siguiente">▶</button>
-    </section>
+  visor.innerHTML = `
+    <div class="nb-visor-col">
+      <h3 class="nb-visor-col-title">Ahorros</h3>
+      <div id="visorFondos" class="nb-visor-cards"></div>
+    </div>
+    <div class="nb-visor-col">
+      <h3 class="nb-visor-col-title">Inversiones</h3>
+      <div id="visorInversiones" class="nb-visor-cards"></div>
+    </div>
   `;
-  wireInsightsBelt();
-}
-
-function wireInsightsBelt() {
-  const track = document.getElementById('insightsBeltTrack');
-  const belt = document.getElementById('insightsBelt');
-  if (!track || !belt || track.dataset.wired === '1') return;
-  track.dataset.wired = '1';
-
-  const moveBy = (dir) => {
-    const first = track.querySelector('.nb-belt-slide');
-    const delta = first ? first.getBoundingClientRect().width + 16 : 320;
-    track.scrollBy({ left: dir * delta, behavior: 'smooth' });
-  };
-
-  belt.querySelectorAll('.nb-belt-arrow').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const dir = Number(btn.dataset.dir || 0);
-      if (!dir) return;
-      moveBy(dir);
-    });
-  });
 }
 
 // ===== Replicación de ingresos/gastos fijos =====

@@ -41,9 +41,15 @@
       <p class="page-hero-sub">Ingresos, gastos y proyección en un solo vistazo.</p>
     </section>
 
+    <section id="visorFondosInv" class="nb-visor-strip" aria-label="Visor de ahorros e inversiones"></section>
     <section id="periodBar" class="nb-period-bar" aria-label="Período del resumen"></section>
 
-    <section id="insightsBeltHost"></section>
+    <section class="grafico-box" id="graficoContainer">
+      <h3 class="nb-grafico-title">Distribución del período</h3>
+      <div class="nb-grafico-canvas-wrap">
+        <canvas id="graficoResumen" width="300" height="300"></canvas>
+      </div>
+    </section>
 
     <section class="resumen-container">
       <!-- Se llena dinámicamente -->
