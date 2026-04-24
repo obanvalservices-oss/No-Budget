@@ -65,16 +65,12 @@ function normalizeDateOnly(d){ const nd=new Date(d); nd.setHours(0,0,0,0); retur
 document.addEventListener('DOMContentLoaded', async () => {
   buildTopBars(); // crea banner + selector periodo + visor fondos/inv
 
-  // Cargar settings (para semana personalizada)
   try {
-    const resS = await axios.get('/settings');
-    if (resS?.data) STATE.settings = resS.data;
-  } catch (err) {
-    console.warn('[home] no se pudo cargar settings, uso defaults', err);
-  }
-
-  try {
-    const [resI, resG, resInv, resFondos, resDeudas] = await Promise.all([
+    const [resS, resI, resG, resInv, resFondos, resDeudas] = await Promise.all([
+      axios.get('/settings').catch((err) => {
+        console.warn('[home] no se pudo cargar settings, uso defaults', err);
+        return { data: null };
+      }),
       axios.get('/ingresos'),
       axios.get('/gastos'),
       axios.get('/inversiones'),
@@ -82,6 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       axios.get('/deudas'),
     ]);
 
+    if (resS?.data) STATE.settings = resS.data;
     STATE.data.ingresos    = Array.isArray(resI.data) ? resI.data : [];
     STATE.data.gastos      = Array.isArray(resG.data) ? resG.data : [];
     STATE.data.inversiones = Array.isArray(resInv.data) ? resInv.data : [];
