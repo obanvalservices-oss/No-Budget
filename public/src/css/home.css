@@ -163,6 +163,14 @@
   color: #0a0f18;
 }
 
+.nb-balance-positivo {
+  color: var(--mod-ingresos, #059669) !important;
+}
+
+.nb-balance-negativo {
+  color: var(--mod-gastos, #dc2626) !important;
+}
+
 .detalle-items {
   margin-top: 0.45rem;
   margin-bottom: 0.65rem;

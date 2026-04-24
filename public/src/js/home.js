@@ -525,6 +525,7 @@ function render() {
   // Deudas (cuotas) en todo el rango
   const deudasAll   = deudaItemsForRange(STATE.data.deudas, rangeStart, rangeEnd);
 
+  let carryFromPrevWeek = 0;
   weeks.forEach(({start,end}, idx) => {
     const titulo = weekTitle(start, end, STATE.period, idx);
 
@@ -541,7 +542,10 @@ function render() {
       ahorros:  sumBy(ahorrosAportes, vAporte),
       inversiones: sumBy(inversionItems, vInversionFlujo),
     };
-    const balance = tot.ingresos - tot.gastos - tot.deudas - tot.ahorros - tot.inversiones;
+    const balanceSemana = tot.ingresos - tot.gastos - tot.deudas - tot.ahorros - tot.inversiones;
+    const balanceFinal = balanceSemana + carryFromPrevWeek;
+    const carryCls = carryFromPrevWeek < 0 ? 'nb-balance-negativo' : carryFromPrevWeek > 0 ? 'nb-balance-positivo' : '';
+    const finalCls = balanceFinal < 0 ? 'nb-balance-negativo' : balanceFinal > 0 ? 'nb-balance-positivo' : '';
 
     const el = document.createElement('section');
     el.className = 'resumen-box';
@@ -552,11 +556,15 @@ function render() {
       ${bloque('💳 Pagos de deudas',    deudas,   'deudas',     vDeuda,   lblDeuda)}
       ${bloque('💧 Aportes a fondos',   ahorrosAportes, 'aportes', vAporte, lblAporte)}
       ${bloque('📈 Inversiones',        inversionItems, 'inversiones', vInversionFlujo, lblInversionFlujo)}
+      <div class="resumen-item">
+        <span>↩ Balance semana anterior:</span><strong class="${carryCls}">${fmtMoney(carryFromPrevWeek)}</strong>
+      </div>
       <div class="resumen-item resumen-final">
-        <span>🧮 Balance:</span><strong>${fmtMoney(balance)}</strong>
+        <span>🧮 Balance:</span><strong class="${finalCls}">${fmtMoney(balanceFinal)}</strong>
       </div>
     `;
     container.appendChild(el);
+    carryFromPrevWeek = balanceFinal;
   });
 
   // Totales para el gráfico
