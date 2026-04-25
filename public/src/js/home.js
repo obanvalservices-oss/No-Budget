@@ -626,7 +626,31 @@ function render() {
             const amount = Number(valMap[m._kind](m)) || 0;
             const sign = m._kind === 'ingresos' ? '+' : '-';
             const cls = m._kind === 'ingresos' ? 'nb-balance-positivo' : 'nb-balance-negativo';
-            return `<div class="item-detalle"><span>${esc(label)}</span><strong class="${cls}">${sign}${fmtMoney(amount)}</strong></div>`;
+            const tipo = m._kind;
+            const isRep = !!m._replicated;
+            const dateKey = m._dateKey || (m.fecha ? ymd(new Date(m.fecha)) : '');
+            const origId = m._originalId ?? m.deudaId ?? m.inversionId ?? m.id;
+            const statusKey = dateKey && origId != null ? `${tipo}:${origId}:${dateKey}` : '';
+            const status = statusKey ? STATE.lineStatus.get(statusKey) || '' : '';
+            const rowClass = status === 'done' ? 'is-done' : status === 'skipped' ? 'is-skipped' : '';
+            const statusTag =
+              status === 'done'
+                ? '<span class="nb-line-status-tag nb-line-status-tag--done">Done</span>'
+                : status === 'skipped'
+                  ? '<span class="nb-line-status-tag nb-line-status-tag--skipped">Skipped</span>'
+                  : '';
+            const nextKey = statusKey ? `${tipo}:${origId}:${addWeeksToYmd(dateKey, 1)}` : '';
+            return `
+              <div class="item-detalle ${rowClass}">
+                <span>${esc(label)} ${statusTag}</span>
+                <div>
+                  <strong class="${cls}" style="margin-right:0.35rem;">${sign}${fmtMoney(amount)}</strong>
+                  <button class="btn-mark-done" data-key="${statusKey}">Done</button>
+                  <button class="btn-mark-skip" data-key="${statusKey}" data-next-key="${nextKey}" data-amount="${amount}">Skip</button>
+                  ${acciones(tipo, m.id, origId, isRep, dateKey, m)}
+                </div>
+              </div>
+            `;
           })
           .join('');
 
