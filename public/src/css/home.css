@@ -5,7 +5,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1.35rem 1.6rem;
-  padding: 2rem;
+  padding: 2rem 2rem 8rem;
   justify-content: center;
   align-items: flex-start;
 }
@@ -513,8 +513,8 @@
 
 .nb-period-bar {
   width: 100%;
-  max-width: 1080px;
-  margin: 0.85rem auto 0;
+  max-width: 980px;
+  margin: 0;
   padding: 0.85rem 1.1rem;
   display: flex;
   flex-wrap: wrap;
@@ -524,11 +524,16 @@
   border-radius: var(--nb-home-slab-radius);
   border: var(--nb-home-slab-border);
   box-shadow: var(--nb-home-slab-shadow);
-  position: sticky;
-  top: 82px;
-  z-index: 40;
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 90;
   backdrop-filter: blur(6px) saturate(115%);
   -webkit-backdrop-filter: blur(6px) saturate(115%);
+  box-shadow:
+    0 10px 22px rgba(15, 23, 42, 0.16),
+    0 1px 0 rgba(255, 255, 255, 0.65) inset;
 }
 
 .nb-period-bar:focus-within {
@@ -583,6 +588,29 @@
   cursor: pointer;
 }
 
+.report-generator-box {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0.65rem auto 0;
+}
+
+.nb-report-toolbar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.55rem;
+  align-items: end;
+  margin-bottom: 0.6rem;
+}
+
+.nb-report-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+}
+
 .nb-period-bar-btn:hover {
   background: #f8fafc;
 }
@@ -607,7 +635,10 @@
 
 @media (max-width: 768px) {
   .nb-period-bar {
-    top: 68px;
+    width: calc(100% - 1rem);
+    max-width: none;
+    bottom: 8px;
+    padding: 0.7rem 0.75rem;
   }
 }
 

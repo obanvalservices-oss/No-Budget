@@ -19,6 +19,16 @@ const STATE = {
   period: 'SEMANA', // SEMANA | COMPARAR | 1M | 3M | 6M
   viewMode: 'SEMANAL', // SEMANAL | DIARIA
   historyWeeks: 12,
+  report: {
+    mode: 'MENSUAL', // MENSUAL | ANUAL | RANGO
+    month: (() => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    })(),
+    year: String(new Date().getFullYear()),
+    from: '',
+    to: '',
+  },
   chart: null,
   data: {
     ingresos: [],
@@ -282,6 +292,8 @@ function buildTopBars() {
   histSel.onchange = () => { STATE.historyWeeks = Number(histSel.value) || 12; render(); };
   printBtn.onclick = () => window.print();
 
+  ensureReportGenerator();
+
   // Visor compacto de fondos/inversiones (arriba del selector de periodo)
   let visor = document.getElementById('visorFondosInv');
   if (!visor) {
@@ -298,6 +310,208 @@ function buildTopBars() {
     <div class="nb-visor-col">
       <h3 class="nb-visor-col-title">Inversiones</h3>
       <div id="visorInversiones" class="nb-visor-cards"></div>
+    </div>
+  `;
+}
+
+function ensureReportGenerator() {
+  const main = document.querySelector('.dashboard-container') || document.body;
+  let box = document.getElementById('reportGeneratorBox');
+  if (!box) {
+    box = document.createElement('section');
+    box.id = 'reportGeneratorBox';
+    box.className = 'resumen-box report-generator-box';
+    main.appendChild(box);
+  }
+
+  box.innerHTML = `
+    <h2 class="resumen-title">📘 Generador de reportes</h2>
+    <div class="nb-report-toolbar">
+      <label class="nb-report-label">
+        Tipo
+        <select id="reportModeSelect" class="nb-period-bar-select">
+          <option value="MENSUAL">Mensual</option>
+          <option value="ANUAL">Anual</option>
+          <option value="RANGO">Por rango</option>
+        </select>
+      </label>
+      <label class="nb-report-label" id="reportMonthWrap">
+        Mes
+        <input id="reportMonthInput" class="nb-period-bar-select" type="month" />
+      </label>
+      <label class="nb-report-label" id="reportYearWrap">
+        Año
+        <input id="reportYearInput" class="nb-period-bar-select" type="number" min="2000" max="2100" />
+      </label>
+      <label class="nb-report-label" id="reportFromWrap">
+        Desde
+        <input id="reportFromInput" class="nb-period-bar-select" type="date" />
+      </label>
+      <label class="nb-report-label" id="reportToWrap">
+        Hasta
+        <input id="reportToInput" class="nb-period-bar-select" type="date" />
+      </label>
+      <button id="btnRunReport" type="button" class="nb-period-bar-btn">Generar</button>
+    </div>
+    <div id="reportGeneratorResult" class="detalle-items"><em>Generá un reporte para ver resultados.</em></div>
+  `;
+
+  const modeSel = document.getElementById('reportModeSelect');
+  const monthInput = document.getElementById('reportMonthInput');
+  const yearInput = document.getElementById('reportYearInput');
+  const fromInput = document.getElementById('reportFromInput');
+  const toInput = document.getElementById('reportToInput');
+  const runBtn = document.getElementById('btnRunReport');
+  const monthWrap = document.getElementById('reportMonthWrap');
+  const yearWrap = document.getElementById('reportYearWrap');
+  const fromWrap = document.getElementById('reportFromWrap');
+  const toWrap = document.getElementById('reportToWrap');
+
+  const syncVisibility = () => {
+    const m = modeSel.value;
+    monthWrap.style.display = m === 'MENSUAL' ? '' : 'none';
+    yearWrap.style.display = m === 'ANUAL' ? '' : 'none';
+    fromWrap.style.display = m === 'RANGO' ? '' : 'none';
+    toWrap.style.display = m === 'RANGO' ? '' : 'none';
+  };
+
+  modeSel.value = STATE.report.mode;
+  monthInput.value = STATE.report.month;
+  yearInput.value = STATE.report.year;
+  fromInput.value = STATE.report.from;
+  toInput.value = STATE.report.to;
+  syncVisibility();
+
+  modeSel.onchange = () => {
+    STATE.report.mode = modeSel.value;
+    syncVisibility();
+  };
+  monthInput.onchange = () => {
+    STATE.report.month = monthInput.value;
+  };
+  yearInput.onchange = () => {
+    STATE.report.year = yearInput.value;
+  };
+  fromInput.onchange = () => {
+    STATE.report.from = fromInput.value;
+  };
+  toInput.onchange = () => {
+    STATE.report.to = toInput.value;
+  };
+  runBtn.onclick = () => renderGeneratedReport();
+}
+
+function collectTransactionsForReport() {
+  const list = [];
+  (STATE.data.ingresos || []).forEach((x) => {
+    const d = new Date(x.fecha || x.createdAt || '');
+    if (Number.isNaN(d.getTime())) return;
+    list.push({
+      kind: 'INGRESO',
+      date: d,
+      amount: Number(x.monto) || 0,
+      category: x.fuente || x.categoria || 'Ingreso',
+      flow: 'in',
+    });
+  });
+  (STATE.data.gastos || []).forEach((x) => {
+    const d = new Date(x.fecha || x.createdAt || '');
+    if (Number.isNaN(d.getTime())) return;
+    list.push({
+      kind: 'GASTO',
+      date: d,
+      amount: Number(x.monto) || 0,
+      category: (typeof x.categoria === 'object' ? x.categoria?.nombre : x.categoria) || 'Sin categoría',
+      flow: 'out',
+    });
+  });
+  (STATE.data.fondos || []).forEach((f) => {
+    const movs = Array.isArray(f.movimientos) ? f.movimientos : Array.isArray(f.movements) ? f.movements : [];
+    movs.forEach((m) => {
+      if (esMovimientoAporteInicial(m.motivo || m.reason)) return;
+      const d = new Date(m.fecha || m.date || '');
+      if (Number.isNaN(d.getTime())) return;
+      list.push({
+        kind: 'AHORRO',
+        date: d,
+        amount: Number(m.monto ?? m.amount) || 0,
+        category: f.nombre || f.objetivo || 'Ahorro',
+        flow: 'out',
+      });
+    });
+  });
+  (STATE.data.deudas || []).forEach((d) => {
+    const pagos = Array.isArray(d.pagos) ? d.pagos : Array.isArray(d.payments) ? d.payments : [];
+    pagos.forEach((p) => {
+      const dt = new Date(p.fecha || p.date || '');
+      if (Number.isNaN(dt.getTime())) return;
+      list.push({
+        kind: 'DEUDA',
+        date: dt,
+        amount: Number(p.monto ?? p.amount) || 0,
+        category: d.title || d.nombre || 'Deuda',
+        flow: 'out',
+      });
+    });
+  });
+  return list;
+}
+
+function reportRangeFromState() {
+  const mode = STATE.report.mode;
+  if (mode === 'MENSUAL') {
+    const [y, m] = String(STATE.report.month || '').split('-').map(Number);
+    if (!y || !m) return null;
+    const from = new Date(y, m - 1, 1, 0, 0, 0, 0);
+    const to = new Date(y, m, 0, 23, 59, 59, 999);
+    return { from, to };
+  }
+  if (mode === 'ANUAL') {
+    const y = Number(STATE.report.year);
+    if (!y) return null;
+    return {
+      from: new Date(y, 0, 1, 0, 0, 0, 0),
+      to: new Date(y, 11, 31, 23, 59, 59, 999),
+    };
+  }
+  const from = STATE.report.from ? new Date(`${STATE.report.from}T00:00:00`) : null;
+  const to = STATE.report.to ? new Date(`${STATE.report.to}T23:59:59`) : null;
+  if (!from || !to || Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || from > to) return null;
+  return { from, to };
+}
+
+function renderGeneratedReport() {
+  const out = document.getElementById('reportGeneratorResult');
+  if (!out) return;
+  const range = reportRangeFromState();
+  if (!range) {
+    out.innerHTML = '<em>Rango no válido. Revisá los campos del reporte.</em>';
+    return;
+  }
+  const tx = collectTransactionsForReport().filter((t) => t.date >= range.from && t.date <= range.to);
+  const inTotal = tx.filter((t) => t.flow === 'in').reduce((a, t) => a + t.amount, 0);
+  const outTotal = tx.filter((t) => t.flow === 'out').reduce((a, t) => a + t.amount, 0);
+  const net = inTotal - outTotal;
+  const netCls = net < 0 ? 'nb-balance-negativo' : net > 0 ? 'nb-balance-positivo' : '';
+
+  const byCat = {};
+  tx.filter((t) => t.flow === 'out').forEach((t) => {
+    byCat[t.category] = (byCat[t.category] || 0) + t.amount;
+  });
+  const top = Object.entries(byCat)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([k, v]) => `<div class="item-detalle"><span>${esc(k)}</span><strong>${fmtMoney(v)}</strong></div>`)
+    .join('') || '<em>Sin egresos para este período.</em>';
+
+  out.innerHTML = `
+    <div class="resumen-item"><span>Periodo</span><strong>${esc(range.from.toLocaleDateString())} - ${esc(range.to.toLocaleDateString())}</strong></div>
+    <div class="resumen-item"><span>Total ingresos</span><strong>${fmtMoney(inTotal)}</strong></div>
+    <div class="resumen-item"><span>Total egresos</span><strong>${fmtMoney(outTotal)}</strong></div>
+    <div class="resumen-item resumen-final"><span>Resultado neto</span><strong class="${netCls}">${fmtMoney(net)}</strong></div>
+    <div class="detalle-items">
+      <strong style="display:block;margin-bottom:0.35rem;">En qué se gasta el dinero (top categorías)</strong>
+      ${top}
     </div>
   `;
 }
@@ -698,9 +912,9 @@ function render() {
             const cls = m._kind === 'ingresos' ? 'nb-balance-positivo' : 'nb-balance-negativo';
             const tipo = m._kind;
             const isRep = !!m._replicated;
-            const dateKey = m._dateKey || (m.fecha ? ymd(new Date(m.fecha)) : '');
-            const origId = m._originalId ?? m.deudaId ?? m.inversionId ?? m.id;
-            const statusKey = dateKey && origId != null ? `${tipo}:${origId}:${dateKey}` : '';
+            const dateKey = resolveItemDateKey(m);
+            const origId = normalizeOrigId(m._originalId ?? m.deudaId ?? m.inversionId ?? m.id);
+            const statusKey = buildLineKey(tipo, m) || '';
             const status = statusKey ? STATE.lineStatus.get(statusKey) || '' : '';
             const rowClass = status === 'done' ? 'is-done' : status === 'skipped' ? 'is-skipped' : '';
             const statusTag =
@@ -709,7 +923,7 @@ function render() {
                 : status === 'skipped'
                   ? '<span class="nb-line-status-tag nb-line-status-tag--skipped">Skipped</span>'
                   : '';
-            const nextKey = statusKey ? `${tipo}:${origId}:${addWeeksToYmd(dateKey, 1)}` : '';
+            const nextKey = statusKey && dateKey ? `${tipo}:${origId}:${addWeeksToYmd(dateKey, 1)}` : '';
             return `
               <div class="item-detalle ${rowClass}">
                 <span>${esc(label)} ${statusTag}</span>
@@ -780,6 +994,7 @@ function render() {
   renderBoxesProgressive(container, boxes, () => {
     renderReports(rangeStart, rangeEnd, ingresosAll, gastosAll, deudasAll, weekFrames);
   });
+  renderGeneratedReport();
 }
 
 function renderReports(rangeStart, rangeEnd, ingresosAll, gastosAll, deudasAll, weekFrames) {
@@ -1068,11 +1283,30 @@ function addWeeksToYmd(ymdStr, weeks = 1) {
   return ymd(d);
 }
 
-function itemStatusKey(tipo, item) {
-  const dateKey = item._dateKey || (item.fecha ? ymd(new Date(item.fecha)) : '');
-  const origId = item._originalId ?? item.deudaId ?? item.inversionId ?? item.id;
-  if (!dateKey || origId == null) return null;
+function normalizeOrigId(x) {
+  if (x == null) return '';
+  return String(x).split('__')[0];
+}
+
+function resolveItemDateKey(item) {
+  if (item?._dateKey) return String(item._dateKey);
+  const raw = item?.fecha || item?.createdAt;
+  if (!raw) return '';
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return '';
+  return ymd(d);
+}
+
+function buildLineKey(tipo, item) {
+  const dateKey = resolveItemDateKey(item);
+  const origIdRaw = item?._originalId ?? item?.deudaId ?? item?.inversionId ?? item?.fondoId ?? item?.id;
+  const origId = normalizeOrigId(origIdRaw);
+  if (!tipo || !origId || !dateKey) return null;
   return `${tipo}:${origId}:${dateKey}`;
+}
+
+function itemStatusKey(tipo, item) {
+  return buildLineKey(tipo, item);
 }
 
 function baseAndCarry(tipo, item, rawValue) {
@@ -1182,9 +1416,9 @@ function bloque(titulo, lista, tipo, valFn, labelFn){
     ? `<div class="detalle-items">
         ${lista.map(item => {
           const isRep = !!item._replicated;
-          const dateKey = item._dateKey || (item.fecha ? ymd(new Date(item.fecha)) : '');
-          const origId = item._originalId ?? item.deudaId ?? item.inversionId ?? item.id;
-          const statusKey = dateKey && origId != null ? `${tipo}:${origId}:${dateKey}` : '';
+          const dateKey = resolveItemDateKey(item);
+          const origId = normalizeOrigId(item._originalId ?? item.deudaId ?? item.inversionId ?? item.id);
+          const statusKey = buildLineKey(tipo, item) || '';
           const status = statusKey ? STATE.lineStatus.get(statusKey) || '' : '';
           const rowClass = status === 'done' ? 'is-done' : status === 'skipped' ? 'is-skipped' : '';
           const statusTag =
@@ -1194,7 +1428,7 @@ function bloque(titulo, lista, tipo, valFn, labelFn){
                 ? '<span class="nb-line-status-tag nb-line-status-tag--skipped">Skipped</span>'
                 : '';
           const amount = Number(valFn(item)) || 0;
-          const nextKey = statusKey ? `${tipo}:${origId}:${addWeeksToYmd(dateKey, 1)}` : '';
+          const nextKey = statusKey && dateKey ? `${tipo}:${origId}:${addWeeksToYmd(dateKey, 1)}` : '';
           return `
           <div class="item-detalle ${rowClass}">
             <span>${esc(labelFn(item))} ${statusTag}</span>
