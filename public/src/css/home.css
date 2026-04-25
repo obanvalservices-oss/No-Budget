@@ -588,12 +588,6 @@
   cursor: pointer;
 }
 
-.report-generator-box {
-  width: 100%;
-  max-width: 1080px;
-  margin: 0.65rem auto 0;
-}
-
 .nb-report-toolbar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -609,6 +603,35 @@
   font-size: 0.78rem;
   font-weight: 700;
   color: #475569;
+}
+
+.nb-report-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.45);
+  z-index: 120;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.nb-report-modal-content {
+  width: min(1020px, 100%);
+  max-height: 86vh;
+  overflow: auto;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22);
+  padding: 1rem 1rem 1.1rem;
+}
+
+.nb-report-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .nb-period-bar-btn:hover {
@@ -639,6 +662,11 @@
     max-width: none;
     bottom: 8px;
     padding: 0.7rem 0.75rem;
+  }
+
+  .nb-report-modal-content {
+    max-height: 92vh;
+    padding: 0.8rem;
   }
 }
 

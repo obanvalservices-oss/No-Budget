@@ -271,6 +271,7 @@ function buildTopBars() {
       <option value="24">24</option>
       <option value="52">52</option>
     </select>
+    <button id="btnOpenReports" type="button" class="nb-period-bar-btn">Reportes</button>
     <button id="btnPrintDashboard" type="button" class="nb-period-bar-btn">Imprimir</button>
     <small class="nb-period-bar-hint">Usa el inicio de semana de Configuración.</small>
   `;
@@ -278,6 +279,7 @@ function buildTopBars() {
   const viewSel = bar.querySelector('#viewModeSelect');
   const sel = bar.querySelector('#periodSelect');
   const histSel = bar.querySelector('#historyWeeksSelect');
+  const openReportsBtn = bar.querySelector('#btnOpenReports');
   const printBtn = bar.querySelector('#btnPrintDashboard');
   viewSel.value = STATE.viewMode;
   sel.value = STATE.period;
@@ -291,8 +293,14 @@ function buildTopBars() {
   };
   histSel.onchange = () => { STATE.historyWeeks = Number(histSel.value) || 12; render(); };
   printBtn.onclick = () => window.print();
+  openReportsBtn.onclick = () => {
+    ensureReportModal();
+    const modal = document.getElementById('reportModal');
+    if (modal) modal.style.display = 'flex';
+    renderGeneratedReport();
+  };
 
-  ensureReportGenerator();
+  ensureReportModal();
 
   // Visor compacto de fondos/inversiones (arriba del selector de periodo)
   let visor = document.getElementById('visorFondosInv');
@@ -314,47 +322,55 @@ function buildTopBars() {
   `;
 }
 
-function ensureReportGenerator() {
-  const main = document.querySelector('.dashboard-container') || document.body;
-  let box = document.getElementById('reportGeneratorBox');
-  if (!box) {
-    box = document.createElement('section');
-    box.id = 'reportGeneratorBox';
-    box.className = 'resumen-box report-generator-box';
-    main.appendChild(box);
-  }
+function ensureReportModal() {
+  let modal = document.getElementById('reportModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'reportModal';
+    modal.className = 'nb-report-modal';
+    modal.style.display = 'none';
+    modal.innerHTML = `
+      <div class="nb-report-modal-content">
+        <div class="nb-report-modal-head">
+          <h2 class="resumen-title">📘 Generador de reportes</h2>
+          <button id="btnCloseReportModal" type="button" class="nb-period-bar-btn">Cerrar</button>
+        </div>
+        <div class="nb-report-toolbar">
+          <label class="nb-report-label">
+            Tipo
+            <select id="reportModeSelect" class="nb-period-bar-select">
+              <option value="MENSUAL">Mensual</option>
+              <option value="ANUAL">Anual</option>
+              <option value="RANGO">Por rango</option>
+            </select>
+          </label>
+          <label class="nb-report-label" id="reportMonthWrap">
+            Mes
+            <input id="reportMonthInput" class="nb-period-bar-select" type="month" />
+          </label>
+          <label class="nb-report-label" id="reportYearWrap">
+            Año
+            <input id="reportYearInput" class="nb-period-bar-select" type="number" min="2000" max="2100" />
+          </label>
+          <label class="nb-report-label" id="reportFromWrap">
+            Desde
+            <input id="reportFromInput" class="nb-period-bar-select" type="date" />
+          </label>
+          <label class="nb-report-label" id="reportToWrap">
+            Hasta
+            <input id="reportToInput" class="nb-period-bar-select" type="date" />
+          </label>
+          <button id="btnRunReport" type="button" class="nb-period-bar-btn">Generar</button>
+        </div>
+        <div id="reportGeneratorResult" class="detalle-items"><em>Generá un reporte para ver resultados.</em></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
 
-  box.innerHTML = `
-    <h2 class="resumen-title">📘 Generador de reportes</h2>
-    <div class="nb-report-toolbar">
-      <label class="nb-report-label">
-        Tipo
-        <select id="reportModeSelect" class="nb-period-bar-select">
-          <option value="MENSUAL">Mensual</option>
-          <option value="ANUAL">Anual</option>
-          <option value="RANGO">Por rango</option>
-        </select>
-      </label>
-      <label class="nb-report-label" id="reportMonthWrap">
-        Mes
-        <input id="reportMonthInput" class="nb-period-bar-select" type="month" />
-      </label>
-      <label class="nb-report-label" id="reportYearWrap">
-        Año
-        <input id="reportYearInput" class="nb-period-bar-select" type="number" min="2000" max="2100" />
-      </label>
-      <label class="nb-report-label" id="reportFromWrap">
-        Desde
-        <input id="reportFromInput" class="nb-period-bar-select" type="date" />
-      </label>
-      <label class="nb-report-label" id="reportToWrap">
-        Hasta
-        <input id="reportToInput" class="nb-period-bar-select" type="date" />
-      </label>
-      <button id="btnRunReport" type="button" class="nb-period-bar-btn">Generar</button>
-    </div>
-    <div id="reportGeneratorResult" class="detalle-items"><em>Generá un reporte para ver resultados.</em></div>
-  `;
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+    });
+  }
 
   const modeSel = document.getElementById('reportModeSelect');
   const monthInput = document.getElementById('reportMonthInput');
@@ -362,6 +378,7 @@ function ensureReportGenerator() {
   const fromInput = document.getElementById('reportFromInput');
   const toInput = document.getElementById('reportToInput');
   const runBtn = document.getElementById('btnRunReport');
+  const closeBtn = document.getElementById('btnCloseReportModal');
   const monthWrap = document.getElementById('reportMonthWrap');
   const yearWrap = document.getElementById('reportYearWrap');
   const fromWrap = document.getElementById('reportFromWrap');
@@ -399,6 +416,10 @@ function ensureReportGenerator() {
     STATE.report.to = toInput.value;
   };
   runBtn.onclick = () => renderGeneratedReport();
+  if (closeBtn) closeBtn.onclick = () => {
+    const m = document.getElementById('reportModal');
+    if (m) m.style.display = 'none';
+  };
 }
 
 function collectTransactionsForReport() {
@@ -994,7 +1015,6 @@ function render() {
   renderBoxesProgressive(container, boxes, () => {
     renderReports(rangeStart, rangeEnd, ingresosAll, gastosAll, deudasAll, weekFrames);
   });
-  renderGeneratedReport();
 }
 
 function renderReports(rangeStart, rangeEnd, ingresosAll, gastosAll, deudasAll, weekFrames) {
