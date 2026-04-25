@@ -36,6 +36,7 @@ const STATE = {
 };
 
 const HOME_UI_STATE_KEY = 'nb_home_ui_state_v1';
+const HOME_DATA_CACHE_KEY = 'nb_home_data_cache_v1';
 
 function loadUiState() {
   try {
@@ -100,6 +101,43 @@ function persistUiState() {
   }
 }
 
+function applyDashboardData(payload) {
+  if (!payload) return;
+  if (payload.settings && typeof payload.settings === 'object') STATE.settings = payload.settings;
+  const d = payload.data || {};
+  STATE.data.ingresos = Array.isArray(d.ingresos) ? d.ingresos : [];
+  STATE.data.gastos = Array.isArray(d.gastos) ? d.gastos : [];
+  STATE.data.inversiones = Array.isArray(d.inversiones) ? d.inversiones : [];
+  STATE.data.fondos = Array.isArray(d.fondos) ? d.fondos : [];
+  STATE.data.deudas = Array.isArray(d.deudas) ? d.deudas : [];
+}
+
+function loadDashboardCache() {
+  try {
+    const raw = sessionStorage.getItem(HOME_DATA_CACHE_KEY);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return false;
+    applyDashboardData(parsed);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function persistDashboardCache() {
+  try {
+    const payload = {
+      settings: STATE.settings,
+      data: STATE.data,
+      ts: Date.now(),
+    };
+    sessionStorage.setItem(HOME_DATA_CACHE_KEY, JSON.stringify(payload));
+  } catch {
+    // ignore cache failures
+  }
+}
+
 // ===== Helpers de fecha =====
 function startOfWeek(d, startDow = 1) { // startDow: 0=Dom..6=Sab
   const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -135,6 +173,9 @@ function normalizeDateOnly(d){ const nd=new Date(d); nd.setHours(0,0,0,0); retur
 document.addEventListener('DOMContentLoaded', async () => {
   buildTopBars(); // crea banner + selector periodo + visor fondos/inv
   loadUiState();
+  if (loadDashboardCache()) {
+    render();
+  }
 
   try {
     const [resS, resI, resG, resInv, resFondos, resDeudas] = await Promise.all([
@@ -149,13 +190,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       axios.get('/deudas'),
     ]);
 
-    if (resS?.data) STATE.settings = resS.data;
-    STATE.data.ingresos    = Array.isArray(resI.data) ? resI.data : [];
-    STATE.data.gastos      = Array.isArray(resG.data) ? resG.data : [];
-    STATE.data.inversiones = Array.isArray(resInv.data) ? resInv.data : [];
-    STATE.data.fondos      = Array.isArray(resFondos.data) ? resFondos.data : [];
-    STATE.data.deudas      = Array.isArray(resDeudas.data) ? resDeudas.data : [];
-
+    applyDashboardData({
+      settings: resS?.data || STATE.settings,
+      data: {
+        ingresos: resI.data,
+        gastos: resG.data,
+        inversiones: resInv.data,
+        fondos: resFondos.data,
+        deudas: resDeudas.data,
+      },
+    });
+    persistDashboardCache();
     render();
   } catch (e) {
     console.error('[home] carga fallida', e);
@@ -566,7 +611,6 @@ function deudaItemsForRange(deudas, start, end){
 function render() {
   const container = document.querySelector('.resumen-container');
   if (!container) return;
-  container.innerHTML = '';
 
   // Visor balances arriba
   paintVisor();
@@ -584,8 +628,34 @@ function render() {
   const gastosAll   = replicateRecurringItems(STATE.data.gastos,   rangeStart, rangeEnd, 'gastos');
   // Deudas (cuotas) en todo el rango
   const deudasAll   = deudaItemsForRange(STATE.data.deudas, rangeStart, rangeEnd);
+  const weekFrames = weeks.map(({ start, end }) => {
+    const ingresos = itemsInRange(ingresosAll, start, end, 'fecha');
+    const gastos = itemsInRange(gastosAll, start, end, 'fecha');
+    const deudas = itemsInRange(deudasAll, start, end, 'fecha');
+    const ahorrosAportes = aporteItemsForWeek(STATE.data.fondos, start, end);
+    const inversionItems = inversionItemsForWeek(STATE.data.inversiones, start, end);
+    return {
+      start,
+      end,
+      ingresos,
+      gastos,
+      deudas,
+      ahorrosAportes,
+      inversionItems,
+      tot: {
+        ingresos: sumBy(ingresos, vIngreso),
+        gastos: sumBy(gastos, vGasto),
+        deudas: sumBy(deudas, vDeuda),
+        ahorros: sumBy(ahorrosAportes, vAporte),
+        inversiones: sumBy(inversionItems, vInversionFlujo),
+      },
+    };
+  });
+  const aportesAll = weekFrames.flatMap((f) => f.ahorrosAportes);
+  const inversionesAll = weekFrames.flatMap((f) => f.inversionItems);
 
   let carryFromPrevWeek = 0;
+  const boxes = [];
   if (STATE.viewMode === 'DIARIA') {
     const days = buildDaysInRange(rangeStart, rangeEnd);
     days.forEach((day) => {
@@ -594,8 +664,8 @@ function render() {
       const ingresos = itemsInRange(ingresosAll, dayStart, dayEnd, 'fecha').map((x) => ({ ...x, _kind: 'ingresos' }));
       const gastos = itemsInRange(gastosAll, dayStart, dayEnd, 'fecha').map((x) => ({ ...x, _kind: 'gastos' }));
       const deudas = itemsInRange(deudasAll, dayStart, dayEnd, 'fecha').map((x) => ({ ...x, _kind: 'deudas' }));
-      const aportes = aporteItemsForWeek(STATE.data.fondos, dayStart, dayEnd).map((x) => ({ ...x, _kind: 'aportes' }));
-      const invs = inversionItemsForWeek(STATE.data.inversiones, dayStart, dayEnd).map((x) => ({ ...x, _kind: 'inversiones' }));
+      const aportes = itemsInRange(aportesAll, dayStart, dayEnd, 'fecha').map((x) => ({ ...x, _kind: 'aportes' }));
+      const invs = itemsInRange(inversionesAll, dayStart, dayEnd, 'fecha').map((x) => ({ ...x, _kind: 'inversiones' }));
       const movs = [...ingresos, ...gastos, ...deudas, ...aportes, ...invs].sort(
         (a, b) => new Date(a.fecha || a.createdAt) - new Date(b.fecha || b.createdAt),
       );
@@ -656,43 +726,28 @@ function render() {
           })
           .join('');
 
-      const el = document.createElement('section');
-      el.className = 'resumen-box';
-      el.innerHTML = `
+      const html = `
+      <section class="resumen-box">
         <h2 class="resumen-title">Día ${esc(day.toLocaleDateString())}</h2>
         <div class="detalle-items">${rows || '<em>Sin movimientos.</em>'}</div>
         <div class="resumen-item"><span>↩ Saldo anterior:</span><strong>${fmtMoney(carryFromPrevWeek)}</strong></div>
         <div class="resumen-item"><span>Flujo del día:</span><strong>${fmtMoney(neto)}</strong></div>
         <div class="resumen-item resumen-final"><span>Saldo cierre:</span><strong class="${finalCls}">${fmtMoney(final)}</strong></div>
-      `;
-      container.appendChild(el);
+      </section>`;
+      boxes.push(html);
       carryFromPrevWeek = final;
     });
   } else {
-    weeks.forEach(({start,end}, idx) => {
+    weekFrames.forEach((frame, idx) => {
+      const { start, end, ingresos, gastos, deudas, ahorrosAportes, inversionItems, tot } = frame;
       const titulo = weekTitle(start, end, STATE.period, idx);
-
-      const ingresos = itemsInRange(ingresosAll, start, end, 'fecha');
-      const gastos   = itemsInRange(gastosAll,   start, end, 'fecha');
-      const deudas   = itemsInRange(deudasAll,   start, end, 'fecha');
-      const ahorrosAportes = aporteItemsForWeek(STATE.data.fondos, start, end);
-      const inversionItems = inversionItemsForWeek(STATE.data.inversiones, start, end);
-
-      const tot = {
-        ingresos: sumBy(ingresos, vIngreso),
-        gastos:   sumBy(gastos,   vGasto),
-        deudas:   sumBy(deudas,   vDeuda),
-        ahorros:  sumBy(ahorrosAportes, vAporte),
-        inversiones: sumBy(inversionItems, vInversionFlujo),
-      };
       const balanceSemana = tot.ingresos - tot.gastos - tot.deudas - tot.ahorros - tot.inversiones;
       const balanceFinal = balanceSemana + carryFromPrevWeek;
       const carryCls = carryFromPrevWeek < 0 ? 'nb-balance-negativo' : carryFromPrevWeek > 0 ? 'nb-balance-positivo' : '';
       const finalCls = balanceFinal < 0 ? 'nb-balance-negativo' : balanceFinal > 0 ? 'nb-balance-positivo' : '';
 
-      const el = document.createElement('section');
-      el.className = 'resumen-box';
-      el.innerHTML = `
+      const html = `
+      <section class="resumen-box">
         <h2 class="resumen-title">${esc(titulo)}</h2>
         ${bloque('💰 Ingresos',           ingresos, 'ingresos',   vIngreso, lblIngreso)}
         ${bloque('📉 Gastos',             gastos,   'gastos',     vGasto,   lblGasto)}
@@ -705,33 +760,29 @@ function render() {
         <div class="resumen-item resumen-final">
           <span>🧮 Balance:</span><strong class="${finalCls}">${fmtMoney(balanceFinal)}</strong>
         </div>
-      `;
-      container.appendChild(el);
+      </section>`;
+      boxes.push(html);
       carryFromPrevWeek = balanceFinal;
     });
   }
 
   // Totales para el gráfico
-  const totals = weeks.reduce((acc,{start,end})=>{
-    const ingresos = itemsInRange(ingresosAll, start, end, 'fecha');
-    const gastos   = itemsInRange(gastosAll,   start, end, 'fecha');
-    const deudas   = itemsInRange(deudasAll,   start, end, 'fecha');
-    const ahorrosAportes = aporteItemsForWeek(STATE.data.fondos, start, end);
-    const inversionItems = inversionItemsForWeek(STATE.data.inversiones, start, end);
-
-    acc.ingresos += sumBy(ingresos, vIngreso);
-    acc.gastos   += sumBy(gastos,   vGasto);
-    acc.deudas   += sumBy(deudas,   vDeuda);
-    acc.ahorros  += sumBy(ahorrosAportes, vAporte);
-    acc.inv      += sumBy(inversionItems, vInversionFlujo);
+  const totals = weekFrames.reduce((acc, frame) => {
+    acc.ingresos += frame.tot.ingresos;
+    acc.gastos += frame.tot.gastos;
+    acc.deudas += frame.tot.deudas;
+    acc.ahorros += frame.tot.ahorros;
+    acc.inv += frame.tot.inversiones;
     return acc;
   }, {ingresos:0,gastos:0,deudas:0,ahorros:0,inv:0});
 
   renderChart({ ingresos: totals.ingresos, gastos: totals.gastos, deudas: totals.deudas, ahorros: totals.ahorros, inversiones: totals.inv });
-  renderReports(rangeStart, rangeEnd, ingresosAll, gastosAll, deudasAll);
+  renderBoxesProgressive(container, boxes, () => {
+    renderReports(rangeStart, rangeEnd, ingresosAll, gastosAll, deudasAll, weekFrames);
+  });
 }
 
-function renderReports(rangeStart, rangeEnd, ingresosAll, gastosAll, deudasAll) {
+function renderReports(rangeStart, rangeEnd, ingresosAll, gastosAll, deudasAll, weekFrames) {
   const hostId = 'reportesFinancieros';
   let host = document.getElementById(hostId);
   if (!host) {
@@ -746,13 +797,8 @@ function renderReports(rangeStart, rangeEnd, ingresosAll, gastosAll, deudasAll) 
   const ingresos = itemsInRange(ingresosAll, rangeStart, rangeEnd, 'fecha');
   const gastos = itemsInRange(gastosAll, rangeStart, rangeEnd, 'fecha');
   const deudas = itemsInRange(deudasAll, rangeStart, rangeEnd, 'fecha');
-  const weeks = buildWeeksFor(STATE.period);
-  let ahorros = 0;
-  let inversiones = 0;
-  weeks.forEach(({ start, end }) => {
-    ahorros += sumBy(aporteItemsForWeek(STATE.data.fondos, start, end), vAporte);
-    inversiones += sumBy(inversionItemsForWeek(STATE.data.inversiones, start, end), vInversionFlujo);
-  });
+  const ahorros = (weekFrames || []).reduce((a, f) => a + (f?.tot?.ahorros || 0), 0);
+  const inversiones = (weekFrames || []).reduce((a, f) => a + (f?.tot?.inversiones || 0), 0);
 
   const totalIngresos = sumBy(ingresos, vIngreso);
   const totalGastos = sumBy(gastos, vGasto) + sumBy(deudas, vDeuda) + ahorros + inversiones;
@@ -974,6 +1020,34 @@ function buildDaysInRange(start, end) {
     cur.setDate(cur.getDate() + 1);
   }
   return days;
+}
+
+function renderBoxesProgressive(container, htmlBoxes, onDone) {
+  container.innerHTML = '';
+  if (!htmlBoxes.length) {
+    if (typeof onDone === 'function') onDone();
+    return;
+  }
+  const total = htmlBoxes.length;
+  const chunkSize = total > 80 ? 14 : total > 30 ? 10 : 9999;
+  let idx = 0;
+  const paintChunk = () => {
+    const frag = document.createDocumentFragment();
+    const until = Math.min(total, idx + chunkSize);
+    for (; idx < until; idx++) {
+      const wrap = document.createElement('div');
+      wrap.innerHTML = htmlBoxes[idx];
+      const node = wrap.firstElementChild;
+      if (node) frag.appendChild(node);
+    }
+    container.appendChild(frag);
+    if (idx < total) {
+      requestAnimationFrame(paintChunk);
+      return;
+    }
+    if (typeof onDone === 'function') onDone();
+  };
+  paintChunk();
 }
 
 // ===== Filtros / sumas =====
