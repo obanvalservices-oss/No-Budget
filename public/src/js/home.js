@@ -28,6 +28,9 @@ const STATE = {
   settings: { weekStartDay: 1 }, // 1=Lunes por defecto (se sobrescribe)
   overrides: new Map(), // tipo:origId:YYYY-MM-DD -> { monto, label }
   skips: new Set(),     // tipo:origId:YYYY-MM-DD -> skip esta ocurrencia
+  lineStatus: new Map(), // tipo:origId:YYYY-MM-DD -> done | skipped
+  carryNext: new Map(), // tipo:origId:YYYY-MM-DD -> monto arrastrado por skip
+  skipCarryApplied: new Map(), // tipo:origId:YYYY-MM-DD -> { nextKey, amount }
 };
 
 const HOME_UI_STATE_KEY = 'nb_home_ui_state_v1';
@@ -51,6 +54,30 @@ function loadUiState() {
       );
       STATE.overrides = new Map(clean.map((x) => [x.key, x.value]));
     }
+    if (Array.isArray(parsed?.lineStatus)) {
+      const cleanStatus = parsed.lineStatus.filter(
+        (x) => x && typeof x.key === 'string' && (x.value === 'done' || x.value === 'skipped'),
+      );
+      STATE.lineStatus = new Map(cleanStatus.map((x) => [x.key, x.value]));
+    }
+    if (Array.isArray(parsed?.carryNext)) {
+      const cleanCarry = parsed.carryNext.filter(
+        (x) => x && typeof x.key === 'string' && typeof x.value === 'number' && Number.isFinite(x.value),
+      );
+      STATE.carryNext = new Map(cleanCarry.map((x) => [x.key, x.value]));
+    }
+    if (Array.isArray(parsed?.skipCarryApplied)) {
+      const cleanApplied = parsed.skipCarryApplied.filter(
+        (x) =>
+          x &&
+          typeof x.key === 'string' &&
+          x.value &&
+          typeof x.value.nextKey === 'string' &&
+          typeof x.value.amount === 'number' &&
+          Number.isFinite(x.value.amount),
+      );
+      STATE.skipCarryApplied = new Map(cleanApplied.map((x) => [x.key, x.value]));
+    }
   } catch (err) {
     console.warn('[home] no se pudo restaurar estado local de semanas', err);
   }
@@ -61,6 +88,9 @@ function persistUiState() {
     const payload = {
       skips: [...STATE.skips],
       overrides: [...STATE.overrides].map(([key, value]) => ({ key, value })),
+      lineStatus: [...STATE.lineStatus].map(([key, value]) => ({ key, value })),
+      carryNext: [...STATE.carryNext].map(([key, value]) => ({ key, value })),
+      skipCarryApplied: [...STATE.skipCarryApplied].map(([key, value]) => ({ key, value })),
     };
     localStorage.setItem(HOME_UI_STATE_KEY, JSON.stringify(payload));
   } catch (err) {
@@ -771,47 +801,79 @@ function itemsInRange(list,start,end,campo){
 }
 function sumBy(arr, valFn){ return arr.reduce((a,x)=>a+(Number(valFn(x))||0),0); }
 
+function addWeeksToYmd(ymdStr, weeks = 1) {
+  const d = new Date(`${ymdStr}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return ymdStr;
+  d.setDate(d.getDate() + weeks * 7);
+  return ymd(d);
+}
+
+function itemStatusKey(tipo, item) {
+  const dateKey = item._dateKey || (item.fecha ? ymd(new Date(item.fecha)) : '');
+  const origId = item._originalId ?? item.deudaId ?? item.inversionId ?? item.id;
+  if (!dateKey || origId == null) return null;
+  return `${tipo}:${origId}:${dateKey}`;
+}
+
+function baseAndCarry(tipo, item, rawValue) {
+  const key = itemStatusKey(tipo, item);
+  const base = Number(rawValue) || 0;
+  if (!key) return base;
+  const carry = Number(STATE.carryNext.get(key) || 0);
+  return base + carry;
+}
+
 // ===== Mapeos por tipo =====
 function vIngreso(it){
+  let base;
   if (it._replicated && it._dateKey) {
     const k = `ingresos:${it._originalId}:${it._dateKey}`;
     const ov = STATE.overrides.get(k);
-    if (ov && typeof ov.monto === 'number') return ov.monto;
+    if (ov && typeof ov.monto === 'number') base = ov.monto;
   }
-  return it.monto;
+  if (base == null) base = it.monto;
+  return baseAndCarry('ingresos', it, base);
 }
 function vGasto(it){
+  let base;
   if (it._replicated && it._dateKey) {
     const k = `gastos:${it._originalId}:${it._dateKey}`;
     const ov = STATE.overrides.get(k);
-    if (ov && typeof ov.monto === 'number') return ov.monto;
+    if (ov && typeof ov.monto === 'number') base = ov.monto;
   }
-  return it.monto;
+  if (base == null) base = it.monto;
+  return baseAndCarry('gastos', it, base);
 }
 function vDeuda(it){
+  let base;
   if (it._replicated && it._dateKey) {
     const k = `deudas:${it.deudaId}:${it._dateKey}`;
     const ov = STATE.overrides.get(k);
-    if (ov && typeof ov.monto === 'number') return ov.monto;
+    if (ov && typeof ov.monto === 'number') base = ov.monto;
   }
-  return it.monto;
+  if (base == null) base = it.monto;
+  return baseAndCarry('deudas', it, base);
 }
 /** Ítems sintéticos de inversionItemsForWeek (monto = flujo de caja). */
 function vInversionFlujo(it) {
+  let base;
   if (it._replicated && it._dateKey) {
     const k = `inversiones:${it._originalId}:${it._dateKey}`;
     const ov = STATE.overrides.get(k);
-    if (ov && typeof ov.monto === 'number') return ov.monto;
+    if (ov && typeof ov.monto === 'number') base = ov.monto;
   }
-  return Number(it.monto) || 0;
+  if (base == null) base = Number(it.monto) || 0;
+  return baseAndCarry('inversiones', it, base);
 }
 function vAporte(it){
+  let base;
   if (it._replicated && it._dateKey) {
     const k = `aportes:${it.fondoId}:${it._dateKey}`;
     const ov = STATE.overrides.get(k);
-    if (ov && typeof ov.monto === 'number') return ov.monto;
+    if (ov && typeof ov.monto === 'number') base = ov.monto;
   }
-  return it.monto;
+  if (base == null) base = it.monto;
+  return baseAndCarry('aportes', it, base);
 }
 
 // ===== Labels =====
@@ -862,10 +924,23 @@ function bloque(titulo, lista, tipo, valFn, labelFn){
           const isRep = !!item._replicated;
           const dateKey = item._dateKey || (item.fecha ? ymd(new Date(item.fecha)) : '');
           const origId = item._originalId ?? item.deudaId ?? item.inversionId ?? item.id;
+          const statusKey = dateKey && origId != null ? `${tipo}:${origId}:${dateKey}` : '';
+          const status = statusKey ? STATE.lineStatus.get(statusKey) || '' : '';
+          const rowClass = status === 'done' ? 'is-done' : status === 'skipped' ? 'is-skipped' : '';
+          const statusTag =
+            status === 'done'
+              ? '<span class="nb-line-status-tag nb-line-status-tag--done">Done</span>'
+              : status === 'skipped'
+                ? '<span class="nb-line-status-tag nb-line-status-tag--skipped">Skipped</span>'
+                : '';
+          const amount = Number(valFn(item)) || 0;
+          const nextKey = statusKey ? `${tipo}:${origId}:${addWeeksToYmd(dateKey, 1)}` : '';
           return `
-          <div class="item-detalle">
-            <span>${esc(labelFn(item))}: ${fmtMoney(valFn(item))}</span>
+          <div class="item-detalle ${rowClass}">
+            <span>${esc(labelFn(item))}: ${fmtMoney(amount)} ${statusTag}</span>
             <div>
+              <button class="btn-mark-done" data-key="${statusKey}">Done</button>
+              <button class="btn-mark-skip" data-key="${statusKey}" data-next-key="${nextKey}" data-amount="${amount}">Skip</button>
               ${acciones(tipo, item.id, origId, isRep, dateKey, item)}
             </div>
           </div>`;
@@ -1153,6 +1228,45 @@ document.body.addEventListener('click', async (e) => {
     const monto = Number(montoStr); if (Number.isNaN(monto)) return alert('Monto inválido');
     const label = prompt('Etiqueta/Descripción (opcional):') || '';
     STATE.overrides.set(`${tipo}:${orig}:${date}`, { monto, label });
+    persistUiState();
+    render();
+  }
+
+  if (e.target.classList.contains('btn-mark-done')) {
+    const key = e.target.dataset.key;
+    if (!key) return;
+    const curr = STATE.lineStatus.get(key);
+    if (curr === 'done') STATE.lineStatus.delete(key);
+    else STATE.lineStatus.set(key, 'done');
+    persistUiState();
+    render();
+  }
+
+  if (e.target.classList.contains('btn-mark-skip')) {
+    const key = e.target.dataset.key;
+    const nextKey = e.target.dataset.nextKey;
+    const amount = Number(e.target.dataset.amount || 0);
+    if (!key) return;
+
+    const curr = STATE.lineStatus.get(key);
+    if (curr === 'skipped') {
+      STATE.lineStatus.delete(key);
+      const applied = STATE.skipCarryApplied.get(key);
+      if (applied?.nextKey && Number.isFinite(applied.amount)) {
+        const prev = Number(STATE.carryNext.get(applied.nextKey) || 0);
+        const next = Math.max(0, prev - applied.amount);
+        if (next > 0) STATE.carryNext.set(applied.nextKey, next);
+        else STATE.carryNext.delete(applied.nextKey);
+      }
+      STATE.skipCarryApplied.delete(key);
+    } else {
+      STATE.lineStatus.set(key, 'skipped');
+      if (nextKey && Number.isFinite(amount) && amount > 0) {
+        const prev = Number(STATE.carryNext.get(nextKey) || 0);
+        STATE.carryNext.set(nextKey, prev + amount);
+        STATE.skipCarryApplied.set(key, { nextKey, amount });
+      }
+    }
     persistUiState();
     render();
   }
