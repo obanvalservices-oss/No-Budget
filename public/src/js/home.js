@@ -17,6 +17,8 @@ function esMovimientoAporteInicial(motivo) {
 // ===== Estado =====
 const STATE = {
   period: 'SEMANA', // SEMANA | COMPARAR | 1M | 3M | 6M
+  viewMode: 'SEMANAL', // SEMANAL | DIARIA
+  historyWeeks: 12,
   chart: null,
   data: {
     ingresos: [],
@@ -192,6 +194,11 @@ function buildTopBars() {
     main.insertBefore(bar, main.children[1]);
   }
   bar.innerHTML = `
+    <label for="viewModeSelect" class="nb-period-bar-label">Vista</label>
+    <select id="viewModeSelect" class="nb-period-bar-select">
+      <option value="SEMANAL">Semanal (resumen/proyección)</option>
+      <option value="DIARIA">Diaria (estado de cuenta)</option>
+    </select>
     <label for="periodSelect" class="nb-period-bar-label">Periodo</label>
     <select id="periodSelect" class="nb-period-bar-select">
       <option value="SEMANA">Semana actual</option>
@@ -199,13 +206,36 @@ function buildTopBars() {
       <option value="1M">1 mes (semanas a futuro)</option>
       <option value="3M">3 meses (semanas a futuro)</option>
       <option value="6M">6 meses (semanas a futuro)</option>
+      <option value="HISTORICO">Histórico (últimas semanas)</option>
     </select>
+    <label for="historyWeeksSelect" class="nb-period-bar-label">Semanas</label>
+    <select id="historyWeeksSelect" class="nb-period-bar-select">
+      <option value="4">4</option>
+      <option value="8">8</option>
+      <option value="12">12</option>
+      <option value="24">24</option>
+      <option value="52">52</option>
+    </select>
+    <button id="btnPrintDashboard" type="button" class="nb-period-bar-btn">Imprimir</button>
     <small class="nb-period-bar-hint">Usa el inicio de semana de Configuración.</small>
   `;
   bar.className = 'nb-period-bar';
+  const viewSel = bar.querySelector('#viewModeSelect');
   const sel = bar.querySelector('#periodSelect');
+  const histSel = bar.querySelector('#historyWeeksSelect');
+  const printBtn = bar.querySelector('#btnPrintDashboard');
+  viewSel.value = STATE.viewMode;
   sel.value = STATE.period;
-  sel.onchange = () => { STATE.period = sel.value; render(); };
+  histSel.value = String(STATE.historyWeeks);
+  histSel.style.display = STATE.period === 'HISTORICO' ? '' : 'none';
+  viewSel.onchange = () => { STATE.viewMode = viewSel.value; render(); };
+  sel.onchange = () => {
+    STATE.period = sel.value;
+    histSel.style.display = STATE.period === 'HISTORICO' ? '' : 'none';
+    render();
+  };
+  histSel.onchange = () => { STATE.historyWeeks = Number(histSel.value) || 12; render(); };
+  printBtn.onclick = () => window.print();
 
   // Visor compacto de fondos/inversiones (arriba del selector de periodo)
   let visor = document.getElementById('visorFondosInv');
@@ -556,46 +586,104 @@ function render() {
   const deudasAll   = deudaItemsForRange(STATE.data.deudas, rangeStart, rangeEnd);
 
   let carryFromPrevWeek = 0;
-  weeks.forEach(({start,end}, idx) => {
-    const titulo = weekTitle(start, end, STATE.period, idx);
+  if (STATE.viewMode === 'DIARIA') {
+    const days = buildDaysInRange(rangeStart, rangeEnd);
+    days.forEach((day) => {
+      const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0, 0, 0);
+      const dayEnd = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 23, 59, 59, 999);
+      const ingresos = itemsInRange(ingresosAll, dayStart, dayEnd, 'fecha').map((x) => ({ ...x, _kind: 'ingresos' }));
+      const gastos = itemsInRange(gastosAll, dayStart, dayEnd, 'fecha').map((x) => ({ ...x, _kind: 'gastos' }));
+      const deudas = itemsInRange(deudasAll, dayStart, dayEnd, 'fecha').map((x) => ({ ...x, _kind: 'deudas' }));
+      const aportes = aporteItemsForWeek(STATE.data.fondos, dayStart, dayEnd).map((x) => ({ ...x, _kind: 'aportes' }));
+      const invs = inversionItemsForWeek(STATE.data.inversiones, dayStart, dayEnd).map((x) => ({ ...x, _kind: 'inversiones' }));
+      const movs = [...ingresos, ...gastos, ...deudas, ...aportes, ...invs].sort(
+        (a, b) => new Date(a.fecha || a.createdAt) - new Date(b.fecha || b.createdAt),
+      );
 
-    const ingresos = itemsInRange(ingresosAll, start, end, 'fecha');
-    const gastos   = itemsInRange(gastosAll,   start, end, 'fecha');
-    const deudas   = itemsInRange(deudasAll,   start, end, 'fecha');
-    const ahorrosAportes = aporteItemsForWeek(STATE.data.fondos, start, end);
-    const inversionItems = inversionItemsForWeek(STATE.data.inversiones, start, end);
+      const inTot = sumBy(ingresos, vIngreso);
+      const outTot =
+        sumBy(gastos, vGasto) + sumBy(deudas, vDeuda) + sumBy(aportes, vAporte) + sumBy(invs, vInversionFlujo);
+      const neto = inTot - outTot;
+      const final = carryFromPrevWeek + neto;
+      const finalCls = final < 0 ? 'nb-balance-negativo' : final > 0 ? 'nb-balance-positivo' : '';
+      const rows = movs
+          .map((m) => {
+            const labelMap = {
+              ingresos: lblIngreso,
+              gastos: lblGasto,
+              deudas: lblDeuda,
+              aportes: lblAporte,
+              inversiones: lblInversionFlujo,
+            };
+            const valMap = {
+              ingresos: vIngreso,
+              gastos: vGasto,
+              deudas: vDeuda,
+              aportes: vAporte,
+              inversiones: vInversionFlujo,
+            };
+            const label = labelMap[m._kind](m);
+            const amount = Number(valMap[m._kind](m)) || 0;
+            const sign = m._kind === 'ingresos' ? '+' : '-';
+            const cls = m._kind === 'ingresos' ? 'nb-balance-positivo' : 'nb-balance-negativo';
+            return `<div class="item-detalle"><span>${esc(label)}</span><strong class="${cls}">${sign}${fmtMoney(amount)}</strong></div>`;
+          })
+          .join('');
 
-    const tot = {
-      ingresos: sumBy(ingresos, vIngreso),
-      gastos:   sumBy(gastos,   vGasto),
-      deudas:   sumBy(deudas,   vDeuda),
-      ahorros:  sumBy(ahorrosAportes, vAporte),
-      inversiones: sumBy(inversionItems, vInversionFlujo),
-    };
-    const balanceSemana = tot.ingresos - tot.gastos - tot.deudas - tot.ahorros - tot.inversiones;
-    const balanceFinal = balanceSemana + carryFromPrevWeek;
-    const carryCls = carryFromPrevWeek < 0 ? 'nb-balance-negativo' : carryFromPrevWeek > 0 ? 'nb-balance-positivo' : '';
-    const finalCls = balanceFinal < 0 ? 'nb-balance-negativo' : balanceFinal > 0 ? 'nb-balance-positivo' : '';
+      const el = document.createElement('section');
+      el.className = 'resumen-box';
+      el.innerHTML = `
+        <h2 class="resumen-title">Día ${esc(day.toLocaleDateString())}</h2>
+        <div class="detalle-items">${rows || '<em>Sin movimientos.</em>'}</div>
+        <div class="resumen-item"><span>↩ Saldo anterior:</span><strong>${fmtMoney(carryFromPrevWeek)}</strong></div>
+        <div class="resumen-item"><span>Flujo del día:</span><strong>${fmtMoney(neto)}</strong></div>
+        <div class="resumen-item resumen-final"><span>Saldo cierre:</span><strong class="${finalCls}">${fmtMoney(final)}</strong></div>
+      `;
+      container.appendChild(el);
+      carryFromPrevWeek = final;
+    });
+  } else {
+    weeks.forEach(({start,end}, idx) => {
+      const titulo = weekTitle(start, end, STATE.period, idx);
 
-    const el = document.createElement('section');
-    el.className = 'resumen-box';
-    el.innerHTML = `
-      <h2 class="resumen-title">${esc(titulo)}</h2>
-      ${bloque('💰 Ingresos',           ingresos, 'ingresos',   vIngreso, lblIngreso)}
-      ${bloque('📉 Gastos',             gastos,   'gastos',     vGasto,   lblGasto)}
-      ${bloque('💳 Pagos de deudas',    deudas,   'deudas',     vDeuda,   lblDeuda)}
-      ${bloque('💧 Aportes a fondos',   ahorrosAportes, 'aportes', vAporte, lblAporte)}
-      ${bloque('📈 Inversiones',        inversionItems, 'inversiones', vInversionFlujo, lblInversionFlujo)}
-      <div class="resumen-item">
-        <span>↩ Balance semana anterior:</span><strong class="${carryCls}">${fmtMoney(carryFromPrevWeek)}</strong>
-      </div>
-      <div class="resumen-item resumen-final">
-        <span>🧮 Balance:</span><strong class="${finalCls}">${fmtMoney(balanceFinal)}</strong>
-      </div>
-    `;
-    container.appendChild(el);
-    carryFromPrevWeek = balanceFinal;
-  });
+      const ingresos = itemsInRange(ingresosAll, start, end, 'fecha');
+      const gastos   = itemsInRange(gastosAll,   start, end, 'fecha');
+      const deudas   = itemsInRange(deudasAll,   start, end, 'fecha');
+      const ahorrosAportes = aporteItemsForWeek(STATE.data.fondos, start, end);
+      const inversionItems = inversionItemsForWeek(STATE.data.inversiones, start, end);
+
+      const tot = {
+        ingresos: sumBy(ingresos, vIngreso),
+        gastos:   sumBy(gastos,   vGasto),
+        deudas:   sumBy(deudas,   vDeuda),
+        ahorros:  sumBy(ahorrosAportes, vAporte),
+        inversiones: sumBy(inversionItems, vInversionFlujo),
+      };
+      const balanceSemana = tot.ingresos - tot.gastos - tot.deudas - tot.ahorros - tot.inversiones;
+      const balanceFinal = balanceSemana + carryFromPrevWeek;
+      const carryCls = carryFromPrevWeek < 0 ? 'nb-balance-negativo' : carryFromPrevWeek > 0 ? 'nb-balance-positivo' : '';
+      const finalCls = balanceFinal < 0 ? 'nb-balance-negativo' : balanceFinal > 0 ? 'nb-balance-positivo' : '';
+
+      const el = document.createElement('section');
+      el.className = 'resumen-box';
+      el.innerHTML = `
+        <h2 class="resumen-title">${esc(titulo)}</h2>
+        ${bloque('💰 Ingresos',           ingresos, 'ingresos',   vIngreso, lblIngreso)}
+        ${bloque('📉 Gastos',             gastos,   'gastos',     vGasto,   lblGasto)}
+        ${bloque('💳 Pagos de deudas',    deudas,   'deudas',     vDeuda,   lblDeuda)}
+        ${bloque('💧 Aportes a fondos',   ahorrosAportes, 'aportes', vAporte, lblAporte)}
+        ${bloque('📈 Inversiones',        inversionItems, 'inversiones', vInversionFlujo, lblInversionFlujo)}
+        <div class="resumen-item">
+          <span>↩ Balance semana anterior:</span><strong class="${carryCls}">${fmtMoney(carryFromPrevWeek)}</strong>
+        </div>
+        <div class="resumen-item resumen-final">
+          <span>🧮 Balance:</span><strong class="${finalCls}">${fmtMoney(balanceFinal)}</strong>
+        </div>
+      `;
+      container.appendChild(el);
+      carryFromPrevWeek = balanceFinal;
+    });
+  }
 
   // Totales para el gráfico
   const totals = weeks.reduce((acc,{start,end})=>{
@@ -614,6 +702,58 @@ function render() {
   }, {ingresos:0,gastos:0,deudas:0,ahorros:0,inv:0});
 
   renderChart({ ingresos: totals.ingresos, gastos: totals.gastos, deudas: totals.deudas, ahorros: totals.ahorros, inversiones: totals.inv });
+  renderReports(rangeStart, rangeEnd, ingresosAll, gastosAll, deudasAll);
+}
+
+function renderReports(rangeStart, rangeEnd, ingresosAll, gastosAll, deudasAll) {
+  const hostId = 'reportesFinancieros';
+  let host = document.getElementById(hostId);
+  if (!host) {
+    host = document.createElement('section');
+    host.id = hostId;
+    host.className = 'resumen-box';
+    const cont = document.querySelector('.resumen-container');
+    if (cont) cont.appendChild(host);
+  }
+  if (!host) return;
+
+  const ingresos = itemsInRange(ingresosAll, rangeStart, rangeEnd, 'fecha');
+  const gastos = itemsInRange(gastosAll, rangeStart, rangeEnd, 'fecha');
+  const deudas = itemsInRange(deudasAll, rangeStart, rangeEnd, 'fecha');
+  const weeks = buildWeeksFor(STATE.period);
+  let ahorros = 0;
+  let inversiones = 0;
+  weeks.forEach(({ start, end }) => {
+    ahorros += sumBy(aporteItemsForWeek(STATE.data.fondos, start, end), vAporte);
+    inversiones += sumBy(inversionItemsForWeek(STATE.data.inversiones, start, end), vInversionFlujo);
+  });
+
+  const totalIngresos = sumBy(ingresos, vIngreso);
+  const totalGastos = sumBy(gastos, vGasto) + sumBy(deudas, vDeuda) + ahorros + inversiones;
+  const neto = totalIngresos - totalGastos;
+  const netoCls = neto < 0 ? 'nb-balance-negativo' : neto > 0 ? 'nb-balance-positivo' : '';
+
+  const gastoPorCat = {};
+  gastos.forEach((g) => {
+    const k = (typeof g.categoria === 'object' ? g.categoria?.nombre : g.categoria) || 'Sin categoría';
+    gastoPorCat[k] = (gastoPorCat[k] || 0) + (Number(vGasto(g)) || 0);
+  });
+  const topCats = Object.entries(gastoPorCat)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([k, v]) => `<div class="item-detalle"><span>${esc(k)}</span><strong>${fmtMoney(v)}</strong></div>`)
+    .join('') || '<em>Sin gastos en el período.</em>';
+
+  host.innerHTML = `
+    <h2 class="resumen-title">📊 Reporte financiero (${esc(rangeStart.toLocaleDateString())} - ${esc(rangeEnd.toLocaleDateString())})</h2>
+    <div class="resumen-item"><span>Ingresos recibidos</span><strong>${fmtMoney(totalIngresos)}</strong></div>
+    <div class="resumen-item"><span>Salidas totales</span><strong>${fmtMoney(totalGastos)}</strong></div>
+    <div class="resumen-item resumen-final"><span>Resultado neto</span><strong class="${netoCls}">${fmtMoney(neto)}</strong></div>
+    <div class="detalle-items">
+      <strong style="display:block;margin-bottom:0.35rem;">Top gastos por categoría</strong>
+      ${topCats}
+    </div>
+  `;
 }
 
 // ===== Banner de saldo proyectado a 6 meses =====
@@ -779,6 +919,15 @@ function buildWeeksFor(period){
   const today=new Date(); const curS=startOfWeek(today, startDow); const curE=endOfWeek(today, startDow);
   if(period==='SEMANA') return [{start:curS,end:curE}];
   if(period==='COMPARAR'){ const prevS=addWeeks(curS,-1); return [{start:curS,end:curE},{start:prevS,end:endOfWeek(prevS,startDow)}]; }
+  if (period === 'HISTORICO') {
+    const out = [];
+    const n = Math.max(1, Number(STATE.historyWeeks) || 12);
+    for (let i = n - 1; i >= 0; i--) {
+      const s = addWeeks(curS, -i);
+      out.push({ start: s, end: endOfWeek(s, startDow) });
+    }
+    return out;
+  }
   const monthsMap={ '1M':1,'3M':3,'6M':6 }; const m=monthsMap[period]||1;
   const endTarget=endOfWeek(addMonths(today,m), startDow);
   const arr=[]; let c=new Date(curS);
@@ -788,6 +937,17 @@ function buildWeeksFor(period){
 function weekTitle(start,end,period,idx){
   const r=`Semana del ${start.toLocaleDateString()} al ${end.toLocaleDateString()}`;
   if(period==='COMPARAR' && idx===1) return `${r} (anterior)`; if(idx===0) return `${r} (actual)`; return r;
+}
+
+function buildDaysInRange(start, end) {
+  const days = [];
+  const cur = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  const last = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+  while (cur <= last) {
+    days.push(new Date(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return days;
 }
 
 // ===== Filtros / sumas =====
