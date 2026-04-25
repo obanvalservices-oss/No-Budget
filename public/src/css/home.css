@@ -197,6 +197,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: #475569;
+  transition: background 0.18s ease, border-color 0.18s ease;
 }
 
 .item-detalle span:first-child {
@@ -279,6 +280,35 @@
   align-items: center;
   gap: 0.2rem;
   flex-shrink: 0;
+}
+
+.nb-line-actions {
+  opacity: 0;
+  transform: translateX(4px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.item-detalle:hover,
+.item-detalle:focus-within {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 0.45rem 0.45rem;
+}
+
+.item-detalle:hover .nb-line-actions,
+.item-detalle:focus-within .nb-line-actions {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+@media (max-width: 900px) {
+  .nb-line-actions {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
 }
 
 .modal {

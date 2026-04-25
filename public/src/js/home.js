@@ -643,7 +643,7 @@ function render() {
             return `
               <div class="item-detalle ${rowClass}">
                 <span>${esc(label)} ${statusTag}</span>
-                <div>
+                <div class="nb-line-actions">
                   <strong class="${cls}" style="margin-right:0.35rem;">${sign}${fmtMoney(amount)}</strong>
                   <button class="btn-mark-done" data-key="${statusKey}">Done</button>
                   <button class="btn-mark-skip" data-key="${statusKey}" data-next-key="${nextKey}" data-amount="${amount}">Skip</button>
@@ -1122,7 +1122,7 @@ function bloque(titulo, lista, tipo, valFn, labelFn){
           return `
           <div class="item-detalle ${rowClass}">
             <span>${esc(labelFn(item))}: ${fmtMoney(amount)} ${statusTag}</span>
-            <div>
+            <div class="nb-line-actions">
               <button class="btn-mark-done" data-key="${statusKey}">Done</button>
               <button class="btn-mark-skip" data-key="${statusKey}" data-next-key="${nextKey}" data-amount="${amount}">Skip</button>
               ${acciones(tipo, item.id, origId, isRep, dateKey, item)}
