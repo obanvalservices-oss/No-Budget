@@ -11,7 +11,7 @@
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 const money = (n) =>
-  (Number(n) || 0).toLocaleString('es-ES', { style: 'currency', currency: 'USD' });
+  (Number(n) || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 const fdate = (v) => {
   const d = new Date(v);
   if (Number.isNaN(+d)) return '-';
@@ -36,9 +36,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Datos requeridos
   await loadSavingsOptions();
-  await reloadHistorial(); // 👈 carga inicial del listado
+  await reloadHistory(); // 👈 carga inicial del listado
 
-  $('.deudas-container').addEventListener('click', onDeudaHistorialClick);
+  $('.deudas-container').addEventListener('click', onDeudaHistoryClick);
 });
 
 // ---------- UI toggles ----------
@@ -76,18 +76,18 @@ function bindUiToggles() {
     else instSavingsWrap.classList.add('hidden');
   });
 
-  // Tabs Historial
+  // Tabs History
   $$('.tabs .tab').forEach((btn) => {
     btn.addEventListener('click', () => {
       $$('.tabs .tab').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       const tab = btn.dataset.tab; // act | inact
       if (tab === 'act') {
-        $('#listActivas').classList.remove('hidden');
-        $('#listInactivas').classList.add('hidden');
+        $('#listActive').classList.remove('hidden');
+        $('#listInactive').classList.add('hidden');
       } else {
-        $('#listInactivas').classList.remove('hidden');
-        $('#listActivas').classList.add('hidden');
+        $('#listInactive').classList.remove('hidden');
+        $('#listActive').classList.add('hidden');
       }
     });
   });
@@ -104,7 +104,7 @@ function bindUiToggles() {
   });
 }
 
-// ---------- Cargar fondos de ahorro para selects ----------
+// ---------- Load fondos de ahorro para selects ----------
 async function loadSavingsOptions() {
   try {
     const { data } = await axios.get('/ahorros'); // asumiendo GET /ahorros lista fondos
@@ -112,16 +112,16 @@ async function loadSavingsOptions() {
     // Pago inicial
     const downSel = $('#downSavings');
     downSel.innerHTML = STATE.savings
-      .map((f) => `<option value="${f.id}">${escapeHtml(f.nombre || 'Fondo')} — Saldo ${money(f.saldo || 0)}</option>`)
+      .map((f) => `<option value="${f.id}">${escapeHtml(f.nombre || 'Fund')} — Balance ${money(f.saldo || 0)}</option>`)
       .join('');
     // Cuotas
     const instSel = $('#instSavings');
     instSel.innerHTML = STATE.savings
-      .map((f) => `<option value="${f.id}">${escapeHtml(f.nombre || 'Fondo')} — Saldo ${money(f.saldo || 0)}</option>`)
+      .map((f) => `<option value="${f.id}">${escapeHtml(f.nombre || 'Fund')} — Balance ${money(f.saldo || 0)}</option>`)
       .join('');
     // Hints
-    $('#downSavingsHint').textContent = 'Se debitará del saldo del fondo seleccionado.';
-    $('#instSavingsHint').textContent = 'Cada cuota se debitará del fondo seleccionado.';
+    $('#downSavingsHint').textContent = 'Will be debited from the selected fund balance.';
+    $('#instSavingsHint').textContent = 'Each installment will be debited from the selected fund.';
   } catch (e) {
     console.error('[deudas] no se pudieron cargar fondos', e);
     STATE.savings = [];
@@ -151,21 +151,21 @@ function bindForm() {
     const instSavings = $('#instSavings').value ? Number($('#instSavings').value) : undefined;
 
     if (!title || !principal || !startDate) {
-      return alert('Completa Título, Monto total y Fecha de inicio.');
+      return alert('Complete Title, Total amount, and Start date.');
     }
 
     // Validaciones de ahorro cuando se usa SAVINGS
     if (downSource === 'SAVINGS' && downPayment > 0) {
       const f = STATE.savings.find((x) => x.id === downSavings);
-      if (!f) return alert('Selecciona un fondo válido para el pago inicial.');
+      if (!f) return alert('Select a valid fund for the down payment.');
       if ((Number(f.saldo) || 0) < downPayment) {
-        return alert('El fondo seleccionado no tiene saldo suficiente para el pago inicial.');
+        return alert('The selected fund does not have enough balance for the down payment.');
       }
     }
     if (hasInstallments && installmentsSource === 'SAVINGS') {
-      if (!instSavings) return alert('Selecciona un fondo para pagar las cuotas.');
+      if (!instSavings) return alert('Select a fund to pay installments.');
       const f2 = STATE.savings.find((x) => x.id === instSavings);
-      if (!f2) return alert('Selecciona un fondo válido para cuotas.');
+      if (!f2) return alert('Select a valid fund for installments.');
     }
 
     const payload = {
@@ -189,7 +189,7 @@ function bindForm() {
     try {
       const { data } = await axios.post('/deudas', payload);
       console.log('[deudas] creada →', data);
-      alert('✅ Deuda guardada con éxito.');
+      alert('✅ Debt saved successfully.');
       $('#formDeuda').reset();
       // Restablecer fechas y ocultar condicionales
       $('#startDate').value = new Date().toISOString().slice(0, 10);
@@ -198,17 +198,17 @@ function bindForm() {
       $('#downSavingsWrap').classList.add('hidden');
       $('#instSavingsWrap').classList.add('hidden');
 
-      await reloadHistorial(); // 👈 refrescar listado tras crear
+      await reloadHistory(); // 👈 refrescar listado tras crear
     } catch (e) {
       console.error('[deudas] error al guardar', e);
-      const msg = e?.response?.data?.message || 'No se pudo guardar la deuda.';
+      const msg = e?.response?.data?.message || 'Could not save debt.';
       alert(Array.isArray(msg) ? msg.join('\n') : msg);
     }
   });
 }
 
-// ---------- Historial ----------
-async function reloadHistorial() {
+// ---------- History ----------
+async function reloadHistory() {
   try {
     const res = await axios.get('/deudas');
     // Debug
@@ -220,12 +220,12 @@ async function reloadHistorial() {
     const inactivas = data.filter((d) => (d.status || '').toUpperCase() !== 'ACTIVA');
 
     // Pintar
-    paintDebtList('#listActivas', activas, 'No hay deudas activas.');
-    paintDebtList('#listInactivas', inactivas, 'No hay deudas inactivas.');
+    paintDebtList('#listActive', activas, 'No active debts.');
+    paintDebtList('#listInactive', inactivas, 'No inactive debts.');
   } catch (e) {
     console.error('[deudas] error al cargar historial', e);
-    paintDebtList('#listActivas', [], 'No se pudo cargar el listado.');
-    paintDebtList('#listInactivas', [], '');
+    paintDebtList('#listActive', [], 'Could not load list.');
+    paintDebtList('#listInactive', [], '');
   }
 }
 
@@ -234,7 +234,7 @@ function paintDebtList(containerSel, items, emptyText) {
   if (!cont) return;
 
   if (!items || items.length === 0) {
-    cont.innerHTML = `<p class="vacio">${escapeHtml(emptyText || 'Sin resultados')}</p>`;
+    cont.innerHTML = `<p class="vacio">${escapeHtml(emptyText || 'No results')}</p>`;
     return;
   }
 
@@ -251,24 +251,24 @@ function debtItemHtml(d) {
   const estado = (d.status || '').toUpperCase();
   const pagos = Array.isArray(d.pagos) ? d.pagos : [];
   const pair =
-    typeof window.nbHistorialPair === 'function'
-      ? window.nbHistorialPair('deuda', d.id)
+    typeof window.nbHistoryPair === 'function'
+      ? window.nbHistoryPair('deuda', d.id)
       : '';
 
   return `
     <div class="debt-row nb-historial-item">
       <div class="nb-historial-body debt-main">
-        <p class="nb-historial-title">${escapeHtml(d.title || 'Deuda')}</p>
+        <p class="nb-historial-title">${escapeHtml(d.title || 'Debt')}</p>
         <p class="nb-historial-meta">
-          Inició: ${fdate(d.startDate)} · Frecuencia: ${escapeHtml(freq)} · Cuotas: ${cuotas}
+          Started: ${fdate(d.startDate)} · Frequency: ${escapeHtml(freq)} · Cuotas: ${cuotas}
           ${d.description ? ` · ${escapeHtml(d.description)}` : ''}
         </p>
       </div>
       <div class="debt-money-actions">
         <div class="debt-money">
           <div>Total: ${money(d.principal)}</div>
-          <div>Pagado: ${money(pagado)}</div>
-          <div><strong>Pendiente: ${money(saldo)}</strong></div>
+          <div>Paid: ${money(pagado)}</div>
+          <div><strong>Pending: ${money(saldo)}</strong></div>
           <div class="badge ${estado === 'ACTIVA' ? 'ok' : 'off'}">${estado}</div>
         </div>
         ${pair}
@@ -277,7 +277,7 @@ function debtItemHtml(d) {
       ${pagos.length ? `
       <div class="debt-pagos">
         <details>
-          <summary>Pagos (${pagos.length})</summary>
+          <summary>Payments (${pagos.length})</summary>
           <ul>
             ${pagos.map(p => `
               <li>${fdate(p.fecha)} — ${money(p.monto)} ${p.fuente ? `• ${escapeHtml(p.fuente)}` : ''}</li>
@@ -289,7 +289,7 @@ function debtItemHtml(d) {
   `;
 }
 
-async function onDeudaHistorialClick(e) {
+async function onDeudaHistoryClick(e) {
   const btn = e.target.closest('[data-entity="deuda"][data-action]');
   if (!btn) return;
   const id = btn.dataset.id;
@@ -297,13 +297,13 @@ async function onDeudaHistorialClick(e) {
   if (!id) return;
 
   if (action === 'delete') {
-    if (!confirm('¿Eliminar esta deuda y sus pagos?')) return;
+    if (!confirm('Delete this debt and its payments?')) return;
     try {
       await axios.delete(`/deudas/${id}`);
-      await reloadHistorial();
+      await reloadHistory();
     } catch (err) {
       console.error('[deudas] error al eliminar', err);
-      alert('No se pudo borrar el registro.');
+      alert('Could not delete record.');
     }
     return;
   }
@@ -316,18 +316,18 @@ async function onDeudaHistorialClick(e) {
       row = data.find((x) => String(x.id) === String(id));
     } catch (err) {
       console.error('[deudas] error al cargar deuda', err);
-      alert('No se pudo cargar la deuda.');
+      alert('Could not load debt.');
       return;
     }
     if (!row) {
-      alert('No se encontró la deuda.');
+      alert('Debt not found.');
       return;
     }
 
-    const newTitle = prompt('Título:', row.title || '') ?? '';
+    const newTitle = prompt('Title:', row.title || '') ?? '';
     if (newTitle === '') return;
-    const newDesc = prompt('Descripción (opcional):', row.description || '') ?? '';
-    const newPrincipalStr = prompt('Monto total:', String(row.principal ?? '')) ?? '';
+    const newDesc = prompt('Description (optional):', row.description || '') ?? '';
+    const newPrincipalStr = prompt('Total amount:', String(row.principal ?? '')) ?? '';
 
     const payload = {
       title: newTitle.trim(),
@@ -339,10 +339,10 @@ async function onDeudaHistorialClick(e) {
 
     try {
       await axios.patch(`/deudas/${id}`, payload);
-      await reloadHistorial();
+      await reloadHistory();
     } catch (err) {
       console.error('[deudas] error al editar', err);
-      const msg = err?.response?.data?.message || 'No se pudo editar la deuda.';
+      const msg = err?.response?.data?.message || 'Could not edit debt.';
       alert(Array.isArray(msg) ? msg.join('\n') : msg);
     }
   }

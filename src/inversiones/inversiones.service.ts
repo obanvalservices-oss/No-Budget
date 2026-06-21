@@ -16,7 +16,7 @@ type InversionRow = Prisma.InversionGetPayload<{ include: { fondo: true } }>;
 export type InversionMetricas = {
   simbolo: string | null;
   acciones: number;
-  capitalInvertido: number;
+  capitalInvested: number;
   precioMercado: number;
   valorActual: number;
   pnl: number;
@@ -24,7 +24,7 @@ export type InversionMetricas = {
   variacionDiariaValor: number;
   variacionDiariaPct: number | null;
   cotizacionAsOf: string | null;
-  cotizacionFuente: string;
+  cotizacionSource: string;
 };
 
 @Injectable()
@@ -40,7 +40,7 @@ export class InversionesService {
       return {
         ok: false as const,
         symbol: null as string | null,
-        message: 'No hay símbolo para cotizar. Indicá ticker (ej. AAPL) o elegí un activo con mapa.',
+        message: 'No symbol to quote. Enter ticker (e.g. AAPL) or choose a mapped asset.',
       };
     }
     const q = await this.quotes.getQuote(sym);
@@ -49,7 +49,7 @@ export class InversionesService {
         ok: false as const,
         symbol: sym,
         message:
-          'Sin cotización (configurá TWELVE_DATA_API_KEY o esperá caché). Podés registrar con cantidad y precio manual.',
+          'No quote (set TWELVE_DATA_API_KEY or wait for cache). You can register with quantity and manual price.',
       };
     }
     return {
@@ -71,7 +71,7 @@ export class InversionesService {
       });
       if (!f) {
         f = await this.prisma.fondoInversion.create({
-          data: { nombre: 'Cartera principal', monto: 0, userId },
+          data: { nombre: 'Main portfolio', monto: 0, userId },
         });
       }
       fondoId = f.id;
@@ -81,13 +81,13 @@ export class InversionesService {
       where: { id: fondoId, userId },
     });
     if (!fondo) {
-      throw new BadRequestException('Fondo de inversión no válido.');
+      throw new BadRequestException('Invalid investment fund.');
     }
 
     const sym = resolveQuoteSymbol(dto.tipo, dto.activo, dto.simbolo);
     const cap =
-      dto.capitalInvertido != null && Number(dto.capitalInvertido) > 0
-        ? Number(dto.capitalInvertido)
+      dto.capitalInvested != null && Number(dto.capitalInvested) > 0
+        ? Number(dto.capitalInvested)
         : null;
 
     let cantidad = dto.cantidad != null ? Number(dto.cantidad) : null;
@@ -97,13 +97,13 @@ export class InversionesService {
     if (cap != null) {
       if (!sym) {
         throw new BadRequestException(
-          'Para registrar por capital necesitás un símbolo cotizable (campo simbolo o activo con mapa: Apple, Bitcoin, …).',
+          'To register by capital you need a quotable symbol (simbolo field or mapped asset: Apple, Bitcoin, …).',
         );
       }
       const q = await this.quotes.getQuote(sym);
       if (!q) {
         throw new BadRequestException(
-          'No hay precio de mercado disponible. Revisá TWELVE_DATA_API_KEY o registrá con cantidad y precio de compra manual.',
+          'No market price available. Check TWELVE_DATA_API_KEY or register with quantity and manual purchase price.',
         );
       }
       precioCompra = q.close;
@@ -112,7 +112,7 @@ export class InversionesService {
     } else {
       if (cantidad == null || cantidad <= 0 || precioCompra == null || precioCompra <= 0) {
         throw new BadRequestException(
-          'Enviá capitalInvertido (> 0) o bien cantidad y precioCompra (> 0).',
+          'Send capitalInvested (> 0) or quantity and precioCompra (> 0).',
         );
       }
       if (sym && (dto.precioActual == null || Number.isNaN(Number(dto.precioActual)))) {
@@ -133,8 +133,8 @@ export class InversionesService {
           descripcion: dto.descripcion ?? null,
           simbolo: sym ?? undefined,
           planAporteMonto: dto.planAporteMonto ?? undefined,
-          planAporteFrecuencia: dto.planAporteFrecuencia ?? undefined,
-          planAporteInicio: dto.planAporteInicio ? new Date(dto.planAporteInicio) : undefined,
+          planAporteFrequency: dto.planAporteFrequency ?? undefined,
+          planAporteHome: dto.planAporteHome ? new Date(dto.planAporteHome) : undefined,
           fondo: { connect: { id: fondoId } },
           user: { connect: { id: userId } },
         },
@@ -142,7 +142,7 @@ export class InversionesService {
       });
       return this.attachMetrics(row, await this.quoteMapForRows([row]));
     } catch {
-      throw new InternalServerErrorException('Error al crear inversión.');
+      throw new InternalServerErrorException('Error creating investment.');
     }
   }
 
@@ -161,7 +161,7 @@ export class InversionesService {
       where: { id: Number(id), userId },
       include: { fondo: true },
     });
-    if (!row) throw new NotFoundException('Inversión no encontrada');
+    if (!row) throw new NotFoundException('Investment not found');
     const quoteMap = await this.quoteMapForRows([row]);
     return this.attachMetrics(row, quoteMap);
   }
@@ -170,13 +170,13 @@ export class InversionesService {
     const existing = await this.prisma.inversion.findFirst({
       where: { id: Number(id), userId },
     });
-    if (!existing) throw new NotFoundException('Inversión no encontrada');
+    if (!existing) throw new NotFoundException('Investment not found');
 
     if (dto.fondoId != null) {
       const f = await this.prisma.fondoInversion.findFirst({
         where: { id: dto.fondoId, userId },
       });
-      if (!f) throw new BadRequestException('Fondo de inversión no válido.');
+      if (!f) throw new BadRequestException('Invalid investment fund.');
     }
 
     const data: Prisma.InversionUpdateInput = {};
@@ -189,11 +189,11 @@ export class InversionesService {
     if (dto.descripcion !== undefined) data.descripcion = dto.descripcion;
     if (dto.simbolo !== undefined) data.simbolo = dto.simbolo || null;
     if (dto.planAporteMonto !== undefined) data.planAporteMonto = dto.planAporteMonto;
-    if (dto.planAporteFrecuencia !== undefined) {
-      data.planAporteFrecuencia = dto.planAporteFrecuencia;
+    if (dto.planAporteFrequency !== undefined) {
+      data.planAporteFrequency = dto.planAporteFrequency;
     }
-    if (dto.planAporteInicio !== undefined) {
-      data.planAporteInicio = dto.planAporteInicio ? new Date(dto.planAporteInicio) : null;
+    if (dto.planAporteHome !== undefined) {
+      data.planAporteHome = dto.planAporteHome ? new Date(dto.planAporteHome) : null;
     }
     if (dto.fondoId !== undefined) data.fondo = { connect: { id: dto.fondoId } };
 
@@ -206,7 +206,7 @@ export class InversionesService {
       const quoteMap = await this.quoteMapForRows([row]);
       return this.attachMetrics(row, quoteMap);
     } catch {
-      throw new InternalServerErrorException('Error al actualizar inversión.');
+      throw new InternalServerErrorException('Error updating investment.');
     }
   }
 
@@ -214,12 +214,12 @@ export class InversionesService {
     const existing = await this.prisma.inversion.findFirst({
       where: { id: Number(id), userId },
     });
-    if (!existing) throw new NotFoundException('Inversión no encontrada');
+    if (!existing) throw new NotFoundException('Investment not found');
 
     try {
       return await this.prisma.inversion.delete({ where: { id: existing.id } });
     } catch {
-      throw new InternalServerErrorException('Error al eliminar inversión.');
+      throw new InternalServerErrorException('Error deleting investment.');
     }
   }
 
@@ -247,12 +247,12 @@ export class InversionesService {
 
     const acciones = Number(inv.cantidad ?? 0);
     const precioCompra = Number(inv.precioCompra ?? 0);
-    const capitalInvertido = acciones * precioCompra;
+    const capitalInvested = acciones * precioCompra;
 
     let currentPrice = Number(inv.precioActual ?? inv.precioCompra ?? 0);
     let previousClose = currentPrice;
     let quoteDate: string | null = null;
-    let quoteSource = 'posición';
+    let quoteSource = 'position';
 
     if (q) {
       currentPrice = q.close;
@@ -262,8 +262,8 @@ export class InversionesService {
     }
 
     const valorActual = acciones * currentPrice;
-    const pnl = valorActual - capitalInvertido;
-    const pnlPct = capitalInvertido > 0 ? (pnl / capitalInvertido) * 100 : null;
+    const pnl = valorActual - capitalInvested;
+    const pnlPct = capitalInvested > 0 ? (pnl / capitalInvested) * 100 : null;
     const deltaPorAccion = currentPrice - previousClose;
     const variacionDiariaValor = acciones * deltaPorAccion;
     const variacionDiariaPct = previousClose > 0 ? (deltaPorAccion / previousClose) * 100 : null;
@@ -271,7 +271,7 @@ export class InversionesService {
     const metricas: InversionMetricas = {
       simbolo: sym,
       acciones,
-      capitalInvertido,
+      capitalInvested,
       precioMercado: currentPrice,
       valorActual,
       pnl,
@@ -279,7 +279,7 @@ export class InversionesService {
       variacionDiariaValor,
       variacionDiariaPct,
       cotizacionAsOf: quoteDate,
-      cotizacionFuente: quoteSource,
+      cotizacionSource: quoteSource,
     };
 
     return { ...inv, metricas };

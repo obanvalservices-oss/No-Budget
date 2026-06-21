@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const config = JSON.parse(localStorage.getItem('config'));
 
   if (!config || !config.fechaBase) {
-    resumenContainer.innerHTML = '<p>Configura primero tu fecha base desde el perfil.</p>';
+    resumenContainer.innerHTML = '<p>Set your base date in your profile first.</p>';
     return;
   }
 
@@ -32,9 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const base = new Date(fechaBase);
     const diff = Math.floor((fecha - base) / (1000 * 60 * 60 * 24));
     const offset = (7 + fecha.getDay() - inicioSemana) % 7;
-    const diasDesdeInicio = diff - offset;
+    const diasDesdeHome = diff - offset;
     const inicio = new Date(base);
-    inicio.setDate(inicio.getDate() + diasDesdeInicio);
+    inicio.setDate(inicio.getDate() + diasDesdeHome);
     return inicio.toISOString().split('T')[0]; // clave de semana
   };
 
@@ -69,17 +69,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const section = document.createElement('section');
     section.classList.add('semana-resumen');
     section.innerHTML = `
-      <h3>Semana del ${inicioSemana.toLocaleDateString()} al ${finSemana.toLocaleDateString()}</h3>
+      <h3>Week of ${inicioSemana.toLocaleDateString()} to ${finSemana.toLocaleDateString()}</h3>
 
-      ${resumen.ingresos.map(i => `<p>Ingreso - ${i.categoria || 'Sin nombre'}: $${i.monto.toFixed(2)}</p>`).join('')}
-      <p><strong>Total Ingreso Semanal: $${totalIngresos.toFixed(2)}</strong></p>
+      ${resumen.ingresos.map(i => `<p>Income - ${i.categoria || 'Unnamed'}: $${i.monto.toFixed(2)}</p>`).join('')}
+      <p><strong>Total Weekly Income: $${totalIngresos.toFixed(2)}</strong></p>
 
-      ${resumen.inversiones.map(i => `<p>Inversión - ${i.categoria || 'Sin nombre'}: $${i.monto.toFixed(2)}</p>`).join('')}
-      ${resumen.ahorros.map(i => `<p>Ahorro - ${i.categoria || 'Sin nombre'}: $${i.monto.toFixed(2)}</p>`).join('')}
-      <p><strong>Total Ahorro e Inversiones Semanal: $${(totalAhorros + totalInversiones).toFixed(2)}</strong></p>
+      ${resumen.inversiones.map(i => `<p>Investment - ${i.categoria || 'Unnamed'}: $${i.monto.toFixed(2)}</p>`).join('')}
+      ${resumen.ahorros.map(i => `<p>Savings - ${i.categoria || 'Unnamed'}: $${i.monto.toFixed(2)}</p>`).join('')}
+      <p><strong>Total Weekly Savings & Investments: $${(totalAhorros + totalInversiones).toFixed(2)}</strong></p>
 
-      ${resumen.gastos.map(i => `<p>Gasto - ${i.categoria || 'Sin nombre'}: $${i.monto.toFixed(2)}</p>`).join('')}
-      <p><strong>Total Gastos Semanal: $${totalGastos.toFixed(2)}</strong></p>
+      ${resumen.gastos.map(i => `<p>Expense - ${i.categoria || 'Unnamed'}: $${i.monto.toFixed(2)}</p>`).join('')}
+      <p><strong>Total Weekly Expenses: $${totalGastos.toFixed(2)}</strong></p>
 
       <p><strong>Balance at the end of the week: $${balanceFinal.toFixed(2)}</strong></p>
       <hr />

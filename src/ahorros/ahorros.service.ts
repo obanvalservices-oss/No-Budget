@@ -13,14 +13,14 @@ const MS_PER_YEAR = 365.25 * 24 * 60 * 60 * 1000;
 export class AhorrosService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private normalizeFrecuencia(v: unknown): string | null {
+  private normalizeFrequency(v: unknown): string | null {
     if (v == null) return null;
     const s = String(v).trim();
     return s === '' ? null : s;
   }
 
   /** null = sin tasa configurada (no estimar). */
-  private parseTasaAnualPctCreate(v: unknown): number | null {
+  private parseTasaAnnualPctCreate(v: unknown): number | null {
     if (v === null || v === undefined || v === '') return null;
     const n = Number(v);
     if (Number.isNaN(n)) return null;
@@ -28,7 +28,7 @@ export class AhorrosService {
   }
 
   /** undefined = no tocar en update. */
-  private parseTasaAnualPctUpdate(v: unknown): number | null | undefined {
+  private parseTasaAnnualPctUpdate(v: unknown): number | null | undefined {
     if (v === undefined) return undefined;
     if (v === null || v === '') return null;
     const n = Number(v);
@@ -36,10 +36,10 @@ export class AhorrosService {
     return n;
   }
 
-  private assertFijoTieneFrecuencia(fijo: boolean, frecuencia: string | null) {
+  private assertFijoTieneFrequency(fijo: boolean, frecuencia: string | null) {
     if (fijo && !frecuencia) {
       throw new BadRequestException(
-        'Un fondo con aporte fijo requiere frecuencia (semanal, bisemanal o mensual).',
+        'A fund with fixed contributions requires frequency (weekly, biweekly, or monthly).',
       );
     }
   }
@@ -47,14 +47,14 @@ export class AhorrosService {
   /** Interés simple anualizado sobre el saldo nominal desde fecha de inicio del fondo. */
   private estimarRendimiento(
     saldoNominal: number,
-    fechaInicio: Date,
-    tasaAnualPct: number | null,
+    fechaHome: Date,
+    tasaAnnualPct: number | null,
   ): { rendimientoEstimado: number; saldoConRendimiento: number } {
-    if (tasaAnualPct == null || !Number.isFinite(saldoNominal) || saldoNominal === 0) {
+    if (tasaAnnualPct == null || !Number.isFinite(saldoNominal) || saldoNominal === 0) {
       return { rendimientoEstimado: 0, saldoConRendimiento: saldoNominal };
     }
-    const rate = Number(tasaAnualPct);
-    const years = Math.max(0, (Date.now() - fechaInicio.getTime()) / MS_PER_YEAR);
+    const rate = Number(tasaAnnualPct);
+    const years = Math.max(0, (Date.now() - fechaHome.getTime()) / MS_PER_YEAR);
     const rendimientoEstimado = saldoNominal * (rate / 100) * years;
     return {
       rendimientoEstimado,
@@ -64,23 +64,23 @@ export class AhorrosService {
 
   async create(userId: number, dto: any) {
     try {
-      const frecuencia = this.normalizeFrecuencia(dto.frecuencia);
+      const frecuencia = this.normalizeFrequency(dto.frecuencia);
       const fijo = !!(dto.fijo ?? dto.recurrente);
-      this.assertFijoTieneFrecuencia(fijo, frecuencia);
-      const tasaAnualPct = this.parseTasaAnualPctCreate(dto.tasaAnualPct);
+      this.assertFijoTieneFrequency(fijo, frecuencia);
+      const tasaAnnualPct = this.parseTasaAnnualPctCreate(dto.tasaAnnualPct);
       const created = await this.prisma.ahorro.create({
         data: {
           objetivo: dto.nombre ?? dto.objetivo ?? '',
           monto: dto.meta ?? dto.monto ?? 0,                 // meta
           categoria: 'FONDO',
-          fecha: new Date(dto.fechaInicio ?? dto.fecha),     // fechaInicio real
+          fecha: new Date(dto.fechaHome ?? dto.fecha),     // fechaHome real
           recurrente: fijo,
           colorTag: frecuencia,
           // guardamos aporte fijo en un campo libre (sharedId) si no tienes columna dedicada
           sharedId: dto.aporteFijo != null ? String(dto.aporteFijo) : null,
           // descripción opcional
           descripcion: dto.descripcion ?? dto.nombre ?? null,
-          tasaAnualPct,
+          tasaAnnualPct,
           user: { connect: { id: userId } },
           isShared: false,
         },
@@ -91,7 +91,7 @@ export class AhorrosService {
         await this.prisma.movimientoAhorro.create({
           data: {
             ahorro: { connect: { id: created.id } },
-            fecha: new Date(dto.fechaInicio ?? dto.fecha),
+            fecha: new Date(dto.fechaHome ?? dto.fecha),
             motivo: MOTIVO_APORTE_INICIAL,
             monto: dto.aporte,
           },
@@ -100,7 +100,7 @@ export class AhorrosService {
 
       return created;
     } catch (e) {
-      throw new InternalServerErrorException('Error al crear ahorro.');
+      throw new InternalServerErrorException('Error creating savings fund.');
     }
   }
 
@@ -130,12 +130,12 @@ export class AhorrosService {
       }
       const saldo = saldoBaseInicial + saldoOtrosAportes;
       const aporteFijo = f.sharedId != null && !isNaN(Number(f.sharedId)) ? Number(f.sharedId) : 0;
-      const tasaRaw = f.tasaAnualPct;
-      const tasaAnualPct = tasaRaw != null && Number.isFinite(Number(tasaRaw)) ? Number(tasaRaw) : null;
+      const tasaRaw = f.tasaAnnualPct;
+      const tasaAnnualPct = tasaRaw != null && Number.isFinite(Number(tasaRaw)) ? Number(tasaRaw) : null;
       const { rendimientoEstimado, saldoConRendimiento } = this.estimarRendimiento(
         saldo,
         new Date(f.fecha),
-        tasaAnualPct,
+        tasaAnnualPct,
       );
 
       return {
@@ -143,7 +143,7 @@ export class AhorrosService {
         nombre: f.objetivo,
         descripcion: f.descripcion ?? null,
         meta: Number(f.monto) || 0,
-        fechaInicio: f.fecha,            // clave para proyección
+        fechaHome: f.fecha,            // clave para proyección
         fechaCreacion: f.createdAt,
         fijo: !!f.recurrente,
         frecuencia: f.colorTag ?? '',    // semanal | bisemanal | mensual
@@ -151,7 +151,7 @@ export class AhorrosService {
         saldo,
         saldoBaseInicial,
         saldoOtrosAportes,
-        tasaAnualPct,
+        tasaAnnualPct,
         rendimientoEstimado,
         saldoConRendimiento,
         movimientos: (f.movimientos || []).map((m: any) => ({
@@ -168,7 +168,7 @@ export class AhorrosService {
     const existing = await this.prisma.ahorro.findFirst({
       where: { id: Number(id), userId },
     });
-    if (!existing) throw new NotFoundException('Fondo no encontrado');
+    if (!existing) throw new NotFoundException('Fund not found');
 
     const nextFijo =
       dto.fijo !== undefined || dto.recurrente !== undefined
@@ -176,11 +176,11 @@ export class AhorrosService {
         : !!existing.recurrente;
     const nextFreq =
       dto.frecuencia !== undefined
-        ? this.normalizeFrecuencia(dto.frecuencia)
-        : this.normalizeFrecuencia(existing.colorTag);
-    this.assertFijoTieneFrecuencia(nextFijo, nextFreq);
+        ? this.normalizeFrequency(dto.frecuencia)
+        : this.normalizeFrequency(existing.colorTag);
+    this.assertFijoTieneFrequency(nextFijo, nextFreq);
 
-    const tasaPatch = this.parseTasaAnualPctUpdate(dto.tasaAnualPct);
+    const tasaPatch = this.parseTasaAnnualPctUpdate(dto.tasaAnnualPct);
 
     return this.prisma.ahorro.update({
       where: { id: existing.id },
@@ -188,21 +188,21 @@ export class AhorrosService {
         objetivo: dto.nombre ?? dto.objetivo,
         descripcion: dto.descripcion,
         monto: dto.meta ?? dto.monto,
-        fecha: dto.fechaInicio ? new Date(dto.fechaInicio) : dto.fecha ? new Date(dto.fecha) : undefined,
+        fecha: dto.fechaHome ? new Date(dto.fechaHome) : dto.fecha ? new Date(dto.fecha) : undefined,
         recurrente: dto.fijo ?? dto.recurrente,
         colorTag:
           dto.frecuencia === undefined
             ? undefined
-            : this.normalizeFrecuencia(dto.frecuencia),
+            : this.normalizeFrequency(dto.frecuencia),
         sharedId: dto.aporteFijo === undefined ? undefined : String(dto.aporteFijo),
-        ...(tasaPatch !== undefined ? { tasaAnualPct: tasaPatch } : {}),
+        ...(tasaPatch !== undefined ? { tasaAnnualPct: tasaPatch } : {}),
       },
     });
   }
 
   async remove(userId: number, id: string) {
     const fondo = await this.prisma.ahorro.findFirst({ where: { id: Number(id), userId } });
-    if (!fondo) throw new NotFoundException('Fondo no encontrado');
+    if (!fondo) throw new NotFoundException('Fund not found');
 
     await this.prisma.$transaction([
       this.prisma.movimientoAhorro.deleteMany({ where: { ahorroId: fondo.id } }),
@@ -212,14 +212,14 @@ export class AhorrosService {
     return { ok: true };
   }
 
-  // Movimientos
+  // Transactions
   async addMovimiento(
     userId: number,
     ahorroId: number,
     data: { fecha: Date; monto: number; motivo: string },
   ) {
     const f = await this.prisma.ahorro.findFirst({ where: { id: ahorroId, userId } });
-    if (!f) throw new NotFoundException('Fondo no encontrado');
+    if (!f) throw new NotFoundException('Fund not found');
 
     return this.prisma.movimientoAhorro.create({
       data: {
@@ -238,10 +238,10 @@ export class AhorrosService {
     patch: { fecha?: Date; monto?: number; motivo?: string },
   ) {
     const f = await this.prisma.ahorro.findFirst({ where: { id: ahorroId, userId } });
-    if (!f) throw new NotFoundException('Fondo no encontrado');
+    if (!f) throw new NotFoundException('Fund not found');
 
     const mov = await this.prisma.movimientoAhorro.findUnique({ where: { id: movId } });
-    if (!mov || mov.ahorroId !== ahorroId) throw new NotFoundException('Movimiento no encontrado');
+    if (!mov || mov.ahorroId !== ahorroId) throw new NotFoundException('Transaction not found');
 
     return this.prisma.movimientoAhorro.update({
       where: { id: movId },
@@ -255,10 +255,10 @@ export class AhorrosService {
 
   async deleteMovimiento(userId: number, ahorroId: number, movId: number) {
     const f = await this.prisma.ahorro.findFirst({ where: { id: ahorroId, userId } });
-    if (!f) throw new NotFoundException('Fondo no encontrado');
+    if (!f) throw new NotFoundException('Fund not found');
 
     const mov = await this.prisma.movimientoAhorro.findUnique({ where: { id: movId } });
-    if (!mov || mov.ahorroId !== ahorroId) throw new NotFoundException('Movimiento no encontrado');
+    if (!mov || mov.ahorroId !== ahorroId) throw new NotFoundException('Transaction not found');
 
     await this.prisma.movimientoAhorro.delete({ where: { id: movId } });
     return { ok: true };

@@ -174,7 +174,7 @@ function addMonthsSameDaySafe(d,n){
   const r=new Date(d); r.setFullYear(ty,tMon,Math.max(1, Math.min(day,last))); r.setHours(0,0,0,0); return r;
 }
 function addMonths(d,n){ return addMonthsSameDaySafe(d,n); }
-function fmtMoney(n){ return (Number(n)||0).toLocaleString('es-ES',{style:'currency',currency:'USD'}); }
+function fmtMoney(n){ return (Number(n)||0).toLocaleString('en-US',{style:'currency',currency:'USD'}); }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
 function ymd(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function normalizeDateOnly(d){ const nd=new Date(d); nd.setHours(0,0,0,0); return nd; }
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     render();
   } catch (e) {
     console.error('[home] carga fallida', e);
-    alert('No se pudieron cargar los datos.');
+    alert('Could not load data.');
     window.location.replace('/src/login.html');
   }
 });
@@ -233,7 +233,7 @@ function buildTopBars() {
       <div class="nb-balance-banner-inner">
         <div class="nb-balance-banner-text">
           <div id="bbTitle" class="nb-balance-banner-title">—</div>
-          <div id="bbMsg" class="nb-balance-banner-msg">Calculando proyección…</div>
+          <div id="bbMsg" class="nb-balance-banner-msg">Calculating projection…</div>
         </div>
       </div>
     `;
@@ -249,21 +249,21 @@ function buildTopBars() {
     main.insertBefore(bar, main.children[1]);
   }
   bar.innerHTML = `
-    <label for="viewModeSelect" class="nb-period-bar-label">Vista</label>
+    <label for="viewModeSelect" class="nb-period-bar-label">View</label>
     <select id="viewModeSelect" class="nb-period-bar-select">
-      <option value="SEMANAL">Semanal (resumen/proyección)</option>
-      <option value="DIARIA">Diaria (estado de cuenta)</option>
+      <option value="SEMANAL">Weekly (summary/projection)</option>
+      <option value="DIARIA">Daily (account statement)</option>
     </select>
-    <label for="periodSelect" class="nb-period-bar-label">Periodo</label>
+    <label for="periodSelect" class="nb-period-bar-label">Period</label>
     <select id="periodSelect" class="nb-period-bar-select">
-      <option value="SEMANA">Semana actual</option>
-      <option value="COMPARAR">Comparar con semana anterior</option>
-      <option value="1M">1 mes (semanas a futuro)</option>
-      <option value="3M">3 meses (semanas a futuro)</option>
-      <option value="6M">6 meses (semanas a futuro)</option>
-      <option value="HISTORICO">Histórico (últimas semanas)</option>
+      <option value="SEMANA">Current week</option>
+      <option value="COMPARAR">Compare with previous week</option>
+      <option value="1M">1 month (future weeks)</option>
+      <option value="3M">3 months (future weeks)</option>
+      <option value="6M">6 months (future weeks)</option>
+      <option value="HISTORICO">History (recent weeks)</option>
     </select>
-    <label for="historyWeeksSelect" class="nb-period-bar-label">Semanas</label>
+    <label for="historyWeeksSelect" class="nb-period-bar-label">Weeks</label>
     <select id="historyWeeksSelect" class="nb-period-bar-select">
       <option value="4">4</option>
       <option value="8">8</option>
@@ -271,9 +271,9 @@ function buildTopBars() {
       <option value="24">24</option>
       <option value="52">52</option>
     </select>
-    <button id="btnOpenReports" type="button" class="nb-period-bar-btn">Reportes</button>
-    <button id="btnPrintDashboard" type="button" class="nb-period-bar-btn">Imprimir</button>
-    <small class="nb-period-bar-hint">Usa el inicio de semana de Configuración.</small>
+    <button id="btnOpenReports" type="button" class="nb-period-bar-btn">Reports</button>
+    <button id="btnPrintDashboard" type="button" class="nb-period-bar-btn">Print</button>
+    <small class="nb-period-bar-hint">Uses week start from Settings.</small>
   `;
   bar.className = 'nb-period-bar';
   const viewSel = bar.querySelector('#viewModeSelect');
@@ -312,11 +312,11 @@ function buildTopBars() {
   }
   visor.innerHTML = `
     <div class="nb-visor-col">
-      <h3 class="nb-visor-col-title">Ahorros</h3>
+      <h3 class="nb-visor-col-title">Savings</h3>
       <div id="visorFondos" class="nb-visor-cards"></div>
     </div>
     <div class="nb-visor-col">
-      <h3 class="nb-visor-col-title">Inversiones</h3>
+      <h3 class="nb-visor-col-title">Investments</h3>
       <div id="visorInversiones" class="nb-visor-cards"></div>
     </div>
   `;
@@ -332,24 +332,24 @@ function ensureReportModal() {
     modal.innerHTML = `
       <div class="nb-report-modal-content">
         <div class="nb-report-modal-head">
-          <h2 class="resumen-title">📘 Generador de reportes</h2>
-          <button id="btnCloseReportModal" type="button" class="nb-period-bar-btn">Cerrar</button>
+          <h2 class="resumen-title">📘 Report generator</h2>
+          <button id="btnCloseReportModal" type="button" class="nb-period-bar-btn">Close</button>
         </div>
         <div class="nb-report-toolbar">
           <label class="nb-report-label">
-            Tipo
+            Type
             <select id="reportModeSelect" class="nb-period-bar-select">
-              <option value="MENSUAL">Mensual</option>
-              <option value="ANUAL">Anual</option>
-              <option value="RANGO">Por rango</option>
+              <option value="MENSUAL">Monthly</option>
+              <option value="ANUAL">Annual</option>
+              <option value="RANGO">By range</option>
             </select>
           </label>
           <label class="nb-report-label" id="reportMonthWrap">
-            Mes
+            Month
             <input id="reportMonthInput" class="nb-period-bar-select" type="month" />
           </label>
           <label class="nb-report-label" id="reportYearWrap">
-            Año
+            Year
             <input id="reportYearInput" class="nb-period-bar-select" type="number" min="2000" max="2100" />
           </label>
           <label class="nb-report-label" id="reportFromWrap">
@@ -360,9 +360,9 @@ function ensureReportModal() {
             Hasta
             <input id="reportToInput" class="nb-period-bar-select" type="date" />
           </label>
-          <button id="btnRunReport" type="button" class="nb-period-bar-btn">Generar</button>
+          <button id="btnRunReport" type="button" class="nb-period-bar-btn">Generate</button>
         </div>
-        <div id="reportGeneratorResult" class="detalle-items"><em>Generá un reporte para ver resultados.</em></div>
+        <div id="reportGeneratorResult" class="detalle-items"><em>Generate a report to see results.</em></div>
       </div>
     `;
     document.body.appendChild(modal);
@@ -431,7 +431,7 @@ function collectTransactionsForReport() {
       kind: 'INGRESO',
       date: d,
       amount: Number(x.monto) || 0,
-      category: x.fuente || x.categoria || 'Ingreso',
+      category: x.fuente || x.categoria || 'Income',
       flow: 'in',
     });
   });
@@ -442,7 +442,7 @@ function collectTransactionsForReport() {
       kind: 'GASTO',
       date: d,
       amount: Number(x.monto) || 0,
-      category: (typeof x.categoria === 'object' ? x.categoria?.nombre : x.categoria) || 'Sin categoría',
+      category: (typeof x.categoria === 'object' ? x.categoria?.nombre : x.categoria) || 'No category',
       flow: 'out',
     });
   });
@@ -456,7 +456,7 @@ function collectTransactionsForReport() {
         kind: 'AHORRO',
         date: d,
         amount: Number(m.monto ?? m.amount) || 0,
-        category: f.nombre || f.objetivo || 'Ahorro',
+        category: f.nombre || f.objetivo || 'Savings',
         flow: 'out',
       });
     });
@@ -470,7 +470,7 @@ function collectTransactionsForReport() {
         kind: 'DEUDA',
         date: dt,
         amount: Number(p.monto ?? p.amount) || 0,
-        category: d.title || d.nombre || 'Deuda',
+        category: d.title || d.nombre || 'Debt',
         flow: 'out',
       });
     });
@@ -506,7 +506,7 @@ function renderGeneratedReport() {
   if (!out) return;
   const range = reportRangeFromState();
   if (!range) {
-    out.innerHTML = '<em>Rango no válido. Revisá los campos del reporte.</em>';
+    out.innerHTML = '<em>Invalid range. Check report fields.</em>';
     return;
   }
   const tx = collectTransactionsForReport().filter((t) => t.date >= range.from && t.date <= range.to);
@@ -523,15 +523,15 @@ function renderGeneratedReport() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8)
     .map(([k, v]) => `<div class="item-detalle"><span>${esc(k)}</span><strong>${fmtMoney(v)}</strong></div>`)
-    .join('') || '<em>Sin egresos para este período.</em>';
+    .join('') || '<em>No outflows for this period.</em>';
 
   out.innerHTML = `
-    <div class="resumen-item"><span>Periodo</span><strong>${esc(range.from.toLocaleDateString())} - ${esc(range.to.toLocaleDateString())}</strong></div>
-    <div class="resumen-item"><span>Total ingresos</span><strong>${fmtMoney(inTotal)}</strong></div>
-    <div class="resumen-item"><span>Total egresos</span><strong>${fmtMoney(outTotal)}</strong></div>
-    <div class="resumen-item resumen-final"><span>Resultado neto</span><strong class="${netCls}">${fmtMoney(net)}</strong></div>
+    <div class="resumen-item"><span>Period</span><strong>${esc(range.from.toLocaleDateString())} - ${esc(range.to.toLocaleDateString())}</strong></div>
+    <div class="resumen-item"><span>Total income</span><strong>${fmtMoney(inTotal)}</strong></div>
+    <div class="resumen-item"><span>Total outflows</span><strong>${fmtMoney(outTotal)}</strong></div>
+    <div class="resumen-item resumen-final"><span>Net result</span><strong class="${netCls}">${fmtMoney(net)}</strong></div>
     <div class="detalle-items">
-      <strong style="display:block;margin-bottom:0.35rem;">En qué se gasta el dinero (top categorías)</strong>
+      <strong style="display:block;margin-bottom:0.35rem;">Where money is spent (top categories)</strong>
       ${top}
     </div>
   `;
@@ -604,7 +604,7 @@ function aporteItemsForWeek(fondos, start, end){
                       : [];
     const fijo = !!(f.fijo ?? f.isFixed);
     const freq = (f.frecuencia || f.frequency || '').toLowerCase();
-    const nombre = f.nombre || f.objetivo || 'Fondo';
+    const nombre = f.nombre || f.objetivo || 'Fund';
     const fechaBase = f.fechaCreacion || f.startDate || new Date();
     const aporteFijo = Number(f.aporteFijo ?? f.fixedAmount ?? f.montoFijo ?? 0) || 0;
 
@@ -656,7 +656,7 @@ function aporteItemsForWeek(fondos, start, end){
             fondoId: f.id,
             fecha: occ.toISOString(),
             monto: ov?.monto ?? baseAmount,
-            motivo: ov?.label || 'APORTE (proyectado)',
+            motivo: ov?.label || 'CONTRIBUTION (projected)',
             _type: 'aporte',
             _replicated: true,
             _dateKey: dateKey,
@@ -674,10 +674,10 @@ function aporteItemsForWeek(fondos, start, end){
 }
 
 /** Capital puesto al abrir la posición (no precio unitario). */
-function capitalInvertidoApertura(inv) {
+function capitalInvestedApertura(inv) {
   const m = inv.metricas;
-  if (m && typeof m.capitalInvertido === 'number' && !Number.isNaN(m.capitalInvertido)) {
-    return m.capitalInvertido;
+  if (m && typeof m.capitalInvested === 'number' && !Number.isNaN(m.capitalInvested)) {
+    return m.capitalInvested;
   }
   const c = Number(inv.cantidad) || 0;
   const pc = Number(inv.precioCompra) || 0;
@@ -694,16 +694,16 @@ function inversionItemsForWeek(inversiones, start, end) {
   const e = normalizeDateOnly(end);
 
   for (const inv of inversiones) {
-    const activo = inv.activo || inv.tipo || 'Inversión';
+    const activo = inv.activo || inv.tipo || 'Investment';
     const invId = inv.id;
 
     const planM = Number(inv.planAporteMonto);
     if (!planM || planM <= 0) continue;
-    const freq = (inv.planAporteFrecuencia || '').toLowerCase();
+    const freq = (inv.planAporteFrequency || '').toLowerCase();
     if (freq !== 'semanal' && freq !== 'mensual') continue;
-    const baseInicio = inv.planAporteInicio || inv.createdAt;
-    if (!baseInicio) continue;
-    const inicio = normalizeDateOnly(new Date(baseInicio));
+    const baseHome = inv.planAporteHome || inv.createdAt;
+    if (!baseHome) continue;
+    const inicio = normalizeDateOnly(new Date(baseHome));
 
     if (freq === 'semanal') {
       let occ = getFirstOccurrenceOnOrAfter(inicio, s, 'semanal');
@@ -730,7 +730,7 @@ function inversionItemsForWeek(inversiones, start, end) {
         occ = addWeeks(occ, 1);
       }
     } else {
-      let occ = normalizeDateOnly(new Date(baseInicio));
+      let occ = normalizeDateOnly(new Date(baseHome));
       while (occ < s) occ = addMonthsSameDaySafe(occ, 1);
       while (occ <= e) {
         const nd = normalizeDateOnly(occ);
@@ -775,7 +775,7 @@ function deudaItemsForRange(deudas, start, end){
                     : [];
 
     const frequency = (d.frequency || d.frecuencia || '').toLowerCase(); // semanal|bisemanal|mensual
-    const firstDue = d.firstDueDate || d.primerVencimiento || d.startDate || d.fechaInicio || d.createdAt;
+    const firstDue = d.firstDueDate || d.primerVencimiento || d.startDate || d.fechaHome || d.createdAt;
     const cuota = Number(d.installmentAmount ?? d.cuotaAmount ?? d.cuotaMonto ?? 0) || 0;
 
     // saldo pendiente: usar campo si existe; sino: principal - sum(pagos)
@@ -795,7 +795,7 @@ function deudaItemsForRange(deudas, start, end){
           monto: Number(p.monto ?? p.amount) || 0,
           _type: 'deuda',
           _replicated: false,
-          _fTitle: d.title || d.nombre || 'Deuda',
+          _fTitle: d.title || d.nombre || 'Debt',
         });
       }
     });
@@ -829,7 +829,7 @@ function deudaItemsForRange(deudas, start, end){
           _type: 'deuda',
           _replicated: true,
           _dateKey: dateKey,
-          _fTitle: d.title || d.nombre || 'Deuda',
+          _fTitle: d.title || d.nombre || 'Debt',
         });
         generadas++;
       }
@@ -963,11 +963,11 @@ function render() {
 
       const html = `
       <section class="resumen-box">
-        <h2 class="resumen-title">Día ${esc(day.toLocaleDateString())}</h2>
-        <div class="detalle-items">${rows || '<em>Sin movimientos.</em>'}</div>
-        <div class="resumen-item"><span>↩ Saldo anterior:</span><strong>${fmtMoney(carryFromPrevWeek)}</strong></div>
-        <div class="resumen-item"><span>Flujo del día:</span><strong>${fmtMoney(neto)}</strong></div>
-        <div class="resumen-item resumen-final"><span>Saldo cierre:</span><strong class="${finalCls}">${fmtMoney(final)}</strong></div>
+        <h2 class="resumen-title">Day ${esc(day.toLocaleDateString())}</h2>
+        <div class="detalle-items">${rows || '<em>No transactions.</em>'}</div>
+        <div class="resumen-item"><span>↩ Previous balance:</span><strong>${fmtMoney(carryFromPrevWeek)}</strong></div>
+        <div class="resumen-item"><span>Daily flow:</span><strong>${fmtMoney(neto)}</strong></div>
+        <div class="resumen-item resumen-final"><span>Closing balance:</span><strong class="${finalCls}">${fmtMoney(final)}</strong></div>
       </section>`;
       boxes.push(html);
       carryFromPrevWeek = final;
@@ -984,13 +984,13 @@ function render() {
       const html = `
       <section class="resumen-box">
         <h2 class="resumen-title">${esc(titulo)}</h2>
-        ${bloque('💰 Ingresos',           ingresos, 'ingresos',   vIngreso, lblIngreso)}
-        ${bloque('📉 Gastos',             gastos,   'gastos',     vGasto,   lblGasto)}
-        ${bloque('💳 Pagos de deudas',    deudas,   'deudas',     vDeuda,   lblDeuda)}
-        ${bloque('💧 Aportes a fondos',   ahorrosAportes, 'aportes', vAporte, lblAporte)}
-        ${bloque('📈 Inversiones',        inversionItems, 'inversiones', vInversionFlujo, lblInversionFlujo)}
+        ${bloque('💰 Income',           ingresos, 'ingresos',   vIngreso, lblIngreso)}
+        ${bloque('📉 Expenses',             gastos,   'gastos',     vGasto,   lblGasto)}
+        ${bloque('💳 Debt payments',    deudas,   'deudas',     vDeuda,   lblDeuda)}
+        ${bloque('💧 Fund contributions',   ahorrosAportes, 'aportes', vAporte, lblAporte)}
+        ${bloque('📈 Investments',        inversionItems, 'inversiones', vInversionFlujo, lblInversionFlujo)}
         <div class="resumen-item">
-          <span>↩ Balance semana anterior:</span><strong class="${carryCls}">${fmtMoney(carryFromPrevWeek)}</strong>
+          <span>↩ Previous week balance:</span><strong class="${carryCls}">${fmtMoney(carryFromPrevWeek)}</strong>
         </div>
         <div class="resumen-item resumen-final">
           <span>🧮 Balance:</span><strong class="${finalCls}">${fmtMoney(balanceFinal)}</strong>
@@ -1001,7 +1001,7 @@ function render() {
     });
   }
 
-  // Totales para el gráfico
+  // Totals para el gráfico
   const totals = weekFrames.reduce((acc, frame) => {
     acc.ingresos += frame.tot.ingresos;
     acc.gastos += frame.tot.gastos;
@@ -1042,22 +1042,22 @@ function renderReports(rangeStart, rangeEnd, ingresosAll, gastosAll, deudasAll, 
 
   const gastoPorCat = {};
   gastos.forEach((g) => {
-    const k = (typeof g.categoria === 'object' ? g.categoria?.nombre : g.categoria) || 'Sin categoría';
+    const k = (typeof g.categoria === 'object' ? g.categoria?.nombre : g.categoria) || 'No category';
     gastoPorCat[k] = (gastoPorCat[k] || 0) + (Number(vGasto(g)) || 0);
   });
   const topCats = Object.entries(gastoPorCat)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([k, v]) => `<div class="item-detalle"><span>${esc(k)}</span><strong>${fmtMoney(v)}</strong></div>`)
-    .join('') || '<em>Sin gastos en el período.</em>';
+    .join('') || '<em>No expenses in the period.</em>';
 
   host.innerHTML = `
-    <h2 class="resumen-title">📊 Reporte financiero (${esc(rangeStart.toLocaleDateString())} - ${esc(rangeEnd.toLocaleDateString())})</h2>
-    <div class="resumen-item"><span>Ingresos recibidos</span><strong>${fmtMoney(totalIngresos)}</strong></div>
-    <div class="resumen-item"><span>Salidas totales</span><strong>${fmtMoney(totalGastos)}</strong></div>
-    <div class="resumen-item resumen-final"><span>Resultado neto</span><strong class="${netoCls}">${fmtMoney(neto)}</strong></div>
+    <h2 class="resumen-title">📊 Financial report (${esc(rangeStart.toLocaleDateString())} - ${esc(rangeEnd.toLocaleDateString())})</h2>
+    <div class="resumen-item"><span>Income received</span><strong>${fmtMoney(totalIngresos)}</strong></div>
+    <div class="resumen-item"><span>Total outflows</span><strong>${fmtMoney(totalGastos)}</strong></div>
+    <div class="resumen-item resumen-final"><span>Net result</span><strong class="${netoCls}">${fmtMoney(neto)}</strong></div>
     <div class="detalle-items">
-      <strong style="display:block;margin-bottom:0.35rem;">Top gastos por categoría</strong>
+      <strong style="display:block;margin-bottom:0.35rem;">Top expenses by category</strong>
       ${topCats}
     </div>
   `;
@@ -1108,11 +1108,11 @@ function paintBalanceBanner(){
     banner.classList.toggle('is-positive', isPos);
     banner.classList.toggle('is-negative', !isPos);
   }
-  bbTitle.textContent = `Saldo proyectado (6 meses): ${fmtMoney(balanceAcum)}`;
+  bbTitle.textContent = `Projected balance (6 months): ${fmtMoney(balanceAcum)}`;
   bbTitle.style.color = '';
   bbMsg.textContent = anyNegative
-    ? `Alerta: la semana del ${anyNegative.start.toLocaleDateString()} al ${anyNegative.end.toLocaleDateString()} proyecta balance negativo.`
-    : 'No se detectan semanas negativas en los próximos 6 meses.';
+    ? `Alert: the week of ${anyNegative.start.toLocaleDateString()} to ${anyNegative.end.toLocaleDateString()} projects a negative balance.`
+    : 'No negative weeks detected in the next 6 months.';
 }
 
 // ===== Visor (fondos) =====
@@ -1130,32 +1130,32 @@ function paintVisor() {
         f.saldoConRendimiento != null && !Number.isNaN(Number(f.saldoConRendimiento))
           ? Number(f.saldoConRendimiento)
           : aportado;
-      const tieneTasa = f.tasaAnualPct != null && Number.isFinite(Number(f.tasaAnualPct));
+      const tieneTasa = f.tasaAnnualPct != null && Number.isFinite(Number(f.tasaAnnualPct));
       const pills = [];
       if (baseIni > 0) {
-        pills.push(`<span class="nb-visor-pill nb-visor-pill--base" title="Aporte inicial (base del fondo)">Base ${fmtMoney(baseIni)}</span>`);
+        pills.push(`<span class="nb-visor-pill nb-visor-pill--base" title="Initial contribution (fund base)">Base ${fmtMoney(baseIni)}</span>`);
       }
       if (otros > 0) {
-        pills.push(`<span class="nb-visor-pill nb-visor-pill--flow" title="Aportes que impactan el flujo">+ Aportes ${fmtMoney(otros)}</span>`);
+        pills.push(`<span class="nb-visor-pill nb-visor-pill--flow" title="Contributions that affect cash flow">+ Contributions ${fmtMoney(otros)}</span>`);
       }
       const pillsHtml = pills.length ? `<div class="nb-visor-fondo-pills">${pills.join('')}</div>` : '';
       const tasaHtml = tieneTasa
-        ? `<div class="nb-visor-fondo-tasa">${Number(f.tasaAnualPct).toFixed(2)}% a.a. · nominal ${fmtMoney(aportado)}</div>`
+        ? `<div class="nb-visor-fondo-tasa">${Number(f.tasaAnnualPct).toFixed(2)}% p.a. · nominal ${fmtMoney(aportado)}</div>`
         : '';
-      const saldoLbl = tieneTasa ? 'Total estimado' : 'Total fondo';
+      const saldoLbl = tieneTasa ? 'Estimated total' : 'Fund total';
       const detalle = `
         <div class="nb-visor-detail-row"><span>Meta</span><strong>${fmtMoney(Number(f.meta) || 0)}</strong></div>
-        <div class="nb-visor-detail-row"><span>Total aportado</span><strong>${fmtMoney(aportado)}</strong></div>
+        <div class="nb-visor-detail-row"><span>Total contributed</span><strong>${fmtMoney(aportado)}</strong></div>
         <div class="nb-visor-detail-row"><span>${esc(saldoLbl)}</span><strong>${fmtMoney(conRend)}</strong></div>
       `;
       return `<details class="nb-visor-fondo-card nb-visor-collapsible">
         <summary class="nb-visor-summary">
           <div class="nb-visor-fondo-head">
-            <span class="nb-visor-fondo-name">${esc(f.nombre || f.objetivo || 'Fondo')}</span>
-            <span class="nb-visor-fondo-meta">Meta ${fmtMoney(Number(f.meta) || 0)}</span>
+            <span class="nb-visor-fondo-name">${esc(f.nombre || f.objetivo || 'Fund')}</span>
+            <span class="nb-visor-fondo-meta">Goal ${fmtMoney(Number(f.meta) || 0)}</span>
           </div>
           <div class="nb-visor-fondo-total">${fmtMoney(conRend)}</div>
-          <div class="nb-visor-fondo-sublbl">${esc(saldoLbl)} · clic para ver detalle</div>
+          <div class="nb-visor-fondo-sublbl">${esc(saldoLbl)} · click to see details</div>
         </summary>
         <div class="nb-visor-detail">
           ${pillsHtml}
@@ -1163,22 +1163,22 @@ function paintVisor() {
           ${detalle}
         </div>
       </details>`;
-    }).join('') || '<p class="nb-visor-empty">Sin fondos</p>';
+    }).join('') || '<p class="nb-visor-empty">No funds</p>';
     fEl.innerHTML = visorCards;
   }
   if (iEl) {
     const invs = STATE.data.inversiones;
     if (!invs.length) {
-      iEl.innerHTML = '<p class="nb-visor-empty">Sin inversiones</p>';
+      iEl.innerHTML = '<p class="nb-visor-empty">No investments</p>';
     } else {
       let totalInv = 0;
       let totalVal = 0;
       invs.forEach((inv) => {
         const m = inv.metricas;
         const cap =
-          m && typeof m.capitalInvertido === 'number'
-            ? m.capitalInvertido
-            : capitalInvertidoApertura(inv);
+          m && typeof m.capitalInvested === 'number'
+            ? m.capitalInvested
+            : capitalInvestedApertura(inv);
         const val = m && typeof m.valorActual === 'number' ? m.valorActual : cap;
         totalInv += cap;
         totalVal += val;
@@ -1191,15 +1191,15 @@ function paintVisor() {
       const detalleInvs = invs
         .map((inv) => {
           const m = inv.metricas;
-          const cap = m && typeof m.capitalInvertido === 'number' ? m.capitalInvertido : capitalInvertidoApertura(inv);
+          const cap = m && typeof m.capitalInvested === 'number' ? m.capitalInvested : capitalInvestedApertura(inv);
           const val = m && typeof m.valorActual === 'number' ? m.valorActual : cap;
           const pnlItem = val - cap;
           const signItem = pnlItem >= 0 ? '+' : '';
           return `
             <div class="nb-visor-detail-item">
-              <div class="nb-visor-detail-title">${esc(inv.activo || inv.tipo || 'Inversión')}</div>
-              <div class="nb-visor-detail-row"><span>Invertido</span><strong>${fmtMoney(cap)}</strong></div>
-              <div class="nb-visor-detail-row"><span>Valor mercado</span><strong>${fmtMoney(val)}</strong></div>
+              <div class="nb-visor-detail-title">${esc(inv.activo || inv.tipo || 'Investment')}</div>
+              <div class="nb-visor-detail-row"><span>Invested</span><strong>${fmtMoney(cap)}</strong></div>
+              <div class="nb-visor-detail-row"><span>Market value</span><strong>${fmtMoney(val)}</strong></div>
               <div class="nb-visor-detail-row"><span>PnL</span><strong>${signItem}${fmtMoney(pnlItem)}</strong></div>
             </div>
           `;
@@ -1208,11 +1208,11 @@ function paintVisor() {
       iEl.innerHTML = `
         <details class="nb-visor-inv-card nb-visor-collapsible ${invCls}">
           <summary class="nb-visor-summary">
-            <div class="nb-visor-inv-label">Cartera agregada</div>
-            <div class="nb-visor-inv-row"><span>Invertido</span><strong>${fmtMoney(totalInv)}</strong></div>
-            <div class="nb-visor-inv-row"><span>Valor mercado</span><strong>${fmtMoney(totalVal)}</strong></div>
+            <div class="nb-visor-inv-label">Aggregated portfolio</div>
+            <div class="nb-visor-inv-row"><span>Invested</span><strong>${fmtMoney(totalInv)}</strong></div>
+            <div class="nb-visor-inv-row"><span>Market value</span><strong>${fmtMoney(totalVal)}</strong></div>
             <div class="nb-visor-inv-pnl">PnL ${sign}${fmtMoney(pnl)} <span class="nb-visor-inv-pct">(${pctStr})</span></div>
-            <div class="nb-visor-fondo-sublbl">Clic para ver detalle por inversión</div>
+            <div class="nb-visor-fondo-sublbl">Click to see investment details</div>
           </summary>
           <div class="nb-visor-detail">${detalleInvs}</div>
         </details>`;
@@ -1242,8 +1242,8 @@ function buildWeeksFor(period){
   return arr;
 }
 function weekTitle(start,end,period,idx){
-  const r=`Semana del ${start.toLocaleDateString()} al ${end.toLocaleDateString()}`;
-  if(period==='COMPARAR' && idx===1) return `${r} (anterior)`; if(idx===0) return `${r} (actual)`; return r;
+  const r=`Week of ${start.toLocaleDateString()} to ${end.toLocaleDateString()}`;
+  if(period==='COMPARAR' && idx===1) return `${r} (previous)`; if(idx===0) return `${r} (current)`; return r;
 }
 
 function buildDaysInRange(start, end) {
@@ -1397,7 +1397,7 @@ function lblIngreso(it){
     const ov = STATE.overrides.get(`ingresos:${it._originalId}:${it._dateKey}`);
     if (ov?.label) return ov.label;
   }
-  return it.fuente || it.categoria || 'Ingreso';
+  return it.fuente || it.categoria || 'Income';
 }
 function lblGasto(it){
   if (it._replicated && it._overrideLabel) return it._overrideLabel;
@@ -1405,29 +1405,29 @@ function lblGasto(it){
     const ov = STATE.overrides.get(`gastos:${it._originalId}:${it._dateKey}`);
     if (ov?.label) return ov.label;
   }
-  return it.descripcion || (typeof it.categoria==='object'? (it.categoria?.nombre||'Gasto') : (it.categoria||'Gasto'));
+  return it.descripcion || (typeof it.categoria==='object'? (it.categoria?.nombre||'Expense') : (it.categoria||'Expense'));
 }
 function lblDeuda(it){
   if (it._replicated && it._dateKey) {
     const ov = STATE.overrides.get(`deudas:${it.deudaId}:${it._dateKey}`);
-    if (ov?.label) return `Deuda (${ov.label})`;
+    if (ov?.label) return `Debt (${ov.label})`;
   }
-  return `Deuda: ${it._fTitle || 'Pago'}`;
+  return `Debt: ${it._fTitle || 'Payment'}`;
 }
 function lblAporte(it){
   if (it._replicated && it._dateKey) {
     const ov = STATE.overrides.get(`aportes:${it.fondoId}:${it._dateKey}`);
-    if (ov?.label) return `Fondo ${it._fondoNombre} (${ov.label})`;
+    if (ov?.label) return `Fund ${it._fondoNombre} (${ov.label})`;
   }
-  return `Fondo ${it._fondoNombre} (${it.motivo||'APORTE'})`;
+  return `Fund ${it._fondoNombre} (${it.motivo||'CONTRIBUTION'})`;
 }
 function lblInversionFlujo(it) {
   if (it._replicated && it._dateKey) {
     const ov = STATE.overrides.get(`inversiones:${it._originalId}:${it._dateKey}`);
     if (ov?.label) return `${it.activo} (${ov.label})`;
   }
-  if (it._type === 'plan') return `Plan aporte — ${it.activo}`;
-  return it.activo || 'Inversión';
+  if (it._type === 'plan') return `Planned contribution — ${it.activo}`;
+  return it.activo || 'Investment';
 }
 
 // ===== Bloque HTML reutilizable =====
@@ -1463,7 +1463,7 @@ function bloque(titulo, lista, tipo, valFn, labelFn){
           </div>`;
         }).join('')}
       </div>`
-    : `<div class="detalle-items"><em>No hay registros.</em></div>`;
+    : `<div class="detalle-items"><em>No records.</em></div>`;
 
   return `
     <div class="resumen-item"><span>${titulo}</span><strong>${fmtMoney(sumBy(lista,valFn))}</strong></div>
@@ -1471,7 +1471,7 @@ function bloque(titulo, lista, tipo, valFn, labelFn){
   `;
 }
 
-// Acciones (edit/eliminar)
+// Actions (edit/eliminar)
 function acciones(tipo, id, originalId, isRep, dateKey, item){
   if (tipo === 'aportes') {
     if (isRep) {
@@ -1494,7 +1494,7 @@ function acciones(tipo, id, originalId, isRep, dateKey, item){
         <button class="btn-del-occ"  data-tipo="deudas" data-orig="${originalId}" data-date="${dateKey}">❌</button>
       `;
     }
-    return `<span class="muted">Pago real</span>`;
+    return `<span class="muted">Real payment</span>`;
   }
 
   if (tipo === 'inversiones') {
@@ -1576,10 +1576,10 @@ const nbDonutCenterPlugin = {
     if (sum <= 0) {
       ctx.font = '600 12px Inter, system-ui, sans-serif';
       ctx.fillStyle = '#94a3b8';
-      ctx.fillText('Sin movimientos', x, y - 7);
+      ctx.fillText('No transactions', x, y - 7);
       ctx.font = '500 11px Inter, system-ui, sans-serif';
       ctx.fillStyle = '#cbd5e1';
-      ctx.fillText('en este período', x, y + 9);
+      ctx.fillText('in this period', x, y + 9);
       ctx.restore();
       return;
     }
@@ -1587,7 +1587,7 @@ const nbDonutCenterPlugin = {
     const valueSize = Math.max(14, Math.min(20, Math.round(innerRadius * 0.36)));
     ctx.font = `600 ${labelSize}px Inter, system-ui, sans-serif`;
     ctx.fillStyle = '#64748b';
-    ctx.fillText('Suma categorías', x, y - innerRadius * 0.15);
+    ctx.fillText('Category total', x, y - innerRadius * 0.15);
     ctx.font = `800 ${valueSize}px Inter, system-ui, sans-serif`;
     ctx.fillStyle = '#0f172a';
     ctx.letterSpacing = '-0.02em';
@@ -1608,7 +1608,7 @@ function renderChart(tot) {
     type: 'doughnut',
     plugins: [nbDonutCenterPlugin],
     data: {
-      labels: ['Ingresos', 'Gastos', 'Deudas', 'Ahorros (aportes)', 'Inversiones'],
+      labels: ['Income', 'Expenses', 'Debts', 'Savings (contributions)', 'Investments'],
       datasets: [{
         data: [tot.ingresos, tot.gastos, tot.deudas, tot.ahorros, tot.inversiones],
         backgroundColor: fills,
@@ -1704,9 +1704,9 @@ document.body.addEventListener('click', async (e) => {
   if (e.target.classList.contains('btn-eliminar-item')) {
     const tipo = e.target.dataset.tipo; // ingresos | gastos | inversiones
     const id = e.target.dataset.id;
-    if (confirm('¿Eliminar este registro?')) {
+    if (confirm('Delete this record?')) {
       try { await axios.delete(`/${tipo}/${id}`); location.reload(); }
-      catch { alert('Error al eliminar.'); }
+      catch { alert('Error deleting.'); }
     }
   }
 
@@ -1719,8 +1719,8 @@ document.body.addEventListener('click', async (e) => {
     const desc = txt.split(':')[0].trim();
 
     document.getElementById('editId').value = id;
-    document.getElementById('editTipo').value = tipo;
-    document.getElementById('editFuente').value = desc;
+    document.getElementById('editType').value = tipo;
+    document.getElementById('editSource').value = desc;
     document.getElementById('editMonto').value = m ? Number(m[1].replace(/\./g,'').replace(',','.')) : '';
     document.getElementById('editFecha').value = new Date().toISOString().split('T')[0];
 
@@ -1732,7 +1732,7 @@ document.body.addEventListener('click', async (e) => {
     const tipo = e.target.dataset.tipo;   // ingresos | gastos | aportes | deudas
     const orig = e.target.dataset.orig;
     const date = e.target.dataset.date;   // YYYY-MM-DD
-    if (!confirm('¿Ocultar solo esta ocurrencia en esta semana?')) return;
+    if (!confirm('Hide only this occurrence this week?')) return;
     STATE.skips.add(`${tipo}:${orig}:${date}`);
     persistUiState();
     render();
@@ -1741,9 +1741,9 @@ document.body.addEventListener('click', async (e) => {
     const tipo = e.target.dataset.tipo;
     const orig = e.target.dataset.orig;
     const date = e.target.dataset.date;
-    const montoStr = prompt('Nuevo monto para esta semana:'); if (montoStr === null) return;
-    const monto = Number(montoStr); if (Number.isNaN(monto)) return alert('Monto inválido');
-    const label = prompt('Etiqueta/Descripción (opcional):') || '';
+    const montoStr = prompt('New amount for this week:'); if (montoStr === null) return;
+    const monto = Number(montoStr); if (Number.isNaN(monto)) return alert('Invalid amount');
+    const label = prompt('Etiqueta/Description (optional):') || '';
     STATE.overrides.set(`${tipo}:${orig}:${date}`, { monto, label });
     persistUiState();
     render();
@@ -1792,29 +1792,29 @@ document.body.addEventListener('click', async (e) => {
   if (e.target.classList.contains('btn-del-aporte')) {
     const fondoId = e.target.dataset.fondo;
     const movId = e.target.dataset.mov;
-    if (confirm('¿Eliminar este aporte del fondo?')) {
+    if (confirm('Delete this fund contribution?')) {
       try { await axios.delete(`/ahorros/${fondoId}/movimientos/${movId}`); location.reload(); }
-      catch { alert('No se pudo eliminar el aporte.'); }
+      catch { alert('Could not delete contribution.'); }
     }
   }
   if (e.target.classList.contains('btn-edit-aporte')) {
     const fondoId = e.target.dataset.fondo;
     const movId = e.target.dataset.mov;
-    const nuevoMontoStr = prompt('Nuevo monto del aporte:');
+    const nuevoMontoStr = prompt('New contribution amount:');
     if (!nuevoMontoStr) return;
     const nuevoMonto = Number(nuevoMontoStr);
-    if (isNaN(nuevoMonto)) return alert('Monto inválido');
+    if (isNaN(nuevoMonto)) return alert('Invalid amount');
     try { await axios.patch(`/ahorros/${fondoId}/movimientos/${movId}`, { monto: nuevoMonto }); location.reload(); }
-    catch { alert('No se pudo actualizar el aporte.'); }
+    catch { alert('Could not update contribution.'); }
   }
 });
 
-// Guardar edición real desde modal
+// Save edición real desde modal
 document.getElementById('formEditar')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = document.getElementById('editId').value;
-  const tipo = document.getElementById('editTipo').value;
-  const fuente = document.getElementById('editFuente').value;
+  const tipo = document.getElementById('editType').value;
+  const fuente = document.getElementById('editSource').value;
   const monto = Number(document.getElementById('editMonto').value);
   const fecha = document.getElementById('editFecha').value;
 
@@ -1827,11 +1827,11 @@ document.getElementById('formEditar')?.addEventListener('submit', async (e) => {
     document.getElementById('modalEditar').style.display = 'none';
     location.reload();
   } catch {
-    alert('Error al guardar cambios.');
+    alert('Error saving changes.');
   }
 });
 
-document.getElementById('btnCancelar')?.addEventListener('click', () => {
+document.getElementById('btnCancel')?.addEventListener('click', () => {
   document.getElementById('modalEditar').style.display = 'none';
 });
 

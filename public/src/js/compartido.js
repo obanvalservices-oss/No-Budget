@@ -30,7 +30,7 @@
         });
         localStorage.setItem('ASOC_ID', res.id);
         outInv.textContent = JSON.stringify(res, null, 2);
-        alert('Invitación enviada. ASOC_ID guardado.');
+        alert('Invitation sent. ASOC_ID saved.');
       } catch (err) {
         outInv.textContent = err.message || String(err);
         alert('Error: ' + (err.message || ''));
@@ -39,7 +39,7 @@
 
     limpiarBtn?.addEventListener('click', () => {
       localStorage.removeItem('ASOC_ID');
-      alert('ASOC_ID eliminado.');
+      alert('ASOC_ID removed.');
     });
 
     // ====== ACEPTAR ======
@@ -49,7 +49,7 @@
       e.preventDefault();
       const fd = new FormData(formAcc);
       const id = (fd.get('asocId') || localStorage.getItem('ASOC_ID') || '').toString();
-      if (!id) return alert('Falta ASOC_ID');
+      if (!id) return alert('ASOC_ID is missing');
 
       try {
         const res = await window.$api(`/compartido/${id}/aceptar`, {
@@ -57,7 +57,7 @@
           body: { aliasParaPartner: fd.get('aliasParaPartner') || null }
         });
         outAcc.textContent = JSON.stringify(res, null, 2);
-        alert('Invitación aceptada.');
+        alert('Invitation accepted.');
       } catch (err) {
         outAcc.textContent = err.message || String(err);
         alert('Error: ' + (err.message || ''));
@@ -66,13 +66,13 @@
 
     // ====== PERMISOS ======
     const asocPerms = q('#asocPerms');
-    const btnCargarPerms = q('#btnCargarPerms');
-    const btnGuardarPerms = q('#btnGuardarPerms');
+    const btnLoadPerms = q('#btnLoadPerms');
+    const btnSavePerms = q('#btnSavePerms');
     const outPerms = q('#out-perms');
 
-    btnCargarPerms?.addEventListener('click', async () => {
+    btnLoadPerms?.addEventListener('click', async () => {
       const id = (asocPerms.value || localStorage.getItem('ASOC_ID') || '').toString();
-      if (!id) return alert('Falta ASOC_ID');
+      if (!id) return alert('ASOC_ID is missing');
       try {
         const perms = await window.$api(`/compartido/${id}/permisos`, { method: 'GET' });
         const map = new Map(perms.map(p => [p.modulo, p.visibilidad]));
@@ -87,9 +87,9 @@
       }
     });
 
-    btnGuardarPerms?.addEventListener('click', async () => {
+    btnSavePerms?.addEventListener('click', async () => {
       const id = (asocPerms.value || localStorage.getItem('ASOC_ID') || '').toString();
-      if (!id) return alert('Falta ASOC_ID');
+      if (!id) return alert('ASOC_ID is missing');
       try {
         const permisos = [
           { modulo: 'INGRESOS', visibilidad: q('#perm-ingresos').value },
@@ -102,7 +102,7 @@
           body: { permisos }
         });
         outPerms.textContent = JSON.stringify(res, null, 2);
-        alert('Permisos guardados.');
+        alert('Permissions guardados.');
       } catch (err) {
         outPerms.textContent = err.message || String(err);
         alert('Error: ' + (err.message || ''));
@@ -116,7 +116,7 @@
       e.preventDefault();
       const fd = new FormData(formMov);
       const id = (fd.get('asocId') || localStorage.getItem('ASOC_ID') || '').toString();
-      if (!id) return alert('Falta ASOC_ID');
+      if (!id) return alert('ASOC_ID is missing');
 
       try {
         const body = {
@@ -127,7 +127,7 @@
         };
         const res = await window.$api(`/compartido/${id}/movimientos`, { method: 'POST', body });
         outMov.textContent = JSON.stringify(res, null, 2);
-        alert('Movimiento creado.');
+        alert('Transaction created.');
       } catch (err) {
         outMov.textContent = err.message || String(err);
         alert('Error: ' + (err.message || ''));
@@ -154,7 +154,7 @@
           const c2 = document.createElement('div'); c2.textContent = o.modulo;
           const c3 = document.createElement('div'); c3.textContent = String(o.sourceUserId);
           const c4 = document.createElement('div');
-          const btn = document.createElement('button'); btn.className = 'secondary'; btn.textContent = 'Mostrar';
+          const btn = document.createElement('button'); btn.className = 'secondary'; btn.textContent = 'Show';
           btn.onclick = async () => {
             try {
               await window.$api(`/compartido/${id}/ocultos`, {
@@ -194,7 +194,7 @@
           const c2 = document.createElement('div'); c2.textContent = modulo;
           const c3 = document.createElement('div'); c3.className = 'monto'; c3.textContent = Number(monto || 0).toFixed(2);
           const c4 = document.createElement('div');
-          const btn = document.createElement('button'); btn.className = 'secondary'; btn.textContent = 'Ocultar';
+          const btn = document.createElement('button'); btn.className = 'secondary'; btn.textContent = 'Hide';
           btn.onclick = async () => {
             try {
               await window.$api(`/compartido/${id}/ocultos`, {
@@ -219,7 +219,7 @@
 
     btnDash?.addEventListener('click', async () => {
       const id = (asocDash.value || localStorage.getItem('ASOC_ID') || '').toString();
-      if (!id) return alert('Falta ASOC_ID');
+      if (!id) return alert('ASOC_ID is missing');
       await cargarDashboard(id);
     });
 

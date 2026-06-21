@@ -6,7 +6,7 @@ export class CreateInversionDto {
   @IsString() categoria: string;
 
   /** Capital en moneda de la cotización → acciones = capital / precio mercado al alta (con caché diaria). */
-  @IsOptional() @IsNumber() capitalInvertido?: number;
+  @IsOptional() @IsNumber() capitalInvested?: number;
 
   @IsOptional() @IsNumber() cantidad?: number;
   @IsOptional() @IsNumber() precioCompra?: number;
@@ -18,10 +18,10 @@ export class CreateInversionDto {
 
   /** Solo planificación; no altera la posición hasta aportes ejecutados (registro futuro). */
   @IsOptional() @IsNumber() planAporteMonto?: number;
-  @IsOptional() @IsString() planAporteFrecuencia?: string;
+  @IsOptional() @IsString() planAporteFrequency?: string;
   /** Fecha desde la que aplica el plan (YYYY-MM-DD). */
-  @IsOptional() @IsDateString() planAporteInicio?: string;
+  @IsOptional() @IsDateString() planAporteHome?: string;
 
-  /** Si no se envía, el servidor asigna o crea "Cartera principal". */
+  /** Si no se envía, el servidor asigna o crea "Main portfolio". */
   @IsOptional() @IsInt() fondoId?: number;
 }

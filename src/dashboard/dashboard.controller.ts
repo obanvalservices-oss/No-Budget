@@ -20,7 +20,7 @@ export class DashboardController {
     @Query('to') to?: string,
   ) {
     if ((from && !to) || (!from && to)) {
-      throw new BadRequestException('Debe enviar ambos: from y to, o ninguno.');
+      throw new BadRequestException('Send both from and to, or neither.');
     }
 
     return this.dashboard.getWeekly(req.user.id, { period, from, to });

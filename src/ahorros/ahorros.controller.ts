@@ -42,7 +42,7 @@ export class AhorrosController {
     return this.ahorros.remove(req.user.id, id);
   }
 
-  // Movimientos
+  // Transactions
   @Post(':id/movimientos')
   addMovimiento(
     @Req() req,
@@ -50,7 +50,7 @@ export class AhorrosController {
     @Body() dto: { fecha: string; monto: number; motivo?: string },
   ) {
     if (!dto?.fecha || typeof dto?.monto !== 'number') {
-      throw new BadRequestException('Campos requeridos: fecha, monto');
+      throw new BadRequestException('Required fields: date, amount');
     }
     return this.ahorros.addMovimiento(req.user.id, Number(ahorroId), {
       fecha: new Date(dto.fecha),

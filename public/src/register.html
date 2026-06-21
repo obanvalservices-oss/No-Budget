@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0f1419" />
-  <title>Registro — No Budget</title>
+  <title>Sign up — No Budget</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -14,50 +14,50 @@
 <body class="dashboard-body module-home nb-public">
   <header class="header">
     <div class="header-brand">
-      <a href="index.html" class="brand-mark" aria-label="No Budget — Inicio">
+      <a href="index.html" class="brand-mark" aria-label="No Budget — Home">
         <img class="brand-logo" src="/assets/logo_budget.png" alt="" width="32" height="32" decoding="async" />
         <span class="brand-text">No Budget</span>
       </a>
     </div>
-    <nav class="menu" aria-label="Cuenta">
+    <nav class="menu" aria-label="Account">
       <ul>
-        <li><a href="index.html" class="nav-link" data-nav="home">Inicio</a></li>
-        <li><a href="login.html" class="nav-link" data-nav="login">Iniciar sesión</a></li>
+        <li><a href="index.html" class="nav-link" data-nav="home">Home</a></li>
+        <li><a href="login.html" class="nav-link" data-nav="login">Log in</a></li>
       </ul>
     </nav>
   </header>
 
   <main class="nb-auth-main">
     <div class="auth-card">
-      <h1>Crear cuenta</h1>
-      <p class="auth-lead">Completá los datos para empezar a organizar tus finanzas.</p>
+      <h1>Create account</h1>
+      <p class="auth-lead">Fill in your details to start organizing your finances.</p>
       <form id="registerForm">
-        <label for="nombre">Nombre completo</label>
+        <label for="nombre">Full name</label>
         <input type="text" id="nombre" name="nombre" required autocomplete="name" />
 
-        <label for="email">Correo electrónico</label>
+        <label for="email">Email</label>
         <input type="email" id="email" name="email" required autocomplete="email" />
 
-        <label for="password">Contraseña</label>
+        <label for="password">Password</label>
         <input type="password" id="password" name="password" required autocomplete="new-password" />
 
-        <label for="confirm-password">Confirmar contraseña</label>
+        <label for="confirm-password">Confirm password</label>
         <input type="password" id="confirm-password" name="confirm-password" required autocomplete="new-password" />
 
         <label class="nb-terms">
           <input type="checkbox" required />
-          <span>Acepto los <a href="terminos.html" target="_blank" rel="noopener noreferrer">términos y condiciones</a></span>
+          <span>I accept the <a href="terminos.html" target="_blank" rel="noopener noreferrer">terms and conditions</a></span>
         </label>
 
-        <button type="submit">Registrarme</button>
+        <button type="submit">Sign up</button>
       </form>
 
-      <p class="switch-auth">¿Ya tenés cuenta? <a href="login.html">Iniciá sesión</a></p>
+      <p class="switch-auth">Already have an account? <a href="login.html">Log in</a></p>
     </div>
   </main>
 
   <footer class="footer">
-    <p>&copy; 2026 No Budget · Finanzas personales</p>
+    <p>&copy; 2026 No Budget · Personal finance</p>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/src/js/auth.js"></script>

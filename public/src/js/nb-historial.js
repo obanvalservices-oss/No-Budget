@@ -12,8 +12,8 @@
    * @param {'edit'|'delete'} kind
    * @param {string} extraAttrs ej: `data-id="1" class="nb-act-ingreso-edit"`
    */
-  w.nbHistorialIconBtn = function nbHistorialIconBtn(kind, extraAttrs) {
-    const label = kind === 'edit' ? 'Editar' : 'Eliminar';
+  w.nbHistoryIconBtn = function nbHistoryIconBtn(kind, extraAttrs) {
+    const label = kind === 'edit' ? 'Edit' : 'Delete';
     const svg = kind === 'edit' ? EDIT_SVG : TRASH_SVG;
     const cls =
       kind === 'edit' ? 'nb-icon-btn nb-icon-btn--edit' : 'nb-icon-btn nb-icon-btn--delete';
@@ -21,14 +21,14 @@
     return `<button type="button" class="${cls}"${attrs} aria-label="${label}">${svg}</button>`;
   };
 
-  w.nbHistorialActions = function nbHistorialActions(editAttrs, deleteAttrs) {
-    return `<div class="nb-historial-actions">${w.nbHistorialIconBtn('edit', editAttrs)}${w.nbHistorialIconBtn('delete', deleteAttrs)}</div>`;
+  w.nbHistoryActions = function nbHistoryActions(editAttrs, deleteAttrs) {
+    return `<div class="nb-historial-actions">${w.nbHistoryIconBtn('edit', editAttrs)}${w.nbHistoryIconBtn('delete', deleteAttrs)}</div>`;
   };
 
   /** Par editar + eliminar con data-entity / data-action / data-id (delegación de eventos). */
-  w.nbHistorialPair = function nbHistorialPair(entity, id) {
+  w.nbHistoryPair = function nbHistoryPair(entity, id) {
     const sid = String(id == null ? '' : id);
-    return w.nbHistorialActions(
+    return w.nbHistoryActions(
       `data-entity="${entity}" data-action="edit" data-id="${sid}"`,
       `data-entity="${entity}" data-action="delete" data-id="${sid}"`,
     );

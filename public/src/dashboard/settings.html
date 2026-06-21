@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0f1419" />
-  <title>Configuración | No Budget</title>
+  <title>Settings — No Budget</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -20,26 +20,27 @@
         <span class="brand-text">No Budget</span>
       </a>
     </div>
-    <nav class="menu" aria-label="Módulos">
+    <nav class="menu" aria-label="Modules">
       <ul>
         <li><a href="home.html" class="nav-link" data-nav="home">Dashboard</a></li>
-        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Ingresos</a></li>
-        <li><a href="gastos.html" class="nav-link" data-nav="gastos">Gastos</a></li>
-        <li><a href="deudas.html" class="nav-link" data-nav="deudas">Deudas</a></li>
-        <li><a href="ahorros.html" class="nav-link" data-nav="ahorros">Ahorros</a></li>
-        <li><a href="inversiones.html" class="nav-link" data-nav="inversiones">Inversiones</a></li>
-        <li><a href="compartido.html" class="nav-link" data-nav="compartido">Compartido</a></li>
-        <li><a href="settings.html" class="nav-link active" data-nav="settings">Configuración</a></li>
+        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Income</a></li>
+        <li><a href="gastos.html" class="nav-link" data-nav="gastos">Expenses</a></li>
+        <li><a href="deudas.html" class="nav-link" data-nav="deudas">Debts</a></li>
+        <li><a href="ahorros.html" class="nav-link" data-nav="ahorros">Savings</a></li>
+        <li><a href="inversiones.html" class="nav-link" data-nav="inversiones">Investments</a></li>
+        <li><a href="compartido.html" class="nav-link" data-nav="compartido">Shared</a></li>
+        <li><a href="settings.html" class="nav-link active" data-nav="settings">Settings</a></li>
+        <li><button type="button" class="btn-logout" data-action="logout" aria-label="Log out">Log out</button></li>
       </ul>
     </nav>
   </header>
 
   <main class="config-container">
-    <h2 class="nb-section-title">Configuración de la cuenta</h2>
+    <h2 class="nb-section-title">Account settings</h2>
 
     <!-- Estado actual visible -->
     <section class="config-box" id="estadoActualBox">
-      <h3>📌 Estado actual</h3>
+      <h3>📌 Current status</h3>
       <div id="estadoActual" class="estado-actual">
         <!-- Se rellena en settings.js -->
       </div>
@@ -47,38 +48,38 @@
 
     <!-- Preferencias de semana -->
     <section class="config-box">
-      <h3>📅 Preferencias de semana</h3>
+      <h3>📅 Week preferences</h3>
       <form id="formSemana">
-        <label for="weekStartDay">Día de inicio:</label>
+        <label for="weekStartDay">Start day:</label>
         <select id="weekStartDay" name="weekStartDay">
-          <option value="0">Domingo</option>
-          <option value="1">Lunes</option>
-          <option value="2">Martes</option>
-          <option value="3">Miércoles</option>
-          <option value="4">Jueves</option>
-          <option value="5">Viernes</option>
-          <option value="6">Sábado</option>
+          <option value="0">Sunday</option>
+          <option value="1">Monday</option>
+          <option value="2">Tuesday</option>
+          <option value="3">Wednesday</option>
+          <option value="4">Thursday</option>
+          <option value="5">Friday</option>
+          <option value="6">Saturday</option>
         </select>
 
-        <label for="weekEndDay">Día de fin:</label>
+        <label for="weekEndDay">End day:</label>
         <select id="weekEndDay" name="weekEndDay">
-          <option value="0">Domingo</option>
-          <option value="1">Lunes</option>
-          <option value="2">Martes</option>
-          <option value="3">Miércoles</option>
-          <option value="4">Jueves</option>
-          <option value="5">Viernes</option>
-          <option value="6">Sábado</option>
+          <option value="0">Sunday</option>
+          <option value="1">Monday</option>
+          <option value="2">Tuesday</option>
+          <option value="3">Wednesday</option>
+          <option value="4">Thursday</option>
+          <option value="5">Friday</option>
+          <option value="6">Saturday</option>
         </select>
-        <button type="submit">Guardar</button>
+        <button type="submit">Save</button>
       </form>
     </section>
 
     <!-- Preferencias generales -->
     <section class="config-box">
-      <h3>🌍 Preferencias generales</h3>
+      <h3>🌍 General preferences</h3>
       <form id="formGeneral">
-        <label for="currency">Moneda:</label>
+        <label for="currency">Currency:</label>
         <select id="currency" name="currency">
           <option value="USD">USD ($)</option>
           <option value="EUR">EUR (€)</option>
@@ -89,35 +90,35 @@
           <option value="PEN">PEN (S/)</option>
         </select>
 
-        <label for="timezone">Zona horaria:</label>
+        <label for="timezone">Time zone:</label>
         <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
           <select id="timezone" name="timezone"></select>
-          <button type="button" id="btnDetectarTZ" title="Detectar automáticamente">Detectar</button>
+          <button type="button" id="btnDetectTZ" title="Auto-detect">Detect</button>
         </div>
 
         <label style="margin-top:.75rem;">
           <input type="checkbox" id="notifications" />
-          Recibir notificaciones
+          Receive notifications
         </label>
 
-        <button type="submit">Guardar</button>
+        <button type="submit">Save</button>
       </form>
       <small id="tzHint" style="color:#666;display:block;margin-top:.5rem;"></small>
     </section>
 
     <!-- Seguridad -->
     <section class="config-box">
-      <h3>🔒 Seguridad</h3>
+      <h3>🔒 Security</h3>
       <form id="formPassword">
-        <label for="currentPassword">Contraseña actual:</label>
+        <label for="currentPassword">Password actual:</label>
         <input type="password" id="currentPassword" required />
 
-        <label for="newPassword">Nueva contraseña:</label>
+        <label for="newPassword">New password:</label>
         <input type="password" id="newPassword" required minlength="6" />
 
-        <button type="submit">Actualizar contraseña</button>
+        <button type="submit">Update password</button>
       </form>
-      <small style="color:#666;display:block;margin-top:.5rem;">La contraseña debe tener al menos 6 caracteres.</small>
+      <small style="color:#666;display:block;margin-top:.5rem;">Password must be at least 6 characters.</small>
     </section>
   </main>
 

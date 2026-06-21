@@ -43,7 +43,7 @@ export class SettingsController {
   ) {
     if (!dto?.currentPassword || !dto?.newPassword) {
       throw new BadRequestException(
-        'Campos requeridos: currentPassword, newPassword',
+        'Required fields: currentPassword, newPassword',
       );
     }
     await this.settings.changePassword(

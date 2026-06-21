@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="theme-color" content="#0f1419" />
-  <title>Compartido - No Budget</title>
+  <title>Shared ? No Budget</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -14,58 +14,59 @@
 <body class="dashboard-body module-compartido">
   <header class="header">
     <div class="header-brand">
-      <a href="home.html" class="brand-mark" aria-label="No Budget — Dashboard">
+      <a href="home.html" class="brand-mark" aria-label="No Budget ��� Dashboard">
         <img class="brand-logo" src="/assets/logo_budget.png" alt="" width="32" height="32" decoding="async" />
         <span class="brand-text">No Budget</span>
       </a>
     </div>
-    <nav class="menu" aria-label="Módulos">
+    <nav class="menu" aria-label="Modules">
       <ul>
         <li><a href="home.html" class="nav-link" data-nav="home">Dashboard</a></li>
-        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Ingresos</a></li>
-        <li><a href="gastos.html" class="nav-link" data-nav="gastos">Gastos</a></li>
-        <li><a href="deudas.html" class="nav-link" data-nav="deudas">Deudas</a></li>
-        <li><a href="ahorros.html" class="nav-link" data-nav="ahorros">Ahorros</a></li>
-        <li><a href="inversiones.html" class="nav-link" data-nav="inversiones">Inversiones</a></li>
-        <li><a href="compartido.html" class="nav-link active" data-nav="compartido">Compartido</a></li>
-        <li><a href="settings.html" class="nav-link" data-nav="settings">Configuración</a></li>
+        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Income</a></li>
+        <li><a href="gastos.html" class="nav-link" data-nav="gastos">Expenses</a></li>
+        <li><a href="deudas.html" class="nav-link" data-nav="deudas">Debts</a></li>
+        <li><a href="ahorros.html" class="nav-link" data-nav="ahorros">Savings</a></li>
+        <li><a href="inversiones.html" class="nav-link" data-nav="inversiones">Investments</a></li>
+        <li><a href="compartido.html" class="nav-link active" data-nav="compartido">Shared</a></li>
+        <li><a href="settings.html" class="nav-link" data-nav="settings">Settings</a></li>
+        <li><button type="button" class="btn-logout" data-action="logout" aria-label="Log out">Log out</button></li>
       </ul>
     </nav>
   </header>
 
   <main class="container">
-    <h1 class="h1 nb-section-title">Compartido <span class="badge">beta</span></h1>
-    <p class="sub">Invita, acepta y administra permisos/ocultos. Visualiza el dashboard combinado.</p>
+    <h1 class="h1 nb-section-title">Shared <span class="badge">beta</span></h1>
+    <p class="sub">Invite, accept, and manage permissions/hidden items. View the combined dashboard.</p>
 
     <section class="grid">
       <!-- INVITAR -->
       <div class="card">
-        <h2 class="nb-section-title">Invitar usuario</h2>
+        <h2 class="nb-section-title">Invite user</h2>
         <form id="form-invitar">
-          <label>Correo</label>
+          <label>Email</label>
           <input name="partnerEmail" type="email" required />
-          <label>Alias local (opcional)</label>
+          <label>Local alias (optional)</label>
           <input name="partnerDisplayName" type="text" />
-          <label>Parentesco</label>
+          <label>Relationship</label>
           <select name="relacion" required>
-            <option value="PAREJA">Pareja</option>
-            <option value="AMIGO">Amigo</option>
-            <option value="SOCIO">Socio</option>
-            <option value="FAMILIAR">Familiar</option>
-            <option value="OTRO">Otro</option>
+            <option value="PAREJA">Partner</option>
+            <option value="AMIGO">Friend</option>
+            <option value="SOCIO">Business partner</option>
+            <option value="FAMILIAR">Family member</option>
+            <option value="OTRO">Other</option>
           </select>
 
-          <h4 style="margin-top:12px">Permisos iniciales</h4>
+          <h4 style="margin-top:12px">Initial permissions</h4>
           <div class="grid grid-2">
-            <div><label>Ingresos</label><select data-mod="INGRESOS" class="vis"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
-            <div><label>Gastos</label><select data-mod="GASTOS" class="vis"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
-            <div><label>Ahorros</label><select data-mod="AHORROS" class="vis"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
-            <div><label>Inversiones</label><select data-mod="INVERSIONES" class="vis"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
+            <div><label>Income</label><select data-mod="INGRESOS" class="vis"><option value="TOTAL">Total</option><option value="PARCIAL">Partial</option><option value="NADA">None</option></select></div>
+            <div><label>Expenses</label><select data-mod="GASTOS" class="vis"><option value="TOTAL">Total</option><option value="PARCIAL">Partial</option><option value="NADA">None</option></select></div>
+            <div><label>Savings</label><select data-mod="AHORROS" class="vis"><option value="TOTAL">Total</option><option value="PARCIAL">Partial</option><option value="NADA">None</option></select></div>
+            <div><label>Investments</label><select data-mod="INVERSIONES" class="vis"><option value="TOTAL">Total</option><option value="PARCIAL">Partial</option><option value="NADA">None</option></select></div>
           </div>
 
           <div class="actions">
-            <button type="submit">Enviar invitación</button>
-            <button class="secondary" type="button" id="limpiarAsoc">Limpiar ASOC_ID</button>
+            <button type="submit">Send invitation</button>
+            <button class="secondary" type="button" id="limpiarAsoc">Clear ASOC_ID</button>
           </div>
           <pre id="out-invitar" class="mono out"></pre>
         </form>
@@ -73,79 +74,79 @@
 
       <!-- ACEPTAR -->
       <div class="card">
-        <h2 class="nb-section-title">Aceptar invitación</h2>
+        <h2 class="nb-section-title">Accept invitation</h2>
         <form id="form-aceptar">
-          <label>ID de asociación (ASOC_ID)</label>
+          <label>Association ID (ASOC_ID)</label>
           <input name="asocId" type="text" placeholder="cuid..." required />
-          <label>Alias para la otra persona (opcional)</label>
+          <label>Alias for the other person (optional)</label>
           <input name="aliasParaPartner" type="text" />
-          <div class="actions"><button type="submit">Aceptar</button></div>
+          <div class="actions"><button type="submit">Accept</button></div>
           <pre id="out-aceptar" class="mono out"></pre>
         </form>
       </div>
 
-      <!-- PERMISOS (gestión posterior) -->
+      <!-- PERMISOS (gesti?n posterior) -->
       <div class="card">
-        <h2 class="nb-section-title">Permisos</h2>
+        <h2 class="nb-section-title">Permissions</h2>
         <div class="dash-controls">
           <input id="asocPerms" type="text" placeholder="ASOC_ID" />
-          <button id="btnCargarPerms" type="button" class="secondary">Cargar</button>
+          <button id="btnLoadPerms" type="button" class="secondary">Load</button>
         </div>
         <div class="grid grid-2" style="margin-top:12px">
-          <div><label>Ingresos</label><select id="perm-ingresos"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
-          <div><label>Gastos</label><select id="perm-gastos"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
-          <div><label>Ahorros</label><select id="perm-ahorros"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
-          <div><label>Inversiones</label><select id="perm-inversiones"><option value="TOTAL">Total</option><option value="PARCIAL">Parcial</option><option value="NADA">Nada</option></select></div>
+          <div><label>Income</label><select id="perm-ingresos"><option value="TOTAL">Total</option><option value="PARCIAL">Partial</option><option value="NADA">None</option></select></div>
+          <div><label>Expenses</label><select id="perm-gastos"><option value="TOTAL">Total</option><option value="PARCIAL">Partial</option><option value="NADA">None</option></select></div>
+          <div><label>Savings</label><select id="perm-ahorros"><option value="TOTAL">Total</option><option value="PARCIAL">Partial</option><option value="NADA">None</option></select></div>
+          <div><label>Investments</label><select id="perm-inversiones"><option value="TOTAL">Total</option><option value="PARCIAL">Partial</option><option value="NADA">None</option></select></div>
         </div>
-        <div class="actions"><button id="btnGuardarPerms" type="button">Guardar permisos</button></div>
+        <div class="actions"><button id="btnSavePerms" type="button">Save permisos</button></div>
         <pre id="out-perms" class="mono out"></pre>
       </div>
 
       <!-- MOVIMIENTO COMPARTIDO -->
       <div class="card">
-        <h2 class="nb-section-title">Crear movimiento compartido</h2>
+        <h2 class="nb-section-title">Create shared transaction</h2>
         <form id="form-mov">
           <label>ASOC_ID</label><input name="asocId" type="text" placeholder="cuid..." required />
-          <label>Módulo</label>
+          <label>Module</label>
           <select name="modulo">
             <option value="INGRESOS">INGRESOS</option>
             <option value="GASTOS">GASTOS</option>
             <option value="AHORROS">AHORROS</option>
             <option value="INVERSIONES">INVERSIONES</option>
           </select>
-          <label>Concepto</label><input name="concepto" type="text" required />
-          <label>Monto total</label><input name="montoTotal" type="number" step="0.01" required />
-          <label>Fecha</label><input name="fecha" type="datetime-local" required />
-          <div class="actions"><button type="submit">Crear</button></div>
+          <label>Concept</label><input name="concepto" type="text" required />
+          <label>Total amount</label><input name="montoTotal" type="number" step="0.01" required />
+          <label>Date</label><input name="fecha" type="datetime-local" required />
+          <div class="actions"><button type="submit">Create</button></div>
           <pre id="out-mov" class="mono out"></pre>
         </form>
       </div>
 
       <!-- DASHBOARD + ocultos -->
       <div class="card">
-        <h2 class="nb-section-title">Dashboard compartido</h2>
+        <h2 class="nb-section-title">Shared dashboard</h2>
         <div class="dash-controls">
           <input id="asocDash" type="text" placeholder="ASOC_ID" />
-          <button id="btnDash" type="button" class="secondary">Cargar</button>
+          <button id="btnDash" type="button" class="secondary">Load</button>
         </div>
-        <h3 class="h3">Totales</h3>
+        <h3 class="h3">Totals</h3>
         <pre id="totales" class="mono out"></pre>
-        <h3 class="h3">Movimientos</h3>
+        <h3 class="h3">Transactions</h3>
         <div id="items">
           <div class="row header-row" style="grid-template-columns: 1fr 120px 120px 120px">
-            <div>Concepto / Descripción</div>
-            <div>Módulo</div>
-            <div class="monto">Monto</div>
-            <div>Acciones</div>
+            <div>Concept / Description</div>
+            <div>Module</div>
+            <div class="monto">Amount</div>
+            <div>Actions</div>
           </div>
         </div>
-        <h3 class="h3" style="margin-top:14px">Registros ocultos</h3>
+        <h3 class="h3" style="margin-top:14px">Hidden records</h3>
         <div id="ocultos">
           <div class="row header-row" style="grid-template-columns: 1fr 140px 160px 120px">
             <div>RecordId</div>
-            <div>Módulo</div>
-            <div>Usuario origen (ID)</div>
-            <div>Acción</div>
+            <div>Module</div>
+            <div>Source user (ID)</div>
+            <div>Action</div>
           </div>
         </div>
       </div>

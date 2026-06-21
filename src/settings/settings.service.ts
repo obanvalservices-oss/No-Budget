@@ -88,14 +88,14 @@ export class SettingsService {
   ) {
     if (newPassword.length < 6) {
       throw new BadRequestException(
-        'La nueva contraseña debe tener al menos 6 caracteres.',
+        'New password must be at least 6 characters.',
       );
     }
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new BadRequestException('Usuario no encontrado');
+    if (!user) throw new BadRequestException('User not found');
 
     const ok = await bcrypt.compare(currentPassword, user.password);
-    if (!ok) throw new BadRequestException('La contraseña actual no es válida');
+    if (!ok) throw new BadRequestException('Current password is invalid');
 
     const hash = await bcrypt.hash(newPassword, 10);
     await this.prisma.user.update({

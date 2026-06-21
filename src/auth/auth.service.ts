@@ -12,7 +12,7 @@ export class AuthService {
 
   async register(nombre: string, email: string, password: string) {
     const existing = await this.prisma.user.findUnique({ where: { email } });
-    if (existing) throw new BadRequestException('Email ya registrado');
+    if (existing) throw new BadRequestException('Email already registered');
 
     const hash = await bcrypt.hash(password, 10);
     const user = await this.prisma.user.create({
@@ -25,10 +25,10 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new BadRequestException('Credenciales incorrectas');
+    if (!user) throw new BadRequestException('Invalid credentials');
 
     const ok = await bcrypt.compare(password, user.password);
-    if (!ok) throw new BadRequestException('Credenciales incorrectas');
+    if (!ok) throw new BadRequestException('Invalid credentials');
 
     const token = this.jwtService.sign({ sub: user.id }, { expiresIn: JWT_EXPIRES });
     return { token, user: { id: user.id, nombre: user.nombre, email: user.email } };

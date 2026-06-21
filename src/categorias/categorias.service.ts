@@ -16,7 +16,7 @@ export class CategoriasService {
     try {
       return await this.prisma.categoria.create({ data });
     } catch {
-      throw new InternalServerErrorException('Error al crear categoría.');
+      throw new InternalServerErrorException('Error creating category.');
     }
   }
 
@@ -25,9 +25,9 @@ export class CategoriasService {
       return await this.prisma.categoria.delete({ where: { id } });
     } catch (error: any) {
       if (error.code === 'P2003') {
-        throw new BadRequestException('No se puede eliminar: categoría en uso.');
+        throw new BadRequestException('Cannot delete: category in use.');
       }
-      throw new InternalServerErrorException('Error al eliminar categoría.');
+      throw new InternalServerErrorException('Error deleting category.');
     }
   }
 }

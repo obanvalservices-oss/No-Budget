@@ -63,7 +63,7 @@ export class DeudasService {
   }
 
   private ensureUser(row: { userId: number } | null, userId: number) {
-    if (!row || row.userId !== userId) throw new NotFoundException('No encontrado');
+    if (!row || row.userId !== userId) throw new NotFoundException('Not found');
   }
 
   // ------- Listados -------
@@ -99,13 +99,13 @@ export class DeudasService {
     return { ...d!, pagado: paid, saldoPend, pagos: d!.payments };
   }
 
-  // ------- Crear -------
+  // ------- Create -------
   async create(userId: number, dto: CreateDebtDto) {
     if (!dto.title || !dto.principal || !dto.startDate) {
-      throw new BadRequestException('Faltan campos obligatorios (title, principal, startDate).');
+      throw new BadRequestException('Required fields missing (title, principal, startDate).');
     }
     if (dto.principal <= 0) {
-      throw new BadRequestException('El monto total (principal) debe ser mayor a 0.');
+      throw new BadRequestException('Total amount (principal) must be greater than 0.');
     }
 
     // Si el usuario pasó "installmentsCount", lo usamos SOLO para calcular installmentAmount
@@ -116,7 +116,7 @@ export class DeudasService {
       installmentAmount = Number((base / dto.installmentsCount).toFixed(2));
     }
 
-    // Crear la deuda base (respetando TU schema: NO hay installmentsCount en DB)
+    // Create la deuda base (respetando TU schema: NO hay installmentsCount en DB)
     const debt = await this.prisma.debt.create({
       data: {
         userId,
@@ -138,7 +138,7 @@ export class DeudasService {
     if (down > 0) {
       // Validación simple de ahorro si vino ahorroId
       if (dto.downSource === 'SAVINGS' && !dto.downSavings) {
-        throw new BadRequestException('Selecciona el fondo de ahorro para el pago inicial.');
+        throw new BadRequestException('Select el fondo de ahorro para el pago inicial.');
       }
       await this.prisma.debtPayment.create({
         data: {
@@ -200,12 +200,12 @@ export class DeudasService {
   // ------- Pagos -------
   async addPayment(userId: number, debtId: number, dto: AddPaymentDto) {
     if (!dto || typeof dto.amount !== 'number' || dto.amount <= 0) {
-      throw new BadRequestException('Monto de pago inválido.');
+      throw new BadRequestException('Invalid payment amount.');
     }
     const deuda = await this.prisma.debt.findUnique({ where: { id: debtId } });
     this.ensureUser(deuda, userId);
 
-    // Crear pago
+    // Create pago
     await this.prisma.debtPayment.create({
       data: {
         debtId,
@@ -236,7 +236,7 @@ export class DeudasService {
     this.ensureUser(deuda, userId);
 
     const pay = await this.prisma.debtPayment.findUnique({ where: { id: paymentId } });
-    if (!pay || pay.debtId !== debtId) throw new NotFoundException('Pago no encontrado');
+    if (!pay || pay.debtId !== debtId) throw new NotFoundException('Payment not found');
 
     await this.prisma.debtPayment.delete({ where: { id: paymentId } });
 

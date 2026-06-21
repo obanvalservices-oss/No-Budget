@@ -11,7 +11,7 @@ export class CategoriasController {
   @Get()
   findAllQuery(@Query('modulo') modulo?: string) {
     if (!modulo) {
-      throw new BadRequestException('El parámetro "modulo" es requerido (INGRESOS, GASTOS, AHORROS, INVERSIONES).');
+      throw new BadRequestException('Parameter "modulo" is required (INGRESOS, GASTOS, AHORROS, INVERSIONES).');
     }
     return this.categoriasService.findAll(modulo);
   }
@@ -20,7 +20,7 @@ export class CategoriasController {
   @Get(':modulo')
   findAllParam(@Param('modulo') modulo: string) {
     if (!modulo) {
-      throw new BadRequestException('El parámetro "modulo" es requerido (INGRESOS, GASTOS, AHORROS, INVERSIONES).');
+      throw new BadRequestException('Parameter "modulo" is required (INGRESOS, GASTOS, AHORROS, INVERSIONES).');
     }
     return this.categoriasService.findAll(modulo);
   }
@@ -28,7 +28,7 @@ export class CategoriasController {
   @Post()
   create(@Body() body: { nombre: string; modulo: string }) {
     if (!body?.nombre || !body?.modulo) {
-      throw new BadRequestException('Campos requeridos: nombre, modulo.');
+      throw new BadRequestException('Required fields: name, module.');
     }
     return this.categoriasService.create({ nombre: body.nombre, modulo: body.modulo });
   }

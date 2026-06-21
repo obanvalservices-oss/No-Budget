@@ -1,6 +1,6 @@
 import { IsBoolean, IsDateString, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export class CrearAhorroDto {
+export class CreateAhorroDto {
   @IsString()
   @IsNotEmpty()
   categoria: string;

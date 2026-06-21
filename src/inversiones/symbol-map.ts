@@ -24,7 +24,7 @@ export function resolveQuoteSymbol(
     acciones: {
       Apple: 'AAPL',
       Amazon: 'AMZN',
-      Meta: 'META',
+      Goal: 'META',
     },
     criptomonedas: {
       Bitcoin: 'BTC/USD',

@@ -51,9 +51,9 @@ export class DashboardService {
     const s = start.toLocaleDateString();
     const e = end.toLocaleDateString();
     if (period === 'COMPARAR') {
-      return idx === 0 ? `Semana (actual) ${s} - ${e}` : `Semana (anterior) ${s} - ${e}`;
+      return idx === 0 ? `Semana (current) ${s} - ${e}` : `Semana (previous) ${s} - ${e}`;
     }
-    return `Semana ${s} - ${e}`;
+    return `Week ${s} - ${e}`;
   }
 
   private buildWeeksByPeriod(
@@ -223,8 +223,8 @@ export class DashboardService {
       precioCompra: number | null;
       createdAt: Date;
       planAporteMonto: number | null;
-      planAporteFrecuencia: string | null;
-      planAporteInicio: Date | null;
+      planAporteFrequency: string | null;
+      planAporteHome: Date | null;
     }>,
     weekStart: Date,
     weekEnd: Date,
@@ -238,11 +238,11 @@ export class DashboardService {
 
       const planM = Number(inv.planAporteMonto);
       if (!planM || planM <= 0) continue;
-      const freq = String(inv.planAporteFrecuencia || '').toLowerCase();
+      const freq = String(inv.planAporteFrequency || '').toLowerCase();
       if (freq !== 'semanal' && freq !== 'mensual') continue;
-      const baseInicio = inv.planAporteInicio ?? inv.createdAt;
-      if (!baseInicio) continue;
-      const inicio = this.normalizeDateOnly(new Date(baseInicio));
+      const baseHome = inv.planAporteHome ?? inv.createdAt;
+      if (!baseHome) continue;
+      const inicio = this.normalizeDateOnly(new Date(baseHome));
 
       if (freq === 'semanal') {
         let occ = this.firstOccurrenceOnOrAfter(inicio, s, 'semanal');
@@ -261,7 +261,7 @@ export class DashboardService {
           occ = this.addWeeksSafe(occ, 1);
         }
       } else {
-        let occ = this.normalizeDateOnly(new Date(baseInicio));
+        let occ = this.normalizeDateOnly(new Date(baseHome));
         while (occ < s) occ = this.addMonthsSameDaySafe(occ, 1);
         while (occ <= e) {
           if (occ >= inicio) {
@@ -461,7 +461,7 @@ export class DashboardService {
       }
     }
 
-    // 9) Totales
+    // 9) Totals
     const sum = (arr: any[], field = 'monto') =>
       arr.reduce((a, x) => a + (Number((x as any)[field]) || 0), 0);
 

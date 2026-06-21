@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0f1419" />
-  <title>Resumen — No Budget</title>
+  <title>Overview — No Budget</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -21,39 +21,40 @@
         <span class="brand-text">No Budget</span>
       </a>
     </div>
-    <nav class="menu" aria-label="Módulos">
+    <nav class="menu" aria-label="Modules">
       <ul>
         <li><a href="home.html" class="nav-link active" data-nav="home">Dashboard</a></li>
-        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Ingresos</a></li>
-        <li><a href="gastos.html" class="nav-link" data-nav="gastos">Gastos</a></li>
-        <li><a href="deudas.html" class="nav-link" data-nav="deudas">Deudas</a></li>
-        <li><a href="ahorros.html" class="nav-link" data-nav="ahorros">Ahorros</a></li>
-        <li><a href="inversiones.html" class="nav-link" data-nav="inversiones">Inversiones</a></li>
-        <li><a href="compartido.html" class="nav-link" data-nav="compartido">Compartido</a></li>
-        <li><a href="settings.html" class="nav-link" data-nav="settings">Configuración</a></li>
+        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Income</a></li>
+        <li><a href="gastos.html" class="nav-link" data-nav="gastos">Expenses</a></li>
+        <li><a href="deudas.html" class="nav-link" data-nav="deudas">Debts</a></li>
+        <li><a href="ahorros.html" class="nav-link" data-nav="ahorros">Savings</a></li>
+        <li><a href="inversiones.html" class="nav-link" data-nav="inversiones">Investments</a></li>
+        <li><a href="compartido.html" class="nav-link" data-nav="compartido">Shared</a></li>
+        <li><a href="settings.html" class="nav-link" data-nav="settings">Settings</a></li>
+        <li><button type="button" class="btn-logout" data-action="logout" aria-label="Log out">Log out</button></li>
       </ul>
     </nav>
   </header>
 
   <main class="dashboard-container">
     <section class="page-hero">
-      <h2 class="nb-section-title">Resumen financiero</h2>
-      <p class="page-hero-sub">Ingresos, gastos y proyección en un solo vistazo.</p>
+      <h2 class="nb-section-title">Financial overview</h2>
+      <p class="page-hero-sub">Income, expenses, and projections at a glance.</p>
     </section>
 
-    <section id="visorFondosInv" class="nb-visor-strip" aria-label="Visor de ahorros e inversiones"></section>
-    <section id="periodBar" class="nb-period-bar" aria-label="Período del resumen"></section>
+    <section id="visorFondosInv" class="nb-visor-strip" aria-label="Savings and investments overview"></section>
+    <section id="periodBar" class="nb-period-bar" aria-label="Summary period"></section>
 
     <section class="dashboard-main-panels">
       <section class="grafico-box" id="graficoContainer">
-        <h3 class="nb-grafico-title">Distribución del período</h3>
+        <h3 class="nb-grafico-title">Period breakdown</h3>
         <div class="nb-grafico-canvas-wrap">
           <canvas id="graficoResumen" width="300" height="300"></canvas>
         </div>
       </section>
 
       <section class="resumen-container">
-        <!-- Se llena dinámicamente -->
+        <!-- Filled dynamically -->
       </section>
     </section>
   </main>
@@ -62,26 +63,26 @@
     <p>&copy; 2026 No Budget</p>
   </footer>
 
-  <!-- Modal de edición (igual que ya tenías) -->
+  <!-- Edit modal -->
   <div id="modalEditar" class="modal-editar" style="display: none;">
     <div class="modal-contenido">
-      <h3>Editar transacción</h3>
+      <h3>Edit transaction</h3>
       <form id="formEditar">
         <input type="hidden" id="editId">
-        <input type="hidden" id="editTipo">
+        <input type="hidden" id="editType">
 
-        <label for="editFuente">Descripción</label>
-        <input type="text" id="editFuente" required>
+        <label for="editSource">Description</label>
+        <input type="text" id="editSource" required>
 
-        <label for="editMonto">Monto</label>
+        <label for="editMonto">Amount</label>
         <input type="number" id="editMonto" step="0.01" required>
 
-        <label for="editFecha">Fecha</label>
+        <label for="editFecha">Date</label>
         <input type="date" id="editFecha" required>
 
         <div class="botones-modal">
-          <button type="submit" class="btn-guardar">Guardar cambios</button>
-          <button type="button" id="btnCancelar" class="btn-cancelar">Cancelar</button>
+          <button type="submit" class="btn-guardar">Save changes</button>
+          <button type="button" id="btnCancel" class="btn-cancelar">Cancel</button>
         </div>
       </form>
     </div>

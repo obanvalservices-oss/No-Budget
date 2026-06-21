@@ -9,7 +9,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const { data } = await axios.post('/auth/login', { email, password });
 
     const token = data.token || data.access_token;
-    if (!token) throw new Error('Token no recibido');
+    if (!token) throw new Error('Token not received');
 
     const user = data.user
       ? { id: data.user.id, nombre: data.user.nombre || data.user.name || '', email: data.user.email }
@@ -23,8 +23,8 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const msg =
       err?.response?.data?.message ||
       (err?.message === 'Network Error'
-        ? 'No se pudo contactar al servidor. Verifica la conexión.'
-        : err?.message || 'Error al iniciar sesión');
+        ? 'Could not reach the server. Check your connection.'
+        : err?.message || 'Error signing in');
     alert(Array.isArray(msg) ? msg.join('\n') : msg);
   }
 });

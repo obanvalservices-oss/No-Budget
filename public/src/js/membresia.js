@@ -7,10 +7,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const usuario = JSON.parse(localStorage.getItem("usuario")) || {};
     const membresiaActual = usuario.membresia || "Free";
   
-    // Mostrar membresía activa al cargar
+    // Show membresía activa al cargar
     const membresiaActiva = document.getElementById("membresiaActiva");
     if (membresiaActiva) {
-      membresiaActiva.textContent = `Tu membresía actual: ${membresiaActual}`;
+      membresiaActiva.textContent = `Your current membership: ${membresiaActual}`;
     }
   
     let seleccion = "";
@@ -21,24 +21,24 @@ document.addEventListener("DOMContentLoaded", () => {
         planes.forEach(p => p.classList.remove("seleccionado"));
         plan.classList.add("seleccionado");
         seleccion = plan.dataset.plan;
-        resultado.textContent = `Has seleccionado el plan: ${seleccion}`;
+        resultado.textContent = `You selected the plan: ${seleccion}`;
       });
     });
   
     // Activar membresía
     activarBtn.addEventListener("click", () => {
       if (!seleccion) {
-        alert("⚠️ Primero debes seleccionar un plan.");
+        alert("⚠️ You must select a plan first.");
         return;
       }
   
       // Simulación de activación (en futuro será una API call)
       usuario.membresia = seleccion;
       localStorage.setItem("usuario", JSON.stringify(usuario));
-      alert(`✅ Tu membresía ha sido actualizada a: ${seleccion}`);
+      alert(`✅ Your membership was updated to: ${seleccion}`);
   
       if (membresiaActiva) {
-        membresiaActiva.textContent = `Tu membresía actual: ${seleccion}`;
+        membresiaActiva.textContent = `Your current membership: ${seleccion}`;
       }
   
       resultado.textContent = "";

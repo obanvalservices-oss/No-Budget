@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await cargarCategoriasDesdeBackend();
   await cargarGastos();
 
-  document.getElementById('historialGastos').addEventListener('click', onHistorialGastosClick);
+  document.getElementById('historialGastos').addEventListener('click', onHistoryGastosClick);
 
   document.getElementById('gastosForm').addEventListener('submit', onSubmitNuevoGasto);
 
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   const modal = document.getElementById('modalEditarGasto');
-  document.getElementById('btnCancelarEditGasto').addEventListener('click', () => {
+  document.getElementById('btnCancelEditGasto').addEventListener('click', () => {
     modal.style.display = 'none';
     modal.setAttribute('aria-hidden', 'true');
   });
@@ -53,7 +53,7 @@ async function onSubmitNuevoGasto(e) {
     const nuevaCategoria = (nuevaCategoriaInput.value || '').trim();
 
     if (!nuevaCategoria) {
-      alert('Debes escribir un nombre para la nueva categoría');
+      alert('You must enter a name for the new category');
       return;
     }
 
@@ -69,7 +69,7 @@ async function onSubmitNuevoGasto(e) {
       nuevaCategoriaInput.value = '';
     } catch (err) {
       console.error('Error creando categoría:', err);
-      const msg = err?.response?.data?.message || 'No se pudo crear la categoría';
+      const msg = err?.response?.data?.message || 'Could not create category';
       alert(Array.isArray(msg) ? msg.join('\n') : msg);
       return;
     }
@@ -100,7 +100,7 @@ async function onSubmitNuevoGasto(e) {
 async function cargarCategoriasDesdeBackend() {
   try {
     const select = document.getElementById('categoriaGasto');
-    select.innerHTML = '<option value="">Selecciona una categoría</option>';
+    select.innerHTML = '<option value="">Select a category</option>';
 
     const res = await axios.get('/categorias', {
       params: { modulo: MODULO },
@@ -115,7 +115,7 @@ async function cargarCategoriasDesdeBackend() {
 
     const nueva = document.createElement('option');
     nueva.value = 'crear-nueva';
-    nueva.textContent = '➕ Crear nueva categoría';
+    nueva.textContent = '➕ Create new category';
     select.appendChild(nueva);
   } catch (err) {
     console.error('Error cargando categorías:', err);
@@ -152,12 +152,12 @@ function renderGastos(gastos) {
   contenedor.innerHTML = '';
 
   if (!gastos.length) {
-    contenedor.innerHTML = `<p class="vacio">No hay gastos registrados.</p>`;
+    contenedor.innerHTML = `<p class="vacio">No expenses recorded.</p>`;
     return;
   }
 
   gastos.forEach((gasto) => {
-    const nombreCat = gasto.categoria?.nombre || 'Sin categoría';
+    const nombreCat = gasto.categoria?.nombre || 'No category';
     const freq = gasto.frecuencia || 'una_vez';
     const org = gasto.origen || 'General';
     const li = document.createElement('div');
@@ -166,11 +166,11 @@ function renderGastos(gastos) {
       <div class="nb-historial-body info">
         <p class="nb-historial-title">${escapeHtml(gasto.descripcion)}</p>
         <p class="nb-historial-meta">${escapeHtml(nombreCat)} · ${escapeHtml(freq)} · ${escapeHtml(org)}</p>
-        <p class="nb-historial-meta">Fecha: ${escapeHtml(formatGastoFecha(gasto.fecha))}</p>
+        <p class="nb-historial-meta">Date: ${escapeHtml(formatGastoFecha(gasto.fecha))}</p>
       </div>
       <div style="display:flex;align-items:center;gap:0.75rem;">
         <span class="nb-historial-amount monto negativo">-$${Number(gasto.monto || 0).toFixed(2)}</span>
-        ${window.nbHistorialPair('gasto', gasto.id)}
+        ${window.nbHistoryPair('gasto', gasto.id)}
       </div>
     `;
     contenedor.appendChild(li);
@@ -221,25 +221,25 @@ async function onSubmitEditarGasto(e) {
     await cargarGastos();
   } catch (err) {
     console.error('Error actualizando gasto:', err);
-    const msg = err?.response?.data?.message || 'No se pudo actualizar';
+    const msg = err?.response?.data?.message || 'Could not update';
     alert(Array.isArray(msg) ? msg.join('\n') : msg);
   }
 }
 
-async function onHistorialGastosClick(e) {
+async function onHistoryGastosClick(e) {
   const btn = e.target.closest('[data-entity="gasto"][data-action]');
   if (!btn) return;
   const { action, id } = btn.dataset;
   if (!id) return;
 
   if (action === 'delete') {
-    if (!confirm('¿Eliminar este gasto?')) return;
+    if (!confirm('Delete this expense?')) return;
     try {
       await axios.delete(`/gastos/${id}`);
       await cargarGastos();
     } catch (err) {
       console.error('Error eliminando gasto:', err);
-      alert('No se pudo eliminar el gasto');
+      alert('Could not delete expense');
     }
     return;
   }
@@ -249,13 +249,13 @@ async function onHistorialGastosClick(e) {
       const res = await axios.get('/gastos');
       const row = (res.data || []).find((x) => String(x.id) === String(id));
       if (!row) {
-        alert('No se encontró el gasto');
+        alert('Expense not found');
         return;
       }
       abrirModalEditarGasto(row);
     } catch (err) {
       console.error(err);
-      alert('No se pudo cargar el gasto');
+      alert('Could not load expense');
     }
   }
 }

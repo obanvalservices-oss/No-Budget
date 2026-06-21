@@ -1,7 +1,7 @@
 // src/compartido/compartido.controller.ts
 import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { CompartidoService } from './compartido.service';
-import { ModuloTipo, VisibilidadNivel } from '@prisma/client';
+import { ModuloType, VisibilidadNivel } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @UseGuards(JwtAuthGuard)
@@ -15,7 +15,7 @@ export class CompartidoController {
     partnerDisplayName: string;
     relacion: any;
     aliasParaOwner?: string;
-    permisos: { modulo: ModuloTipo; visibilidad: VisibilidadNivel }[];
+    permisos: { modulo: ModuloType; visibilidad: VisibilidadNivel }[];
   }) {
     return this.service.invitar(req.user.id, body);
   }
@@ -26,17 +26,17 @@ export class CompartidoController {
   }
 
   @Get(':id/permisos')
-  obtenerPermisos(@Req() req, @Param('id') id: string) {
-    return this.service.obtenerPermisos(id, req.user.id);
+  obtenerPermissions(@Req() req, @Param('id') id: string) {
+    return this.service.obtenerPermissions(id, req.user.id);
   }
 
   @Patch(':id/permisos')
-  actualizarPermisos(
+  actualizarPermissions(
     @Req() req,
     @Param('id') id: string,
-    @Body() body: { permisos: { modulo: ModuloTipo; visibilidad: VisibilidadNivel }[] }
+    @Body() body: { permisos: { modulo: ModuloType; visibilidad: VisibilidadNivel }[] }
   ) {
-    return this.service.actualizarPermisos(id, req.user.id, body.permisos);
+    return this.service.actualizarPermissions(id, req.user.id, body.permisos);
   }
 
   @Get(':id/ocultos')
@@ -49,8 +49,8 @@ export class CompartidoController {
     @Req() req,
     @Param('id') id: string,
     @Body() body: {
-      add?: { modulo: ModuloTipo; recordId: string }[];
-      remove?: { modulo: ModuloTipo; recordId: string }[];
+      add?: { modulo: ModuloType; recordId: string }[];
+      remove?: { modulo: ModuloType; recordId: string }[];
     }
   ) {
     return this.service.syncOcultos(id, req.user.id, body.add, body.remove);
@@ -66,7 +66,7 @@ export class CompartidoController {
 
   @Post(':id/movimientos')
   crearMovimiento(@Req() req, @Param('id') id: string, @Body() body: {
-    modulo: ModuloTipo; concepto: string; montoTotal: number; aporteOwner?: number; aportePartner?: number; fecha: string;
+    modulo: ModuloType; concepto: string; montoTotal: number; aporteOwner?: number; aportePartner?: number; fecha: string;
     categoriaIdGasto?: string; categoriaAhorro?: string; categoriaInversion?: string;
   }) {
     return this.service.crearMovimientoCompartido(id, req.user.id, body);

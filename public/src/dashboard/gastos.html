@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="theme-color" content="#0f1419" />
-  <title>Gastos - No Budget</title>
+  <title>Expenses — No Budget</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -19,113 +19,114 @@
         <span class="brand-text">No Budget</span>
       </a>
     </div>
-    <nav class="menu" aria-label="Módulos">
+    <nav class="menu" aria-label="Modules">
       <ul>
         <li><a href="home.html" class="nav-link" data-nav="home">Dashboard</a></li>
-        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Ingresos</a></li>
-        <li><a href="gastos.html" class="nav-link active" data-nav="gastos">Gastos</a></li>
-        <li><a href="deudas.html" class="nav-link" data-nav="deudas">Deudas</a></li>
-        <li><a href="ahorros.html" class="nav-link" data-nav="ahorros">Ahorros</a></li>
-        <li><a href="inversiones.html" class="nav-link" data-nav="inversiones">Inversiones</a></li>
-        <li><a href="compartido.html" class="nav-link" data-nav="compartido">Compartido</a></li>
-        <li><a href="settings.html" class="nav-link" data-nav="settings">Configuración</a></li>
+        <li><a href="ingresos.html" class="nav-link" data-nav="ingresos">Income</a></li>
+        <li><a href="gastos.html" class="nav-link active" data-nav="gastos">Expenses</a></li>
+        <li><a href="deudas.html" class="nav-link" data-nav="deudas">Debts</a></li>
+        <li><a href="ahorros.html" class="nav-link" data-nav="ahorros">Savings</a></li>
+        <li><a href="inversiones.html" class="nav-link" data-nav="inversiones">Investments</a></li>
+        <li><a href="compartido.html" class="nav-link" data-nav="compartido">Shared</a></li>
+        <li><a href="settings.html" class="nav-link" data-nav="settings">Settings</a></li>
+        <li><button type="button" class="btn-logout" data-action="logout" aria-label="Log out">Log out</button></li>
       </ul>
     </nav>
   </header>
 
   <main class="container">
     <section class="form-section">
-      <h2 class="nb-section-title">Registrar gasto</h2>
+      <h2 class="nb-section-title">Record expense</h2>
       <form id="gastosForm">
-        <label for="descripcionGasto">Descripción</label>
+        <label for="descripcionGasto">Description</label>
         <input type="text" id="descripcionGasto" required />
 
         <div class="nb-categoria-field">
-          <label for="categoriaGasto">Categoría</label>
+          <label for="categoriaGasto">Category</label>
           <select id="categoriaGasto" data-modulo="GASTOS" required aria-describedby="categoriaGastoHint">
-            <option value="">Selecciona categoría</option>
+            <option value="">Select category</option>
           </select>
           <p id="categoriaGastoHint" class="nb-categoria-hint">
-            Los gastos usan categorías con ID en el sistema. Podés crear una nueva y quedará seleccionada al guardar.
+            Expenses use system category IDs. You can create a new one and it will be selected when saved.
           </p>
           <input
             type="text"
             id="nuevaCategoriaInput"
             class="nb-categoria-nueva"
-            placeholder="Nombre de la nueva categoría"
+            placeholder="New category name"
             autocomplete="off"
-            aria-label="Nombre de la nueva categoría"
+            aria-label="New category name"
           />
         </div>
 
-        <label for="montoGasto">Monto ($)</label>
+        <label for="montoGasto">Amount ($)</label>
         <input type="number" id="montoGasto" step="0.01" min="0.01" required />
 
-        <label for="frecuenciaGasto">Frecuencia</label>
+        <label for="frecuenciaGasto">Frequency</label>
         <select id="frecuenciaGasto" required>
-          <option value="">Selecciona</option>
-          <option value="una_vez">Una vez</option>
-          <option value="semanal">Semanal</option>
-          <option value="mensual">Mensual</option>
+          <option value="">Select</option>
+          <option value="una_vez">Once</option>
+          <option value="semanal">Weekly</option>
+          <option value="mensual">Monthly</option>
         </select>
 
-        <label for="fechaPagoGasto">Fecha de pago</label>
+        <label for="fechaPagoGasto">Payment date</label>
         <input type="date" id="fechaPagoGasto" required />
 
-        <label for="origenGasto">Origen del dinero</label>
+        <label for="origenGasto">Source of funds</label>
         <select id="origenGasto" required>
-          <option value="">Selecciona origen</option>
+          <option value="">Select source</option>
           <option value="Banco">Banco</option>
-          <option value="Fondo de ahorro">Fondo de ahorro</option>
-          <option value="Ingreso fijo">Ingreso fijo</option>
+          <option value="Savings fund">Savings fund</option>
+          <option value="Fixed income">Fixed income</option>
         </select>
 
         <div class="checkbox-row">
           <input type="checkbox" id="fijoGasto" />
-          <label for="fijoGasto">¿Es un gasto fijo?</label>
+          <label for="fijoGasto">Is this a fixed expense?</label>
         </div>
 
-        <button type="submit" class="btn-rojo">Guardar gasto</button>
+        <button type="submit" class="btn-rojo">Save expense</button>
       </form>
     </section>
 
     <section class="historial-section">
-      <h2 class="nb-section-title">Historial de gastos</h2>
+      <h2 class="nb-section-title">Expense history</h2>
       <div id="historialGastos" class="historial-lista">
-        <!-- Gastos renderizados dinámicamente aquí -->
+        <!-- Expenses rendered dynamically -->
       </div>
     </section>
   </main>
 
   <div id="modalEditarGasto" class="modal-editar" style="display: none" aria-hidden="true">
     <div class="modal-contenido">
-      <h3>Editar gasto</h3>
+      <h3>Edit expense</h3>
       <form id="formEditarGasto">
         <input type="hidden" id="editGastoId" />
-        <label for="editDescGasto">Descripción</label>
+        <label for="editDescGasto">Description</label>
         <input type="text" id="editDescGasto" required />
-        <label for="editMontoGasto">Monto ($)</label>
+        <label for="editMontoGasto">Amount ($)</label>
         <input type="number" id="editMontoGasto" step="0.01" min="0.01" required />
-        <label for="editCatGasto">Categoría</label>
+        <label for="editCatGasto">Category</label>
         <select id="editCatGasto" required></select>
-        <label for="editFrecGasto">Frecuencia</label>
+        <label for="editFrecGasto">Frequency</label>
         <select id="editFrecGasto" required>
-          <option value="una_vez">Una vez</option>
-          <option value="semanal">Semanal</option>
-          <option value="mensual">Mensual</option>
+          <option value="una_vez">Once</option>
+          <option value="semanal">Weekly</option>
+          <option value="mensual">Monthly</option>
         </select>
-        <label for="editFechaGasto">Fecha de pago</label>
+        <label for="editFechaGasto">Payment date</label>
         <input type="date" id="editFechaGasto" required />
-        <label for="editOrigenGasto">Origen</label>
+        <label for="editOrigenGasto">Source</label>
         <select id="editOrigenGasto" required>
           <option value="Banco">Banco</option>
-          <option value="Fondo de ahorro">Fondo de ahorro</option>
-          <option value="Ingreso fijo">Ingreso fijo</option>
+          <option value="Savings fund">Savings fund</option>
+          <option value="Fixed income">Fixed income</option>
         </select>
-        <label class="chk-wrap"><input type="checkbox" id="editFijoGasto" /> Gasto fijo</label>
+        <label class="chk-wrap"><input type="checkbox" id="editFijoGasto" /> Fixed expense</label>
         <div class="botones-modal">
-          <button type="submit" class="btn-rojo">Guardar cambios</button>
-          <button type="button" id="btnCancelarEditGasto" class="btn-cancelar">Cancelar</button>
+          <button type="submit" class="btn-rojo">Save changes</button>
+          <button type="button" id="btnCancelEditGasto" class="btn-cancelar">Cancel</button>
         </div>
       </form>
     </div>

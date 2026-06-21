@@ -43,13 +43,13 @@ export class GastosService {
     } catch (error: any) {
       if (error.code === 'P2003') {
         if (error.meta?.field_name?.includes('categoriaId')) {
-          throw new BadRequestException('Categoría no encontrada.');
+          throw new BadRequestException('Category no encontrada.');
         }
         if (error.meta?.field_name?.includes('userId')) {
-          throw new BadRequestException('Usuario no válido.');
+          throw new BadRequestException('Invalid user.');
         }
       }
-      throw new InternalServerErrorException('Error al crear gasto.');
+      throw new InternalServerErrorException('Error creating expense.');
     }
   }
 
@@ -117,14 +117,14 @@ export class GastosService {
       where: { id },
       include: { categoria: true },
     });
-    if (!found) throw new NotFoundException('Gasto no encontrado');
+    if (!found) throw new NotFoundException('Expense not found');
     return found;
   }
 
   // ====== UPDATE ===========================================================
   async update(userId: number, id: string, dto: UpdateGastoDto) {
     const existing = await this.prisma.gasto.findFirst({ where: { id, userId } });
-    if (!existing) throw new NotFoundException('Gasto no encontrado');
+    if (!existing) throw new NotFoundException('Expense not found');
 
     try {
       const data: any = {
@@ -151,21 +151,21 @@ export class GastosService {
       });
     } catch (e: any) {
       if (e.code === 'P2003' && e.meta?.field_name?.includes('categoriaId')) {
-        throw new BadRequestException('Categoría no encontrada.');
+        throw new BadRequestException('Category no encontrada.');
       }
-      throw new InternalServerErrorException('Error al actualizar gasto.');
+      throw new InternalServerErrorException('Error updating expense.');
     }
   }
 
   // ====== DELETE uno =======================================================
   async remove(userId: number, id: string) {
     const existing = await this.prisma.gasto.findFirst({ where: { id, userId } });
-    if (!existing) throw new NotFoundException('Gasto no encontrado');
+    if (!existing) throw new NotFoundException('Expense not found');
 
     try {
       return await this.prisma.gasto.delete({ where: { id: existing.id } });
     } catch {
-      throw new InternalServerErrorException('Error al eliminar gasto.');
+      throw new InternalServerErrorException('Error deleting expense.');
     }
   }
 

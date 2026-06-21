@@ -1,4 +1,4 @@
-export class AceptarInvitacionDto {
+export class AcceptInvitacionDto {
     aliasParaPartner?: string;
   }
   

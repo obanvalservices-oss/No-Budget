@@ -5,13 +5,13 @@
 })();
 
 const TIPO_LABELS = {
-  acciones: 'Acciones',
-  criptomonedas: 'Criptomonedas',
-  'bienes-raices': 'Bienes raíces',
-  fondos: 'Fondos',
-  bonos: 'Bonos',
-  retiro: 'Planes de retiro',
-  otros: 'Otros',
+  acciones: 'Stocks',
+  criptomonedas: 'Cryptocurrencies',
+  'bienes-raices': 'Real estate',
+  fondos: 'Funds',
+  bonos: 'Bonds',
+  retiro: 'Retirement plans',
+  otros: 'Other',
 };
 
 /**
@@ -29,17 +29,17 @@ const ACTIVOS_PRESETS = {
     { nombre: 'Ethereum', cotizable: true },
   ],
   'bienes-raices': [
-    { nombre: 'Departamento' },
-    { nombre: 'Local comercial' },
-    { nombre: 'Terreno' },
+    { nombre: 'Apartment' },
+    { nombre: 'Commercial space' },
+    { nombre: 'Land' },
   ],
-  fondos: [{ nombre: 'ETF indexado' }, { nombre: 'Fondo mutuo' }, { nombre: 'Mercado de dinero' }],
-  bonos: [{ nombre: 'Bono corporativo' }, { nombre: 'Bono soberano' }, { nombre: 'Letes / similar' }],
-  retiro: [{ nombre: 'Plan 401(k) / similar' }, { nombre: 'IRA / retiro individual' }, { nombre: 'Sistema público / AFJP' }],
+  fondos: [{ nombre: 'Index ETF' }, { nombre: 'Mutual fund' }, { nombre: 'Money market' }],
+  bonos: [{ nombre: 'Corporate bond' }, { nombre: 'Sovereign bond' }, { nombre: 'T-bills / similar' }],
+  retiro: [{ nombre: '401(k) plan / similar' }, { nombre: 'IRA / individual retirement' }, { nombre: 'Public pension / AFJP' }],
   otros: [],
 };
 
-let selectedTipo = '';
+let selectedType = '';
 let cotizTimer = null;
 /** Última respuesta de /inversiones/cotizacion (solo para texto en formulario). */
 let ultimaCotizacion = null;
@@ -50,24 +50,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const cantidadInput = document.getElementById('cantidad');
   const precioCompraInput = document.getElementById('precioCompra');
   const simboloMercado = document.getElementById('simboloMercado');
-  const capitalInvertido = document.getElementById('capitalInvertido');
+  const capitalInvested = document.getElementById('capitalInvested');
   const listaInversiones = document.getElementById('listaInversiones');
   const hint = document.getElementById('tipoInversionHint');
 
-  fillEditTipoSelect();
+  fillEditTypeSelect();
 
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
       tabs.forEach((t) => t.classList.remove('active'));
       tab.classList.add('active');
-      applyTipo(tab.dataset.tipo);
+      applyType(tab.dataset.tipo);
     });
   });
 
   activoInput.addEventListener('input', () => scheduleCotizacionPreview());
   activoInput.addEventListener('change', () => scheduleCotizacionPreview());
   simboloMercado.addEventListener('input', () => scheduleCotizacionPreview());
-  capitalInvertido.addEventListener('input', () => updateResultadoEstimado());
+  capitalInvested.addEventListener('input', () => updateResultadoEstimado());
   cantidadInput.addEventListener('input', () => updateResultadoEstimado());
   precioCompraInput.addEventListener('input', () => updateResultadoEstimado());
 
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
   listaInversiones.addEventListener('click', onListaInversionesClick);
 
   const modal = document.getElementById('modalEditarInversion');
-  document.getElementById('btnCancelarEditInv').addEventListener('click', () => {
+  document.getElementById('btnCancelEditInv').addEventListener('click', () => {
     modal.style.display = 'none';
     modal.setAttribute('aria-hidden', 'true');
   });
@@ -90,13 +90,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const wrap = document.getElementById('activoUnifiedWrap');
   if (wrap) wrap.style.display = 'none';
-  if (hint) hint.textContent = 'Elegí un tipo de inversión arriba.';
+  if (hint) hint.textContent = 'Choose an investment type above.';
 
   cargarInversiones();
 });
 
-function fillEditTipoSelect() {
-  const sel = document.getElementById('editInvTipo');
+function fillEditTypeSelect() {
+  const sel = document.getElementById('editInvType');
   if (!sel || sel.options.length) return;
   sel.innerHTML = '';
   Object.entries(TIPO_LABELS).forEach(([k, label]) => {
@@ -107,12 +107,12 @@ function fillEditTipoSelect() {
   });
 }
 
-function getActivoNombre() {
+function getAssetNombre() {
   const el = document.getElementById('activoInput');
   return el ? el.value.trim() : '';
 }
 
-function fillActivosDatalist(tipoKey) {
+function fillAssetsDatalist(tipoKey) {
   const dl = document.getElementById('activosDatalist');
   if (!dl) return;
   dl.innerHTML = '';
@@ -134,13 +134,13 @@ function activoPareceTicker(activo) {
 /** Preset cotizable (Apple, Bitcoin…) o ticker tipeado (FXAIX, BTC/USD…). */
 function activoTieneMapaCotizacion(activo) {
   if (activoPareceTicker(activo)) return true;
-  const list = ACTIVOS_PRESETS[selectedTipo] || [];
+  const list = ACTIVOS_PRESETS[selectedType] || [];
   const t = (activo || '').trim().toLowerCase();
   return list.some((a) => a.nombre.toLowerCase() === t && a.cotizable === true);
 }
 
-function applyTipo(tipoKey) {
-  selectedTipo = tipoKey;
+function applyType(tipoKey) {
+  selectedType = tipoKey;
   const wrap = document.getElementById('activoUnifiedWrap');
   const input = document.getElementById('activoInput');
   const hint = document.getElementById('tipoInversionHint');
@@ -149,19 +149,19 @@ function applyTipo(tipoKey) {
   if (wrap && input) {
     wrap.style.display = 'block';
     input.value = '';
-    fillActivosDatalist(tipoKey);
+    fillAssetsDatalist(tipoKey);
   }
 
   const n = (ACTIVOS_PRESETS[tipoKey] || []).length;
   if (subHint) {
     subHint.textContent =
       n > 0
-        ? 'Escribí el nombre o elegí una sugerencia (lista desplegable del navegador).'
-        : 'Escribí el nombre del activo; no hay sugerencias fijas para este tipo.';
+        ? 'Type the name or pick a suggestion (browser dropdown list).'
+        : 'Type the asset name; no fixed suggestions for this type.';
   }
 
   if (hint) {
-    hint.textContent = `Tipo: ${TIPO_LABELS[tipoKey] || tipoKey}. Podés tipear o seleccionar activo. Capital inicial usa cotización del día si hay símbolo.`;
+    hint.textContent = `Type: ${TIPO_LABELS[tipoKey] || tipoKey}. You can type or select an asset. Initial capital uses the day quote if a symbol is available.`;
   }
   scheduleCotizacionPreview();
 }
@@ -173,25 +173,25 @@ function scheduleCotizacionPreview() {
 
 async function fetchCotizacionPreview() {
   const el = document.getElementById('valorMercado');
-  if (!selectedTipo) {
-    el.textContent = 'Cotización: —';
+  if (!selectedType) {
+    el.textContent = 'Quote: —';
     ultimaCotizacion = null;
     updateResultadoEstimado();
     return;
   }
 
-  const activo = getActivoNombre();
+  const activo = getAssetNombre();
   const simbolo = document.getElementById('simboloMercado').value.trim();
   if (!activo && !simbolo) {
-    el.textContent = 'Cotización: indicá activo o símbolo';
+    el.textContent = 'Quote: enter asset or symbol';
     ultimaCotizacion = null;
     updateResultadoEstimado();
     return;
   }
 
-  el.textContent = 'Cotización: cargando…';
+  el.textContent = 'Quote: loading…';
   try {
-    let url = `/inversiones/cotizacion?tipo=${encodeURIComponent(selectedTipo)}&activo=${encodeURIComponent(activo)}`;
+    let url = `/inversiones/cotizacion?tipo=${encodeURIComponent(selectedType)}&activo=${encodeURIComponent(activo)}`;
     if (simbolo) url += `&simbolo=${encodeURIComponent(simbolo)}`;
     const { data } = await axios.get(url);
     if (data.ok) {
@@ -203,29 +203,29 @@ async function fetchCotizacionPreview() {
       el.textContent = `${data.symbol}: ${money(data.close)} · prev. ${prev} · ${data.quoteDate} (${data.source})`;
     } else {
       ultimaCotizacion = null;
-      el.textContent = `Cotización: ${data.message || 'no disponible'}`;
+      el.textContent = `Quote: ${data.message || 'unavailable'}`;
     }
   } catch (err) {
     console.warn('[inversiones] cotizacion preview', err);
     ultimaCotizacion = null;
-    el.textContent = 'Cotización: error de red';
+    el.textContent = 'Quote: network error';
   }
   updateResultadoEstimado();
 }
 
 function updateResultadoEstimado() {
   const resultadoInversion = document.getElementById('resultadoInversion');
-  const cap = parseFloat(document.getElementById('capitalInvertido').value);
+  const cap = parseFloat(document.getElementById('capitalInvested').value);
   if (ultimaCotizacion && ultimaCotizacion.ok && cap > 0 && ultimaCotizacion.close > 0) {
     const acciones = cap / ultimaCotizacion.close;
-    resultadoInversion.textContent = `Con este capital y el precio mostrado arriba → ~${acciones.toFixed(6)} acciones/unidades al registrar.`;
+    resultadoInversion.textContent = `With this capital and the price shown above → ~${acciones.toFixed(6)} acciones/unidades al registrar.`;
     resultadoInversion.className = 'nb-historial-meta';
     return;
   }
   const cant = parseFloat(document.getElementById('cantidad').value);
   const pc = parseFloat(document.getElementById('precioCompra').value);
   if (cant > 0 && pc > 0) {
-    resultadoInversion.textContent = `Capital manual implícito: ${money(cant * pc)}`;
+    resultadoInversion.textContent = `Implied manual capital: ${money(cant * pc)}`;
     resultadoInversion.className = 'nb-historial-meta';
     return;
   }
@@ -235,30 +235,30 @@ function updateResultadoEstimado() {
 
 async function onSubmitInversion(e) {
   e.preventDefault();
-  if (!selectedTipo) {
-    alert('Elegí un tipo de inversión (pestaña superior).');
+  if (!selectedType) {
+    alert('Choose an investment type (top tab).');
     return;
   }
 
-  const activo = getActivoNombre();
+  const activo = getAssetNombre();
   if (!activo) {
-    alert('Indicá el activo (escribiendo o eligiendo de la lista).');
+    alert('Enter the asset (by typing or choosing from the list).');
     return;
   }
 
   const descripcion = (document.getElementById('descripcion').value || '').trim();
   const simboloExtra = document.getElementById('simboloMercado').value.trim();
 
-  const capital = parseFloat(document.getElementById('capitalInvertido').value);
+  const capital = parseFloat(document.getElementById('capitalInvested').value);
   const cantidad = parseFloat(document.getElementById('cantidad').value);
   const precioCompra = parseFloat(document.getElementById('precioCompra').value);
   const planM = parseFloat(document.getElementById('planAporteMonto').value);
-  const planF = document.getElementById('planAporteFrecuencia').value.trim();
-  const planIni = (document.getElementById('planAporteInicio').value || '').trim();
+  const planF = document.getElementById('planAporteFrequency').value.trim();
+  const planIni = (document.getElementById('planAporteHome').value || '').trim();
 
-  const categoria = TIPO_LABELS[selectedTipo] || selectedTipo;
+  const categoria = TIPO_LABELS[selectedType] || selectedType;
   const body = {
-    tipo: selectedTipo,
+    tipo: selectedType,
     activo,
     categoria,
     descripcion: descripcion || undefined,
@@ -268,24 +268,24 @@ async function onSubmitInversion(e) {
   if (!Number.isNaN(planM) && planM > 0) body.planAporteMonto = planM;
   if (planF) {
     if (!Number.isNaN(planM) && planM > 0 && !planIni) {
-      alert('Indicá la fecha de inicio de los aportes planificados (junto a la frecuencia).');
+      alert('Enter the planned contributions start date (along with frequency).');
       return;
     }
-    body.planAporteFrecuencia = planF;
+    body.planAporteFrequency = planF;
   }
-  if (planIni) body.planAporteInicio = planIni;
+  if (planIni) body.planAporteHome = planIni;
 
   if (!Number.isNaN(capital) && capital > 0) {
     if (!simboloExtra && !activoTieneMapaCotizacion(activo)) {
       alert(
-        'Con capital inicial, si el activo no tiene cotización automática en el mapa, indicá el símbolo (ej. MSFT, BTC/USD).',
+        'With initial capital, if the asset has no automatic quote in the map, enter the symbol (e.g. MSFT, BTC/USD).',
       );
       return;
     }
-    body.capitalInvertido = capital;
+    body.capitalInvested = capital;
   } else {
     if (Number.isNaN(cantidad) || cantidad <= 0 || Number.isNaN(precioCompra) || precioCompra <= 0) {
-      alert('Completá capital inicial (> 0) o bien acciones y precio unitario (> 0).');
+      alert('Enter initial capital (> 0) or shares and unit price (> 0).');
       return;
     }
     body.cantidad = cantidad;
@@ -295,24 +295,24 @@ async function onSubmitInversion(e) {
   try {
     await axios.post('/inversiones', body);
     e.target.reset();
-    document.getElementById('valorMercado').textContent = 'Cotización: —';
+    document.getElementById('valorMercado').textContent = 'Quote: —';
     document.getElementById('resultadoInversion').textContent = '';
     document.querySelectorAll('#tipoInversionTabs .tab').forEach((t) => t.classList.remove('active'));
-    selectedTipo = '';
+    selectedType = '';
     ultimaCotizacion = null;
     const wrap = document.getElementById('activoUnifiedWrap');
     if (wrap) wrap.style.display = 'none';
-    document.getElementById('tipoInversionHint').textContent = 'Elegí un tipo de inversión arriba.';
+    document.getElementById('tipoInversionHint').textContent = 'Choose an investment type above.';
     await cargarInversiones();
   } catch (err) {
     console.error('[inversiones] crear', err);
-    const msg = err?.response?.data?.message || 'No se pudo guardar la inversión.';
+    const msg = err?.response?.data?.message || 'Could not save investment.';
     alert(Array.isArray(msg) ? msg.join('\n') : msg);
   }
 }
 
 function money(n) {
-  return (Number(n) || 0).toLocaleString('es-ES', { style: 'currency', currency: 'USD' });
+  return (Number(n) || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 }
 
 function escapeHtml(s) {
@@ -323,7 +323,7 @@ function escapeHtml(s) {
 }
 
 /** ISO / Date para <input type="date"> (YYYY-MM-DD). */
-function planInicioToInputValue(iso) {
+function planHomeToInputValue(iso) {
   if (!iso) return '';
   const m = String(iso).match(/^(\d{4}-\d{2}-\d{2})/);
   if (m) return m[1];
@@ -331,11 +331,11 @@ function planInicioToInputValue(iso) {
   return Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
 }
 
-function formatPlanInicioDisplay(iso) {
-  const part = planInicioToInputValue(iso);
+function formatPlanHomeDisplay(iso) {
+  const part = planHomeToInputValue(iso);
   if (!part) return '';
   const [y, mo, da] = part.split('-').map(Number);
-  return new Date(y, mo - 1, da).toLocaleDateString('es-AR');
+  return new Date(y, mo - 1, da).toLocaleDateString('en-US');
 }
 
 function plDiff(inv) {
@@ -356,7 +356,7 @@ function metricsForRow(inv) {
   return {
     simbolo: inv.simbolo || null,
     acciones: Number(inv.cantidad || 0),
-    capitalInvertido: invertido,
+    capitalInvested: invertido,
     precioMercado: Number(inv.precioActual ?? inv.precioCompra ?? 0),
     valorActual: actualVal,
     pnl: diff,
@@ -364,20 +364,20 @@ function metricsForRow(inv) {
     variacionDiariaValor: 0,
     variacionDiariaPct: null,
     cotizacionAsOf: null,
-    cotizacionFuente: 'local',
+    cotizacionSource: 'local',
   };
 }
 
 async function cargarInversiones() {
   const el = document.getElementById('listaInversiones');
-  el.innerHTML = '<p class="vacio">Cargando…</p>';
+  el.innerHTML = '<p class="vacio">Loading…</p>';
 
   try {
     const { data } = await axios.get('/inversiones');
     const rows = Array.isArray(data) ? data : [];
     el.innerHTML = '';
     if (!rows.length) {
-      el.innerHTML = '<p class="vacio">No hay inversiones registradas.</p>';
+      el.innerHTML = '<p class="vacio">No investments recorded.</p>';
       return;
     }
 
@@ -392,27 +392,27 @@ async function cargarInversiones() {
           ? `${dSign}${m.variacionDiariaPct.toFixed(2)}%`
           : '—';
       const pair =
-        typeof window.nbHistorialPair === 'function'
-          ? window.nbHistorialPair('inversion', inv.id)
+        typeof window.nbHistoryPair === 'function'
+          ? window.nbHistoryPair('inversion', inv.id)
           : '';
 
       const div = document.createElement('div');
       div.className = 'nb-historial-item inversion-item';
       const tipoLbl = escapeHtml(TIPO_LABELS[inv.tipo] || inv.tipo);
-      const planInicioTxt = inv.planAporteInicio ? formatPlanInicioDisplay(inv.planAporteInicio) : '';
+      const planHomeTxt = inv.planAporteHome ? formatPlanHomeDisplay(inv.planAporteHome) : '';
       const planNote =
         Number(inv.planAporteMonto) > 0
-          ? `<p class="nb-historial-meta">Plan (no ejecutado): ${money(inv.planAporteMonto)}${
-              inv.planAporteFrecuencia ? ` · ${escapeHtml(inv.planAporteFrecuencia)}` : ''
-            }${planInicioTxt ? ` · desde ${escapeHtml(planInicioTxt)}` : ''}</p>`
+          ? `<p class="nb-historial-meta">Plan (not executed): ${money(inv.planAporteMonto)}${
+              inv.planAporteFrequency ? ` · ${escapeHtml(inv.planAporteFrequency)}` : ''
+            }${planHomeTxt ? ` · desde ${escapeHtml(planHomeTxt)}` : ''}</p>`
           : '';
       div.innerHTML = `
         <div class="nb-historial-body inversion-info">
           <p class="nb-historial-title">${escapeHtml(inv.activo)} <span style="font-weight:500;color:#64748b;font-size:0.9em;">(${tipoLbl})</span></p>
           <p class="nb-historial-meta">${escapeHtml(inv.categoria)} · ${m.acciones.toFixed(6)} u. · costo ${money(inv.precioCompra)} · mercado ${money(m.precioMercado)}</p>
           ${inv.descripcion ? `<p class="nb-historial-meta">${escapeHtml(inv.descripcion)}</p>` : ''}
-          <p class="nb-historial-meta">Invertido: ${money(m.capitalInvertido)} · Valor: ${money(m.valorActual)}${inv.fondo?.nombre ? ` · ${escapeHtml(inv.fondo.nombre)}` : ''}</p>
-          <p class="nb-historial-meta">Δ día: ${dSign}${money(m.variacionDiariaValor)} (${dPct})${m.simbolo ? ` · ${escapeHtml(m.simbolo)}` : ''} · ${escapeHtml(m.cotizacionFuente)}${m.cotizacionAsOf ? ` · ${escapeHtml(m.cotizacionAsOf)}` : ''}</p>
+          <p class="nb-historial-meta">Invested: ${money(m.capitalInvested)} · Valor: ${money(m.valorActual)}${inv.fondo?.nombre ? ` · ${escapeHtml(inv.fondo.nombre)}` : ''}</p>
+          <p class="nb-historial-meta">Daily Δ: ${dSign}${money(m.variacionDiariaValor)} (${dPct})${m.simbolo ? ` · ${escapeHtml(m.simbolo)}` : ''} · ${escapeHtml(m.cotizacionSource)}${m.cotizacionAsOf ? ` · ${escapeHtml(m.cotizacionAsOf)}` : ''}</p>
           ${planNote}
         </div>
         <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
@@ -424,7 +424,7 @@ async function cargarInversiones() {
     });
   } catch (err) {
     console.error('[inversiones] listar', err);
-    el.innerHTML = '<p class="vacio">No se pudo cargar la lista.</p>';
+    el.innerHTML = '<p class="vacio">Could not load list.</p>';
   }
 }
 
@@ -436,13 +436,13 @@ async function onListaInversionesClick(e) {
   if (!id) return;
 
   if (action === 'delete') {
-    if (!confirm('¿Eliminar esta inversión?')) return;
+    if (!confirm('Delete this investment?')) return;
     try {
       await axios.delete(`/inversiones/${id}`);
       await cargarInversiones();
     } catch (err) {
       console.error('[inversiones] eliminar', err);
-      alert('No se pudo eliminar.');
+      alert('Could not delete.');
     }
     return;
   }
@@ -453,17 +453,17 @@ async function onListaInversionesClick(e) {
       abrirModalEditarInversion(data);
     } catch (err) {
       console.error('[inversiones] obtener una', err);
-      alert('No se pudo cargar la inversión.');
+      alert('Could not load investment.');
     }
   }
 }
 
 function abrirModalEditarInversion(inv) {
   document.getElementById('editInvId').value = inv.id;
-  document.getElementById('editInvTipo').value = inv.tipo || 'otros';
-  document.getElementById('editInvActivo').value = inv.activo || '';
+  document.getElementById('editInvType').value = inv.tipo || 'otros';
+  document.getElementById('editInvAsset').value = inv.activo || '';
   document.getElementById('editInvCategoria').value = inv.categoria || '';
-  document.getElementById('editInvCantidad').value =
+  document.getElementById('editInvQuantity').value =
     inv.cantidad != null && !Number.isNaN(Number(inv.cantidad)) ? inv.cantidad : '';
   document.getElementById('editInvPrecioCompra').value =
     inv.precioCompra != null && !Number.isNaN(Number(inv.precioCompra)) ? inv.precioCompra : '';
@@ -472,8 +472,8 @@ function abrirModalEditarInversion(inv) {
     inv.precioActual != null && !Number.isNaN(Number(inv.precioActual)) ? inv.precioActual : '';
   document.getElementById('editPlanMonto').value =
     inv.planAporteMonto != null && !Number.isNaN(Number(inv.planAporteMonto)) ? inv.planAporteMonto : '';
-  document.getElementById('editPlanFrecuencia').value = inv.planAporteFrecuencia || '';
-  document.getElementById('editPlanInicio').value = planInicioToInputValue(inv.planAporteInicio);
+  document.getElementById('editPlanFrequency').value = inv.planAporteFrequency || '';
+  document.getElementById('editPlanHome').value = planHomeToInputValue(inv.planAporteHome);
   document.getElementById('editInvDesc').value = inv.descripcion || '';
 
   const modal = document.getElementById('modalEditarInversion');
@@ -485,30 +485,30 @@ async function onSubmitEditarInversion(e) {
   e.preventDefault();
   const id = document.getElementById('editInvId').value;
   const payload = {
-    tipo: document.getElementById('editInvTipo').value,
-    activo: document.getElementById('editInvActivo').value.trim(),
+    tipo: document.getElementById('editInvType').value,
+    activo: document.getElementById('editInvAsset').value.trim(),
     categoria: document.getElementById('editInvCategoria').value.trim(),
-    cantidad: parseFloat(document.getElementById('editInvCantidad').value),
+    cantidad: parseFloat(document.getElementById('editInvQuantity').value),
     precioCompra: parseFloat(document.getElementById('editInvPrecioCompra').value),
     simbolo: document.getElementById('editInvSimbolo').value.trim() || null,
     descripcion: document.getElementById('editInvDesc').value.trim() || null,
   };
 
   const planRaw = document.getElementById('editPlanMonto').value;
-  const planIniEdit = (document.getElementById('editPlanInicio').value || '').trim();
+  const planIniEdit = (document.getElementById('editPlanHome').value || '').trim();
   if (planRaw === '' || planRaw == null) {
     payload.planAporteMonto = null;
   } else {
     const pm = parseFloat(planRaw);
     payload.planAporteMonto = Number.isNaN(pm) ? null : pm;
   }
-  payload.planAporteFrecuencia = document.getElementById('editPlanFrecuencia').value.trim() || null;
-  payload.planAporteInicio = planIniEdit || null;
+  payload.planAporteFrequency = document.getElementById('editPlanFrequency').value.trim() || null;
+  payload.planAporteHome = planIniEdit || null;
 
   const pmFinal = payload.planAporteMonto;
-  const pfFinal = payload.planAporteFrecuencia;
+  const pfFinal = payload.planAporteFrequency;
   if (pmFinal != null && pmFinal > 0 && pfFinal && !planIniEdit) {
-    alert('Indicá la fecha de inicio del plan (junto al monto y la frecuencia).');
+    alert('Enter the plan start date (along with amount and frequency).');
     return;
   }
 
@@ -521,15 +521,15 @@ async function onSubmitEditarInversion(e) {
   }
 
   if (!payload.activo || !payload.categoria) {
-    alert('Activo y categoría son obligatorios.');
+    alert('Asset and category are required.');
     return;
   }
   if (Number.isNaN(payload.cantidad) || payload.cantidad < 0) {
-    alert('Cantidad no válida.');
+    alert('Invalid quantity.');
     return;
   }
   if (Number.isNaN(payload.precioCompra) || payload.precioCompra < 0) {
-    alert('Precio de compra no válido.');
+    alert('Invalid purchase price.');
     return;
   }
 
@@ -540,7 +540,7 @@ async function onSubmitEditarInversion(e) {
     await cargarInversiones();
   } catch (err) {
     console.error('[inversiones] actualizar', err);
-    const msg = err?.response?.data?.message || 'No se pudo actualizar.';
+    const msg = err?.response?.data?.message || 'Could not update.';
     alert(Array.isArray(msg) ? msg.join('\n') : msg);
   }
 }

@@ -37,7 +37,7 @@ export class DeudasController {
   async create(@Req() req, @Body() dto: CreateDebtDto) {
     // Normalización mínima (frontend ya valida)
     if (!dto || typeof dto.principal !== 'number') {
-      throw new BadRequestException('Payload inválido.');
+      throw new BadRequestException('Invalid payload.');
     }
     return this.deudas.create(req.user.id, dto);
   }
@@ -65,7 +65,7 @@ export class DeudasController {
   ) {
     // el front envía { amount, fecha?, source?, ahorroId? }
     if (!dto || typeof dto.amount !== 'number') {
-      throw new BadRequestException('Monto de pago inválido.');
+      throw new BadRequestException('Invalid payment amount.');
     }
     return this.deudas.addPayment(req.user.id, id, dto);
   }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { RelacionTipo, ModuloTipo, VisibilidadNivel } from '@prisma/client';
+import { RelacionType, ModuloType, VisibilidadNivel } from '@prisma/client';
 
 @Injectable()
 export class SharedService {
@@ -10,8 +10,8 @@ export class SharedService {
     ownerId: number,
     partnerEmail: string,
     partnerDisplayName: string,
-    relacion: RelacionTipo,
-    permisos: { modulo: ModuloTipo; visibilidad: VisibilidadNivel }[],
+    relacion: RelacionType,
+    permisos: { modulo: ModuloType; visibilidad: VisibilidadNivel }[],
   ) {
     return this.prisma.asociacion.create({
       data: {

@@ -5,7 +5,7 @@
   if (t) axios.defaults.headers.common['Authorization'] = `Bearer ${t}`;
 })();
 
-const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const DIAS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
 // Lista amplia de zonas horarias (UTC ± offset) + ciudad de referencia
 // Nota: esto es estático para front. El backend almacena el ID IANA (ej: "America/New_York").
@@ -13,50 +13,50 @@ const TIMEZONES = [
   { id: 'Pacific/Midway',           label: '(UTC-11:00) Midway' },
   { id: 'Pacific/Honolulu',         label: '(UTC-10:00) Honolulu' },
   { id: 'America/Anchorage',        label: '(UTC-09:00) Anchorage' },
-  { id: 'America/Los_Angeles',      label: '(UTC-08:00) Los Ángeles' },
+  { id: 'America/Los_Angeles',      label: '(UTC-08:00) Los Angeles' },
   { id: 'America/Phoenix',          label: '(UTC-07:00) Phoenix' },
   { id: 'America/Denver',           label: '(UTC-07:00) Denver' },
   { id: 'America/Guatemala',        label: '(UTC-06:00) Guatemala' },
   { id: 'America/Chicago',          label: '(UTC-06:00) Chicago' },
-  { id: 'America/Mexico_City',      label: '(UTC-06:00) Ciudad de México' },
-  { id: 'America/Bogota',           label: '(UTC-05:00) Bogotá' },
-  { id: 'America/New_York',         label: '(UTC-05:00) Nueva York' },
+  { id: 'America/Mexico_City',      label: '(UTC-06:00) Mexico City' },
+  { id: 'America/Bogota',           label: '(UTC-05:00) Bogota' },
+  { id: 'America/New_York',         label: '(UTC-05:00) New York' },
   { id: 'America/Lima',             label: '(UTC-05:00) Lima' },
   { id: 'America/Caracas',          label: '(UTC-04:00) Caracas' },
   { id: 'America/Santiago',         label: '(UTC-04:00) Santiago' },
-  { id: 'America/Asuncion',         label: '(UTC-04:00) Asunción' },
+  { id: 'America/Asuncion',         label: '(UTC-04:00) Asuncion' },
   { id: 'America/Sao_Paulo',        label: '(UTC-03:00) São Paulo' },
   { id: 'America/Montevideo',       label: '(UTC-03:00) Montevideo' },
   { id: 'America/Argentina/Buenos_Aires', label: '(UTC-03:00) Buenos Aires' },
   { id: 'Atlantic/Azores',          label: '(UTC-01:00) Azores' },
-  { id: 'Atlantic/Cape_Verde',      label: '(UTC-01:00) Cabo Verde' },
+  { id: 'Atlantic/Cape_Verde',      label: '(UTC-01:00) Cape Verde' },
   { id: 'UTC',                      label: '(UTC±00:00) UTC' },
-  { id: 'Europe/Lisbon',            label: '(UTC+00:00) Lisboa' },
-  { id: 'Europe/London',            label: '(UTC+00:00) Londres' },
+  { id: 'Europe/Lisbon',            label: '(UTC+00:00) Lisbon' },
+  { id: 'Europe/London',            label: '(UTC+00:00) London' },
   { id: 'Europe/Madrid',            label: '(UTC+01:00) Madrid' },
-  { id: 'Europe/Paris',             label: '(UTC+01:00) París' },
-  { id: 'Europe/Berlin',            label: '(UTC+01:00) Berlín' },
-  { id: 'Europe/Rome',              label: '(UTC+01:00) Roma' },
+  { id: 'Europe/Paris',             label: '(UTC+01:00) Paris' },
+  { id: 'Europe/Berlin',            label: '(UTC+01:00) Berlin' },
+  { id: 'Europe/Rome',              label: '(UTC+01:00) Rome' },
   { id: 'Africa/Lagos',             label: '(UTC+01:00) Lagos' },
-  { id: 'Europe/Athens',            label: '(UTC+02:00) Atenas' },
-  { id: 'Africa/Cairo',             label: '(UTC+02:00) El Cairo' },
-  { id: 'Europe/Istanbul',          label: '(UTC+03:00) Estambul' },
-  { id: 'Europe/Moscow',            label: '(UTC+03:00) Moscú' },
-  { id: 'Asia/Riyadh',              label: '(UTC+03:00) Riad' },
-  { id: 'Asia/Tehran',              label: '(UTC+03:30) Teherán' },
-  { id: 'Asia/Dubai',               label: '(UTC+04:00) Dubái' },
+  { id: 'Europe/Athens',            label: '(UTC+02:00) Athens' },
+  { id: 'Africa/Cairo',             label: '(UTC+02:00) Cairo' },
+  { id: 'Europe/Istanbul',          label: '(UTC+03:00) Istanbul' },
+  { id: 'Europe/Moscow',            label: '(UTC+03:00) Moscow' },
+  { id: 'Asia/Riyadh',              label: '(UTC+03:00) Riyadh' },
+  { id: 'Asia/Tehran',              label: '(UTC+03:30) Tehran' },
+  { id: 'Asia/Dubai',               label: '(UTC+04:00) Dubai' },
   { id: 'Asia/Karachi',             label: '(UTC+05:00) Karachi' },
   { id: 'Asia/Kolkata',             label: '(UTC+05:30) Kolkata' },
-  { id: 'Asia/Dhaka',               label: '(UTC+06:00) Daca' },
-  { id: 'Asia/Jakarta',             label: '(UTC+07:00) Yakarta' },
+  { id: 'Asia/Dhaka',               label: '(UTC+06:00) Dhaka' },
+  { id: 'Asia/Jakarta',             label: '(UTC+07:00) Jakarta' },
   { id: 'Asia/Bangkok',             label: '(UTC+07:00) Bangkok' },
-  { id: 'Asia/Shanghai',            label: '(UTC+08:00) Shanghái' },
-  { id: 'Asia/Singapore',           label: '(UTC+08:00) Singapur' },
-  { id: 'Asia/Tokyo',               label: '(UTC+09:00) Tokio' },
-  { id: 'Asia/Seoul',               label: '(UTC+09:00) Seúl' },
+  { id: 'Asia/Shanghai',            label: '(UTC+08:00) Shanghai' },
+  { id: 'Asia/Singapore',           label: '(UTC+08:00) Singapore' },
+  { id: 'Asia/Tokyo',               label: '(UTC+09:00) Tokyo' },
+  { id: 'Asia/Seoul',               label: '(UTC+09:00) Seoul' },
   { id: 'Australia/Perth',          label: '(UTC+08:00) Perth' },
-  { id: 'Australia/Adelaide',       label: '(UTC+09:30) Adelaida' },
-  { id: 'Australia/Sydney',         label: '(UTC+10:00) Sídney' },
+  { id: 'Australia/Adelaide',       label: '(UTC+09:30) Adelaide' },
+  { id: 'Australia/Sydney',         label: '(UTC+10:00) Sydney' },
   { id: 'Pacific/Guadalcanal',      label: '(UTC+11:00) Guadalcanal' },
   { id: 'Pacific/Auckland',         label: '(UTC+12:00) Auckland' },
 ];
@@ -113,10 +113,10 @@ function paintState() {
   const box = document.getElementById('estadoActual');
   if (box) {
     box.innerHTML = `
-      <div><strong>Semana:</strong> ${DIAS[s.weekStartDay ?? 1]} → ${DIAS[(s.weekEndDay ?? 7) % 7]}</div>
-      <div><strong>Moneda:</strong> ${s.currency || 'USD'}</div>
-      <div><strong>Zona horaria:</strong> ${s.timezone || 'UTC'}</div>
-      <div><strong>Notificaciones:</strong> ${(s.notifications ? 'Activadas' : 'Desactivadas')}</div>
+      <div><strong>Week:</strong> ${DIAS[s.weekStartDay ?? 1]} → ${DIAS[(s.weekEndDay ?? 7) % 7]}</div>
+      <div><strong>Currency:</strong> ${s.currency || 'USD'}</div>
+      <div><strong>Time zone:</strong> ${s.timezone || 'UTC'}</div>
+      <div><strong>Notifications:</strong> ${(s.notifications ? 'Enabled' : 'Disabled')}</div>
     `;
   }
   // Pre-cargar formularios
@@ -143,10 +143,10 @@ function wireForms() {
       const { data } = await axios.patch('/settings', { weekStartDay, weekEndDay });
       STATE.settings = { ...STATE.settings, ...data };
       paintState();
-      alert('Preferencias de semana guardadas.');
+      alert('Week preferences saved.');
     } catch (err) {
       console.error('[settings] error al guardar semana', err);
-      alert('No se pudo guardar. Intenta de nuevo.');
+      alert('Could not save. Try again.');
     }
   });
 
@@ -160,15 +160,15 @@ function wireForms() {
       const { data } = await axios.patch('/settings', { currency, timezone, notifications });
       STATE.settings = { ...STATE.settings, ...data };
       paintState();
-      alert('Preferencias guardadas.');
+      alert('Preferences saved.');
     } catch (err) {
       console.error('[settings] error al guardar generales', err);
-      alert('No se pudo guardar. Intenta de nuevo.');
+      alert('Could not save. Try again.');
     }
   });
 
-  // Detectar zona
-  document.getElementById('btnDetectarTZ')?.addEventListener('click', () => {
+  // Detect zona
+  document.getElementById('btnDetectTZ')?.addEventListener('click', () => {
     sugerirTimeZone(true);
   });
 
@@ -177,14 +177,14 @@ function wireForms() {
     e.preventDefault();
     const currentPassword = document.getElementById('currentPassword').value.trim();
     const newPassword = document.getElementById('newPassword').value.trim();
-    if (!currentPassword || !newPassword) return alert('Completa ambos campos.');
+    if (!currentPassword || !newPassword) return alert('Fill in both fields.');
     try {
       await axios.patch('/settings/password', { currentPassword, newPassword });
       (document.getElementById('currentPassword').value = '');
       (document.getElementById('newPassword').value = '');
-      alert('Contraseña actualizada.');
+      alert('Password updated.');
     } catch (err) {
-      const msg = err?.response?.data?.message || 'No se pudo actualizar la contraseña.';
+      const msg = err?.response?.data?.message || 'Could not update password.';
       alert(Array.isArray(msg) ? msg.join('\n') : msg);
     }
   });
@@ -194,7 +194,7 @@ function wireForms() {
 function sugerirTimeZone(aplicar = false) {
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
   const hint = document.getElementById('tzHint');
-  if (hint) hint.textContent = `Sugerencia automática: ${tz}`;
+  if (hint) hint.textContent = `Automatic suggestion: ${tz}`;
   if (aplicar) {
     const sel = document.getElementById('timezone');
     if (sel) {

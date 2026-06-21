@@ -11,8 +11,8 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     document.getElementById('passwordConfirm')
   )?.value?.trim();
 
-  if (!email || !password) return alert('Correo y contraseña son obligatorios.');
-  if (confirm !== undefined && password !== confirm) return alert('Las contraseñas no coinciden.');
+  if (!email || !password) return alert('Email and password are required.');
+  if (confirm !== undefined && password !== confirm) return alert('Passwords do not match.');
 
   try {
     const { data } = await axios.post('/auth/register', {
@@ -39,8 +39,8 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
   } catch (err) {
     const msg =
       err?.response?.data?.message ||
-      (err?.message === 'Network Error' ? 'No se puede conectar con el servidor.' : err?.message) ||
-      'No se pudo registrar. Verifica los datos.';
+      (err?.message === 'Network Error' ? 'Cannot connect to the server.' : err?.message) ||
+      'Registration failed. Check your details.';
     alert(Array.isArray(msg) ? msg.join('\n') : msg);
   }
 });

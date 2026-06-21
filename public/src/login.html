@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0f1419" />
-  <title>Iniciar sesión — No Budget</title>
+  <title>Log in — No Budget</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -14,41 +14,41 @@
 <body class="dashboard-body module-home nb-public">
   <header class="header">
     <div class="header-brand">
-      <a href="index.html" class="brand-mark" aria-label="No Budget — Inicio">
+      <a href="index.html" class="brand-mark" aria-label="No Budget — Home">
         <img class="brand-logo" src="/assets/logo_budget.png" alt="" width="32" height="32" decoding="async" />
         <span class="brand-text">No Budget</span>
       </a>
     </div>
-    <nav class="menu" aria-label="Cuenta">
+    <nav class="menu" aria-label="Account">
       <ul>
-        <li><a href="index.html" class="nav-link" data-nav="home">Inicio</a></li>
-        <li><a href="register.html" class="nav-link" data-nav="signup">Crear cuenta</a></li>
+        <li><a href="index.html" class="nav-link" data-nav="home">Home</a></li>
+        <li><a href="register.html" class="nav-link" data-nav="signup">Create account</a></li>
       </ul>
     </nav>
   </header>
 
   <main class="nb-auth-main">
     <div class="auth-card">
-      <h1>Iniciar sesión</h1>
-      <p class="auth-lead">Ingresá con tu correo y contraseña para abrir tu panel.</p>
+      <h1>Log in</h1>
+      <p class="auth-lead">Sign in with your email and password to open your dashboard.</p>
       <form id="loginForm">
-        <label for="email">Correo electrónico</label>
+        <label for="email">Email</label>
         <input type="email" id="email" name="email" required autocomplete="email" />
 
-        <label for="password">Contraseña</label>
+        <label for="password">Password</label>
         <input type="password" id="password" name="password" required autocomplete="current-password" />
 
-        <button type="submit">Entrar</button>
+        <button type="submit">Sign in</button>
       </form>
 
       <p class="switch-auth">
-        ¿No tenés cuenta? <a href="register.html">Registrate</a>
+        Don't have an account? <a href="register.html">Sign up</a>
       </p>
     </div>
   </main>
 
   <footer class="footer">
-    <p>&copy; 2026 No Budget · Finanzas personales</p>
+    <p>&copy; 2026 No Budget · Personal finance</p>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="/src/js/auth.js"></script>

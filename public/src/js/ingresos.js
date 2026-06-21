@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('formIngreso').addEventListener('submit', onSubmitIngreso);
 
   const modal = document.getElementById('modalEditarIngreso');
-  document.getElementById('btnCancelarEditIngreso').addEventListener('click', () => {
+  document.getElementById('btnCancelEditIngreso').addEventListener('click', () => {
     modal.style.display = 'none';
     modal.setAttribute('aria-hidden', 'true');
   });
@@ -44,7 +44,7 @@ function wireCategoriaSelect() {
 
 async function cargarCategorias() {
   const select = document.getElementById('categoriaIngreso');
-  select.innerHTML = '<option value="">Selecciona una categoría</option>';
+  select.innerHTML = '<option value="">Select a category</option>';
   try {
     const res = await axios.get(`/categorias/${MODULO_CATEGORIAS}`);
     (res.data || []).forEach((cat) => {
@@ -55,7 +55,7 @@ async function cargarCategorias() {
     });
     const nueva = document.createElement('option');
     nueva.value = 'crear-nueva';
-    nueva.textContent = '➕ Crear nueva categoría…';
+    nueva.textContent = '➕ Create new category…';
     select.appendChild(nueva);
   } catch (err) {
     console.error('Error cargando categorías:', err);
@@ -79,7 +79,7 @@ async function resolverNombreCategoria() {
   if (select.value === 'crear-nueva') {
     const nombre = (inputNueva.value || '').trim();
     if (!nombre) {
-      alert('Escribe el nombre de la nueva categoría');
+      alert('Enter the new category name');
       return null;
     }
     try {
@@ -91,7 +91,7 @@ async function resolverNombreCategoria() {
       return nombre;
     } catch (err) {
       console.error('Error creando categoría:', err);
-      const msg = err?.response?.data?.message || 'No se pudo crear la categoría';
+      const msg = err?.response?.data?.message || 'Could not create category';
       alert(Array.isArray(msg) ? msg.join('\n') : msg);
       return null;
     }
@@ -107,7 +107,7 @@ async function onSubmitIngreso(e) {
 
   const categoria = await resolverNombreCategoria();
   if (!categoria) {
-    alert('Selecciona una categoría o crea una nueva');
+    alert('Select a category o crea una nueva');
     return;
   }
 
@@ -128,7 +128,7 @@ async function onSubmitIngreso(e) {
     await cargarIngresos();
   } catch (err) {
     console.error('Error guardando ingreso:', err);
-    const msg = err?.response?.data?.message || 'No se pudo guardar el ingreso';
+    const msg = err?.response?.data?.message || 'Could not save income';
     alert(Array.isArray(msg) ? msg.join('\n') : msg);
   }
 }
@@ -153,11 +153,11 @@ function renderIngresos(ingresos) {
   contenedor.innerHTML = '';
 
   if (!ingresos.length) {
-    contenedor.innerHTML = '<p class="vacio">No hay ingresos registrados.</p>';
+    contenedor.innerHTML = '<p class="vacio">No income recorded.</p>';
     return;
   }
 
-  const actions = (id) => window.nbHistorialPair('ingreso', id);
+  const actions = (id) => window.nbHistoryPair('ingreso', id);
 
   ingresos.forEach((ingreso) => {
     const item = document.createElement('div');
@@ -168,7 +168,7 @@ function renderIngresos(ingresos) {
     item.innerHTML = `
       <div class="nb-historial-body ingreso-info">
         <p class="nb-historial-title">${escapeHtml(ingreso.fuente)}</p>
-        <p class="nb-historial-meta">${escapeHtml(formatIngresoFecha(ingreso.fecha))}${ingreso.frecuencia ? ` · ${escapeHtml(ingreso.frecuencia)}` : ''}${ingreso.fijo ? ' · Fijo' : ''}</p>
+        <p class="nb-historial-meta">${escapeHtml(formatIngresoFecha(ingreso.fecha))}${ingreso.frecuencia ? ` · ${escapeHtml(ingreso.frecuencia)}` : ''}${ingreso.fijo ? ' · Fixed' : ''}</p>
         ${cat}
       </div>
       <div class="ingreso-monto-acciones" style="display:flex;align-items:center;gap:0.75rem;">
@@ -189,9 +189,9 @@ function escapeHtml(s) {
 function abrirModalEditarIngreso(ingreso) {
   syncEditModalCategorias();
   document.getElementById('editIngresoId').value = ingreso.id;
-  document.getElementById('editFuenteIng').value = ingreso.fuente || '';
+  document.getElementById('editSourceIng').value = ingreso.fuente || '';
   document.getElementById('editMontoIng').value = ingreso.monto ?? '';
-  document.getElementById('editFrecuenciaIng').value = ingreso.frecuencia || 'Único';
+  document.getElementById('editFrequencyIng').value = ingreso.frecuencia || 'Único';
   const fd = ingreso.fecha ? new Date(ingreso.fecha) : null;
   document.getElementById('editFechaIng').value =
     fd && !Number.isNaN(+fd) ? fd.toISOString().slice(0, 10) : '';
@@ -209,9 +209,9 @@ async function onSubmitEditarIngreso(e) {
   e.preventDefault();
   const id = document.getElementById('editIngresoId').value;
   const payload = {
-    fuente: document.getElementById('editFuenteIng').value.trim(),
+    fuente: document.getElementById('editSourceIng').value.trim(),
     monto: parseFloat(document.getElementById('editMontoIng').value),
-    frecuencia: document.getElementById('editFrecuenciaIng').value,
+    frecuencia: document.getElementById('editFrequencyIng').value,
     fecha: document.getElementById('editFechaIng').value,
     fijo: document.getElementById('editFijoIng').checked,
     categoria: document.getElementById('editCategoriaIngreso').value,
@@ -223,7 +223,7 @@ async function onSubmitEditarIngreso(e) {
     await cargarIngresos();
   } catch (err) {
     console.error('Error actualizando ingreso:', err);
-    const msg = err?.response?.data?.message || 'No se pudo actualizar';
+    const msg = err?.response?.data?.message || 'Could not update';
     alert(Array.isArray(msg) ? msg.join('\n') : msg);
   }
 }
@@ -235,13 +235,13 @@ async function onListaIngresosClick(e) {
   if (!id) return;
 
   if (action === 'delete') {
-    if (!confirm('¿Eliminar este ingreso?')) return;
+    if (!confirm('Delete this income?')) return;
     try {
       await axios.delete(`/ingresos/${id}`);
       await cargarIngresos();
     } catch (err) {
       console.error('Error eliminando ingreso:', err);
-      alert('No se pudo eliminar el ingreso');
+      alert('Could not delete income');
     }
     return;
   }
@@ -251,13 +251,13 @@ async function onListaIngresosClick(e) {
       const res = await axios.get('/ingresos');
       const row = (res.data || []).find((x) => String(x.id) === String(id));
       if (!row) {
-        alert('No se encontró el ingreso');
+        alert('Income not found');
         return;
       }
       abrirModalEditarIngreso(row);
     } catch (err) {
       console.error(err);
-      alert('No se pudo cargar el ingreso');
+      alert('Could not load income');
     }
   }
 }

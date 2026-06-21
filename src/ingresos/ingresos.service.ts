@@ -29,7 +29,7 @@ export class IngresosService {
         },
       });
     } catch {
-      throw new InternalServerErrorException('Error al crear ingreso.');
+      throw new InternalServerErrorException('Error creating income.');
     }
   }
 
@@ -77,7 +77,7 @@ export class IngresosService {
 
   async findOne(id: string) {
     const found = await this.prisma.ingreso.findUnique({ where: { id: Number(id) } });
-    if (!found) throw new NotFoundException('Ingreso no encontrado');
+    if (!found) throw new NotFoundException('Income not found');
     return found;
   }
 
@@ -85,7 +85,7 @@ export class IngresosService {
     const existing = await this.prisma.ingreso.findFirst({
       where: { id: Number(id), userId },
     });
-    if (!existing) throw new NotFoundException('Ingreso no encontrado');
+    if (!existing) throw new NotFoundException('Income not found');
 
     try {
       const isFixed = dto.fijo ?? undefined;
@@ -104,7 +104,7 @@ export class IngresosService {
         },
       });
     } catch {
-      throw new InternalServerErrorException('Error al actualizar ingreso.');
+      throw new InternalServerErrorException('Error updating income.');
     }
   }
 
@@ -112,12 +112,12 @@ export class IngresosService {
     const existing = await this.prisma.ingreso.findFirst({
       where: { id: Number(id), userId },
     });
-    if (!existing) throw new NotFoundException('Ingreso no encontrado');
+    if (!existing) throw new NotFoundException('Income not found');
 
     try {
       return await this.prisma.ingreso.delete({ where: { id: existing.id } });
     } catch {
-      throw new InternalServerErrorException('Error al eliminar ingreso.');
+      throw new InternalServerErrorException('Error deleting income.');
     }
   }
 }
