@@ -1,7 +1,7 @@
 // src/compartido/compartido.controller.ts
 import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { CompartidoService } from './compartido.service';
-import { ModuloType, VisibilidadNivel } from '@prisma/client';
+import { ModuloTipo, VisibilidadNivel } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @UseGuards(JwtAuthGuard)
@@ -15,7 +15,7 @@ export class CompartidoController {
     partnerDisplayName: string;
     relacion: any;
     aliasParaOwner?: string;
-    permisos: { modulo: ModuloType; visibilidad: VisibilidadNivel }[];
+    permisos: { modulo: ModuloTipo; visibilidad: VisibilidadNivel }[];
   }) {
     return this.service.invitar(req.user.id, body);
   }
@@ -34,7 +34,7 @@ export class CompartidoController {
   actualizarPermissions(
     @Req() req,
     @Param('id') id: string,
-    @Body() body: { permisos: { modulo: ModuloType; visibilidad: VisibilidadNivel }[] }
+    @Body() body: { permisos: { modulo: ModuloTipo; visibilidad: VisibilidadNivel }[] }
   ) {
     return this.service.actualizarPermissions(id, req.user.id, body.permisos);
   }
@@ -49,8 +49,8 @@ export class CompartidoController {
     @Req() req,
     @Param('id') id: string,
     @Body() body: {
-      add?: { modulo: ModuloType; recordId: string }[];
-      remove?: { modulo: ModuloType; recordId: string }[];
+      add?: { modulo: ModuloTipo; recordId: string }[];
+      remove?: { modulo: ModuloTipo; recordId: string }[];
     }
   ) {
     return this.service.syncOcultos(id, req.user.id, body.add, body.remove);
@@ -66,7 +66,7 @@ export class CompartidoController {
 
   @Post(':id/movimientos')
   crearMovimiento(@Req() req, @Param('id') id: string, @Body() body: {
-    modulo: ModuloType; concepto: string; montoTotal: number; aporteOwner?: number; aportePartner?: number; fecha: string;
+    modulo: ModuloTipo; concepto: string; montoTotal: number; aporteOwner?: number; aportePartner?: number; fecha: string;
     categoriaIdGasto?: string; categoriaAhorro?: string; categoriaInversion?: string;
   }) {
     return this.service.crearMovimientoCompartido(id, req.user.id, body);

@@ -1,7 +1,7 @@
-import { ModuloType } from '@prisma/client';
+import { ModuloTipo } from '@prisma/client';
 
 export class CreateMovCompDto {
-  modulo: ModuloType;
+  modulo: ModuloTipo;
   concepto: string;
   montoTotal: number;
   aporteOwner?: number;   // si no mandas, se calcula 50/50

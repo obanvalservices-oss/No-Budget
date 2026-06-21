@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SharedService } from './shared.service';
-import { RelacionType, ModuloType, VisibilidadNivel } from '@prisma/client';
+import { RelacionTipo, ModuloTipo, VisibilidadNivel } from '@prisma/client';
 
 @UseGuards(JwtAuthGuard)
 @Controller('shared')
@@ -15,8 +15,8 @@ export class SharedController {
     body: {
       partnerEmail: string;
       partnerDisplayName: string;
-      relacion: RelacionType;
-      permisos: { modulo: ModuloType; visibilidad: VisibilidadNivel }[];
+      relacion: RelacionTipo;
+      permisos: { modulo: ModuloTipo; visibilidad: VisibilidadNivel }[];
     },
   ) {
     return this.sharedService.crearInvitacion(

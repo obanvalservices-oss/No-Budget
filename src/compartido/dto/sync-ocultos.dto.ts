@@ -1,6 +1,6 @@
-import { ModuloType } from '@prisma/client';
+import { ModuloTipo } from '@prisma/client';
 
 export class SyncOcultosDto {
-  add?: { modulo: ModuloType; recordId: string; sourceUserId: number }[];
-  remove?: { modulo: ModuloType; recordId: string; sourceUserId: number }[];
+  add?: { modulo: ModuloTipo; recordId: string; sourceUserId: number }[];
+  remove?: { modulo: ModuloTipo; recordId: string; sourceUserId: number }[];
 }

@@ -133,8 +133,11 @@ export class InversionesService {
           descripcion: dto.descripcion ?? null,
           simbolo: sym ?? undefined,
           planAporteMonto: dto.planAporteMonto ?? undefined,
-          planAporteFrequency: dto.planAporteFrequency ?? undefined,
-          planAporteHome: dto.planAporteHome ? new Date(dto.planAporteHome) : undefined,
+          planAporteFrecuencia: dto.planAporteFrequency ?? dto.planAporteFrecuencia ?? undefined,
+          planAporteInicio:
+            dto.planAporteHome || dto.planAporteInicio
+              ? new Date((dto.planAporteHome ?? dto.planAporteInicio) as string)
+              : undefined,
           fondo: { connect: { id: fondoId } },
           user: { connect: { id: userId } },
         },
@@ -189,11 +192,12 @@ export class InversionesService {
     if (dto.descripcion !== undefined) data.descripcion = dto.descripcion;
     if (dto.simbolo !== undefined) data.simbolo = dto.simbolo || null;
     if (dto.planAporteMonto !== undefined) data.planAporteMonto = dto.planAporteMonto;
-    if (dto.planAporteFrequency !== undefined) {
-      data.planAporteFrequency = dto.planAporteFrequency;
+    if (dto.planAporteFrequency !== undefined || dto.planAporteFrecuencia !== undefined) {
+      data.planAporteFrecuencia = dto.planAporteFrequency ?? dto.planAporteFrecuencia ?? null;
     }
-    if (dto.planAporteHome !== undefined) {
-      data.planAporteHome = dto.planAporteHome ? new Date(dto.planAporteHome) : null;
+    if (dto.planAporteHome !== undefined || dto.planAporteInicio !== undefined) {
+      const raw = dto.planAporteHome ?? dto.planAporteInicio;
+      data.planAporteInicio = raw ? new Date(raw) : null;
     }
     if (dto.fondoId !== undefined) data.fondo = { connect: { id: dto.fondoId } };
 
@@ -282,6 +286,11 @@ export class InversionesService {
       cotizacionSource: quoteSource,
     };
 
-    return { ...inv, metricas };
+    return {
+      ...inv,
+      planAporteFrequency: inv.planAporteFrecuencia,
+      planAporteHome: inv.planAporteInicio,
+      metricas,
+    };
   }
 }

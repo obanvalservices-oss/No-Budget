@@ -1,5 +1,5 @@
-import { ModuloType, VisibilidadNivel } from '@prisma/client';
+import { ModuloTipo, VisibilidadNivel } from '@prisma/client';
 
 export class UpdatePermissionsDto {
-  permisos: { modulo: ModuloType; visibilidad: VisibilidadNivel }[];
+  permisos: { modulo: ModuloTipo; visibilidad: VisibilidadNivel }[];
 }

@@ -19,8 +19,10 @@ export class CreateInversionDto {
   /** Solo planificación; no altera la posición hasta aportes ejecutados (registro futuro). */
   @IsOptional() @IsNumber() planAporteMonto?: number;
   @IsOptional() @IsString() planAporteFrequency?: string;
+  @IsOptional() @IsString() planAporteFrecuencia?: string;
   /** Fecha desde la que aplica el plan (YYYY-MM-DD). */
   @IsOptional() @IsDateString() planAporteHome?: string;
+  @IsOptional() @IsDateString() planAporteInicio?: string;
 
   /** Si no se envía, el servidor asigna o crea "Main portfolio". */
   @IsOptional() @IsInt() fondoId?: number;

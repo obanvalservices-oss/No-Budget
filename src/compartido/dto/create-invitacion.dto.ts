@@ -1,9 +1,9 @@
-import { ModuloType, VisibilidadNivel, RelacionType } from '@prisma/client';
+import { ModuloTipo, VisibilidadNivel, RelacionTipo } from '@prisma/client';
 
 export class CreateInvitacionDto {
   partnerEmail: string;
   partnerDisplayName: string;
-  relacion: RelacionType;
+  relacion: RelacionTipo;
   aliasParaOwner?: string;
-  permisos: { modulo: ModuloType; visibilidad: VisibilidadNivel }[];
+  permisos: { modulo: ModuloTipo; visibilidad: VisibilidadNivel }[];
 }

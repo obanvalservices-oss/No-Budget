@@ -67,7 +67,7 @@ export class AhorrosService {
       const frecuencia = this.normalizeFrequency(dto.frecuencia);
       const fijo = !!(dto.fijo ?? dto.recurrente);
       this.assertFijoTieneFrequency(fijo, frecuencia);
-      const tasaAnnualPct = this.parseTasaAnnualPctCreate(dto.tasaAnnualPct);
+      const tasaAnnualPct = this.parseTasaAnnualPctCreate(dto.tasaAnnualPct ?? dto.tasaAnualPct);
       const created = await this.prisma.ahorro.create({
         data: {
           objetivo: dto.nombre ?? dto.objetivo ?? '',
@@ -80,7 +80,7 @@ export class AhorrosService {
           sharedId: dto.aporteFijo != null ? String(dto.aporteFijo) : null,
           // descripción opcional
           descripcion: dto.descripcion ?? dto.nombre ?? null,
-          tasaAnnualPct,
+          tasaAnualPct: tasaAnnualPct,
           user: { connect: { id: userId } },
           isShared: false,
         },
@@ -130,7 +130,7 @@ export class AhorrosService {
       }
       const saldo = saldoBaseInicial + saldoOtrosAportes;
       const aporteFijo = f.sharedId != null && !isNaN(Number(f.sharedId)) ? Number(f.sharedId) : 0;
-      const tasaRaw = f.tasaAnnualPct;
+      const tasaRaw = f.tasaAnualPct;
       const tasaAnnualPct = tasaRaw != null && Number.isFinite(Number(tasaRaw)) ? Number(tasaRaw) : null;
       const { rendimientoEstimado, saldoConRendimiento } = this.estimarRendimiento(
         saldo,
@@ -180,7 +180,7 @@ export class AhorrosService {
         : this.normalizeFrequency(existing.colorTag);
     this.assertFijoTieneFrequency(nextFijo, nextFreq);
 
-    const tasaPatch = this.parseTasaAnnualPctUpdate(dto.tasaAnnualPct);
+    const tasaPatch = this.parseTasaAnnualPctUpdate(dto.tasaAnnualPct ?? dto.tasaAnualPct);
 
     return this.prisma.ahorro.update({
       where: { id: existing.id },
@@ -195,7 +195,7 @@ export class AhorrosService {
             ? undefined
             : this.normalizeFrequency(dto.frecuencia),
         sharedId: dto.aporteFijo === undefined ? undefined : String(dto.aporteFijo),
-        ...(tasaPatch !== undefined ? { tasaAnnualPct: tasaPatch } : {}),
+        ...(tasaPatch !== undefined ? { tasaAnualPct: tasaPatch } : {}),
       },
     });
   }

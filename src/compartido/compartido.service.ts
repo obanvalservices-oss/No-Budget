@@ -1,7 +1,7 @@
 // src/compartido/compartido.service.ts
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AsociacionEstado, ModuloType, VisibilidadNivel } from '@prisma/client';
+import { AsociacionEstado, ModuloTipo, VisibilidadNivel } from '@prisma/client';
 
 @Injectable()
 export class CompartidoService {
@@ -36,7 +36,7 @@ export class CompartidoService {
     partnerDisplayName: string;
     relacion: any;
     aliasParaOwner?: string;
-    permisos: { modulo: ModuloType; visibilidad: VisibilidadNivel }[];
+    permisos: { modulo: ModuloTipo; visibilidad: VisibilidadNivel }[];
   }) {
     const owner = await this.prisma.user.findUnique({ where: { id: ownerId } });
     if (!owner) throw new NotFoundException('User not found');
@@ -78,7 +78,7 @@ export class CompartidoService {
     return this.prisma.asociacionPermiso.findMany({ where: { asociacionId }, orderBy: { modulo: 'asc' } });
   }
 
-  async actualizarPermissions(asociacionId: string, userId: number, permisos: { modulo: ModuloType; visibilidad: VisibilidadNivel }[]) {
+  async actualizarPermissions(asociacionId: string, userId: number, permisos: { modulo: ModuloTipo; visibilidad: VisibilidadNivel }[]) {
     await this.assertMiembro(asociacionId, userId);
     for (const p of permisos) {
       await this.prisma.asociacionPermiso.upsert({
@@ -104,8 +104,8 @@ export class CompartidoService {
   async syncOcultos(
     asociacionId: string,
     userId: number,
-    add?: { modulo: ModuloType; recordId: string }[],
-    remove?: { modulo: ModuloType; recordId: string }[],
+    add?: { modulo: ModuloTipo; recordId: string }[],
+    remove?: { modulo: ModuloTipo; recordId: string }[],
   ) {
     await this.assertMiembro(asociacionId, userId);
 
@@ -147,7 +147,7 @@ export class CompartidoService {
     if (range?.from) fechaFilter.gte = range.from;
     if (range?.to) fechaFilter.lte = range.to;
 
-    const byModulo = async <T>(mod: ModuloType, q: () => Promise<T[]>) => {
+    const byModulo = async <T>(mod: ModuloTipo, q: () => Promise<T[]>) => {
       const perm = asoc.permisos.find(p => p.modulo === mod);
       if (!perm || perm.visibilidad === VisibilidadNivel.NADA) return [] as any[];
       const rows = await q();
@@ -158,14 +158,14 @@ export class CompartidoService {
       return rows as any[];
     };
 
-    const ingresos = await byModulo(ModuloType.INGRESOS, () =>
+    const ingresos = await byModulo(ModuloTipo.INGRESOS, () =>
       this.prisma.ingreso.findMany({
         where: { userId: { in: userIds }, ...(Object.keys(fechaFilter).length ? { fecha: fechaFilter } : {}) },
         orderBy: { fecha: 'desc' }
       })
     );
 
-    const gastos = await byModulo(ModuloType.GASTOS, () =>
+    const gastos = await byModulo(ModuloTipo.GASTOS, () =>
       this.prisma.gasto.findMany({
         where: { userId: { in: userIds }, ...(Object.keys(fechaFilter).length ? { fecha: fechaFilter } : {}) },
         orderBy: { fecha: 'desc' },
@@ -173,14 +173,14 @@ export class CompartidoService {
       })
     );
 
-    const ahorros = await byModulo(ModuloType.AHORROS, () =>
+    const ahorros = await byModulo(ModuloTipo.AHORROS, () =>
       this.prisma.ahorro.findMany({
         where: { userId: { in: userIds }, ...(Object.keys(fechaFilter).length ? { fecha: fechaFilter } : {}) },
         orderBy: { fecha: 'desc' }
       })
     );
 
-    const inversiones = await byModulo(ModuloType.INVERSIONES, () =>
+    const inversiones = await byModulo(ModuloTipo.INVERSIONES, () =>
       this.prisma.inversion.findMany({
         where: { userId: { in: userIds } },
         orderBy: { createdAt: 'desc' },
@@ -207,7 +207,7 @@ export class CompartidoService {
 
   // ===== Transactions compartidos =====
   async crearMovimientoCompartido(asociacionId: string, requesterId: number, dto: {
-    modulo: ModuloType; concepto: string; montoTotal: number; aporteOwner?: number; aportePartner?: number; fecha: string;
+    modulo: ModuloTipo; concepto: string; montoTotal: number; aporteOwner?: number; aportePartner?: number; fecha: string;
     categoriaIdGasto?: string; categoriaAhorro?: string; categoriaInversion?: string;
   }) {
     const asoc = await this.assertMiembro(asociacionId, requesterId);
@@ -241,7 +241,7 @@ export class CompartidoService {
         }
       });
 
-      if (dto.modulo === ModuloType.INGRESOS) {
+      if (dto.modulo === ModuloTipo.INGRESOS) {
         await tx.ingreso.createMany({
           data: [
             { userId: ownerId,   fuente: dto.concepto, monto: aporteOwner,  frecuencia: 'único', fecha, fijo: false, categoria: 'Shared', isShared: true, sharedId: mov.id, colorTag: color },
@@ -250,7 +250,7 @@ export class CompartidoService {
         });
       }
 
-      if (dto.modulo === ModuloType.GASTOS) {
+      if (dto.modulo === ModuloTipo.GASTOS) {
         const categoriaId = dto.categoriaIdGasto || await this.ensureCategoria('GASTOS');
         await tx.gasto.createMany({
           data: [
@@ -260,7 +260,7 @@ export class CompartidoService {
         });
       }
 
-      if (dto.modulo === ModuloType.AHORROS) {
+      if (dto.modulo === ModuloTipo.AHORROS) {
         const categoria = dto.categoriaAhorro || 'Shared';
         await tx.ahorro.createMany({
           data: [
@@ -270,7 +270,7 @@ export class CompartidoService {
         });
       }
 
-      if (dto.modulo === ModuloType.INVERSIONES) {
+      if (dto.modulo === ModuloTipo.INVERSIONES) {
         const categoria = dto.categoriaInversion || 'Compartido';
         const fondoOwner = await this.ensureFondoCompartido(ownerId);
         const fondoPartner = await this.ensureFondoCompartido(partnerId);

@@ -223,8 +223,8 @@ export class DashboardService {
       precioCompra: number | null;
       createdAt: Date;
       planAporteMonto: number | null;
-      planAporteFrequency: string | null;
-      planAporteHome: Date | null;
+      planAporteFrecuencia: string | null;
+      planAporteInicio: Date | null;
     }>,
     weekStart: Date,
     weekEnd: Date,
@@ -238,9 +238,9 @@ export class DashboardService {
 
       const planM = Number(inv.planAporteMonto);
       if (!planM || planM <= 0) continue;
-      const freq = String(inv.planAporteFrequency || '').toLowerCase();
+      const freq = String(inv.planAporteFrecuencia || '').toLowerCase();
       if (freq !== 'semanal' && freq !== 'mensual') continue;
-      const baseHome = inv.planAporteHome ?? inv.createdAt;
+      const baseHome = inv.planAporteInicio ?? inv.createdAt;
       if (!baseHome) continue;
       const inicio = this.normalizeDateOnly(new Date(baseHome));
 
